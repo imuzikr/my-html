@@ -49,12 +49,16 @@ header .meta{font-size:var(--text-sm);color:var(--color-text-faint);margin-left:
 .card:hover{box-shadow:var(--shadow-md);border-color:var(--color-accent);transform:translateY(-2px)}
 .card-thumb{width:100%;height:140px;overflow:hidden;flex-shrink:0;}
 .card-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
-.card-thumb-grad{display:flex;align-items:flex-end;padding:var(--space-4);}
+.card-thumb-grad{
+  display:flex;align-items:flex-end;padding:var(--space-4);
+  background-image:linear-gradient(to top,rgba(0,0,0,0.18) 0%,transparent 60%);
+}
 .card-thumb-text{
   font-size:var(--text-sm);font-weight:var(--weight-semibold);
-  color:rgba(255,255,255,0.92);line-height:1.4;
-  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
-  text-shadow:0 1px 4px rgba(0,0,0,0.3);
+  color:rgba(255,255,255,0.95);line-height:1.45;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  text-shadow:0 1px 6px rgba(0,0,0,0.35);
+  min-height:calc(1.45em * 2);
 }
 .card-body{padding:var(--space-6);flex:1;display:flex;flex-direction:column;gap:var(--space-3);}
 .card-header{display:flex;align-items:center;justify-content:space-between;}
@@ -77,7 +81,7 @@ footer{text-align:center;padding:var(--space-8);color:var(--color-text-faint);fo
 <body>
 <header>
   <h1>My HTML Library</h1>
-  <span class="meta">2 files · Updated 2026-05-18 21:32 UTC</span>
+  <span class="meta">2 files · Updated 2026-05-18 21:43 UTC</span>
 </header>
 <div class="container">
   <div class="toolbar">
@@ -87,18 +91,18 @@ footer{text-align:center;padding:var(--space-8);color:var(--color-text-faint);fo
   <div class="grid" id="grid">
     
     <a class="card" href="articles/2026-05-19-ontology.html" data-folder="articles">
-      <div class='card-thumb card-thumb-grad' style='background:linear-gradient(135deg,#d95f2b,#c2521f)'><span class='card-thumb-text'>온톨로지 — 기계에게 '상식'을 가르치는 지식의 골격</span></div>
+      <div class='card-thumb card-thumb-grad' style='background:linear-gradient(135deg,#d95f2b,#b84820)'><span class='card-thumb-text'>온톨로지 — 기계에게 '상식'을 가르치는 지식의 골격</span></div>
       <div class="card-body">
         <div class="card-header">
           <span class="card-folder">Articles</span>
           <span class='card-date'>2026-05-19</span>
         </div>
         <h3 class="card-title">온톨로지 — 기계에게 '상식'을 가르치는 지식의 골격</h3>
-        
+        <p class='card-desc'>온톨로지가 무엇인지, 클래스·인스턴스·관계라는 재료로 기계에게 상식을 가르치는 원리, 그리고 생성형 AI의 환각 문제를 보완하는 역할을 설명한다.</p>
       </div>
     </a>
     <a class="card" href="articles/2026-05-18-github-actions-auto-deploy.html" data-folder="articles">
-      <div class='card-thumb card-thumb-grad' style='background:linear-gradient(135deg,#d95f2b,#c2521f)'><span class='card-thumb-text'>GitHub Actions로 HTML 아티클 자동 배포하기</span></div>
+      <div class='card-thumb card-thumb-grad' style='background:linear-gradient(135deg,#bf4e20,#9e3c16)'><span class='card-thumb-text'>GitHub Actions로 HTML 아티클 자동 배포하기</span></div>
       <div class="card-body">
         <div class="card-header">
           <span class="card-folder">Articles</span>

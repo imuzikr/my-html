@@ -19,14 +19,14 @@ FOLDER_LABELS = {
 }
 
 FOLDER_GRADIENTS = {
-    "articles": ("d95f2b", "c2521f"),
-    "specs":    ("2d5a8e", "1e3d6b"),
-    "reviews":  ("3a6b4a", "2a4f38"),
-    "reports":  ("8a6a00", "6b5200"),
-    "explore":  ("6b48c8", "4e34a0"),
-    "tools":    ("2a7a7a", "1d5555"),
+    "articles": [("d95f2b","b84820"), ("bf4e20","9e3c16"), ("e07035","c85428"), ("b85020","9a3e16")],
+    "specs":    [("2d5a8e","1e3d6b"), ("234e80","163460"), ("3666a0","244e82"), ("1e3d6b","122845")],
+    "reviews":  [("3a6b4a","2a4f38"), ("2e5c3e","1e4029"), ("468060","325a46"), ("2a4f38","1a3526")],
+    "reports":  [("8a6a00","6b5200"), ("7a5e00","5e4800"), ("9a7800","7a6000"), ("6b5200","503c00")],
+    "explore":  [("6b48c8","4e34a0"), ("5c3cb8","422890"), ("7a58d4","5e44b0"), ("4e34a0","362280")],
+    "tools":    [("2a7a7a","1d5555"), ("1e6868","144848"), ("348888","226666"), ("1d5555","103838")],
 }
-FOLDER_GRADIENT_DEFAULT = ("6b6a63", "4a4a45")
+FOLDER_GRADIENT_DEFAULT = [("6b6a63","4a4a45")]
 
 
 def get_title(path: Path) -> str:
@@ -131,11 +131,12 @@ def render_cards(folders):
     html = ""
     for folder, files in folders.items():
         label = FOLDER_LABELS.get(folder, folder.title())
-        c1, c2 = FOLDER_GRADIENTS.get(folder, FOLDER_GRADIENT_DEFAULT)
-        for f in files:
+        variants = FOLDER_GRADIENTS.get(folder, FOLDER_GRADIENT_DEFAULT)
+        for idx, f in enumerate(files):
             date_str = f"<span class='card-date'>{f['date']}</span>" if f["date"] else ""
             desc_str = f"<p class='card-desc'>{f['description']}</p>" if f["description"] else ""
 
+            c1, c2 = variants[idx % len(variants)]
             if f["og_image"]:
                 thumb = f"<div class='card-thumb'><img src='{f['og_image']}' alt='' loading='lazy'></div>"
             else:
@@ -218,12 +219,16 @@ header .meta{{font-size:var(--text-sm);color:var(--color-text-faint);margin-left
 .card:hover{{box-shadow:var(--shadow-md);border-color:var(--color-accent);transform:translateY(-2px)}}
 .card-thumb{{width:100%;height:140px;overflow:hidden;flex-shrink:0;}}
 .card-thumb img{{width:100%;height:100%;object-fit:cover;display:block;}}
-.card-thumb-grad{{display:flex;align-items:flex-end;padding:var(--space-4);}}
+.card-thumb-grad{{
+  display:flex;align-items:flex-end;padding:var(--space-4);
+  background-image:linear-gradient(to top,rgba(0,0,0,0.18) 0%,transparent 60%);
+}}
 .card-thumb-text{{
   font-size:var(--text-sm);font-weight:var(--weight-semibold);
-  color:rgba(255,255,255,0.92);line-height:1.4;
-  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
-  text-shadow:0 1px 4px rgba(0,0,0,0.3);
+  color:rgba(255,255,255,0.95);line-height:1.45;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  text-shadow:0 1px 6px rgba(0,0,0,0.35);
+  min-height:calc(1.45em * 2);
 }}
 .card-body{{padding:var(--space-6);flex:1;display:flex;flex-direction:column;gap:var(--space-3);}}
 .card-header{{display:flex;align-items:center;justify-content:space-between;}}
