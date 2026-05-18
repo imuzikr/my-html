@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Actions로 HTML 아티클 자동 배포하기</title>
+  <meta name="description" content="HTML 파일을 articles/ 폴더에 넣고 main에 머지하면 GitHub Actions가 목차를 만들고 GitHub Pages에 자동 배포하는 구조를 설명한다.">
+  <style>
+    :root {
+      --color-bg: #f5f2ed; --color-bg-alt: #eceae4; --color-bg-card: #ffffff; --color-bg-code: #1e1e1e;
+      --color-text: #1a1a18; --color-text-muted: #6b6a63; --color-text-faint: #a09f97;
+      --color-border: #dedad2; --color-border-strong: #b8b5ac;
+      --color-accent: #d95f2b; --color-accent-hover: #c2521f; --color-accent-soft: #faeee7;
+      --color-green: #3a6b4a; --color-green-soft: #e6f0e9;
+      --color-blue: #2d5a8e; --color-blue-soft: #e5eef7;
+      --color-yellow: #8a6a00; --color-yellow-soft: #fdf5d9;
+      --color-red: #b03a2e; --color-red-soft: #fdecea;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --font-mono: "SF Mono", "Fira Code", Consolas, monospace;
+      --text-xs: 0.75rem; --text-sm: 0.875rem; --text-base: 1rem; --text-lg: 1.125rem;
+      --text-xl: 1.25rem; --text-2xl: 1.5rem; --text-3xl: 1.875rem; --text-4xl: 2.25rem;
+      --weight-normal: 400; --weight-medium: 500; --weight-semibold: 600; --weight-bold: 700;
+      --leading-tight: 1.25; --leading-normal: 1.6;
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+      --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem;
+      --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px; --radius-full: 9999px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.07); --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-sans); font-size: var(--text-base); line-height: var(--leading-normal); color: var(--color-text); background: var(--color-bg); }
+
+    #progress-bar { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: var(--color-accent); z-index: 1000; transition: width 0.1s linear; }
+
+    .top-nav { position: sticky; top: 0; z-index: 900; background: rgba(245,242,237,0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--color-border); padding: 0 var(--space-6); }
+    .top-nav-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; gap: var(--space-6); height: 52px; overflow: hidden; }
+    .nav-title { font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--color-text); white-space: nowrap; flex-shrink: 0; }
+    .nav-links { display: flex; align-items: center; gap: var(--space-1); overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; flex: 1; }
+    .nav-links::-webkit-scrollbar { display: none; }
+    .nav-links a { font-size: var(--text-xs); font-weight: var(--weight-medium); color: var(--color-text-muted); text-decoration: none; padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); white-space: nowrap; transition: background 0.15s, color 0.15s; }
+    .nav-links a:hover { background: var(--color-accent-soft); color: var(--color-accent); }
+    .nav-links a.active { background: var(--color-accent-soft); color: var(--color-accent); font-weight: var(--weight-semibold); }
+
+    .page-wrapper { max-width: 900px; margin: 0 auto; padding: var(--space-12) var(--space-6); }
+
+    .hero { margin-bottom: var(--space-12); }
+    .hero-meta { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-5); flex-wrap: wrap; }
+    .hero-date { font-size: var(--text-sm); color: var(--color-text-faint); font-weight: var(--weight-medium); }
+    .tag-badge { display: inline-block; font-size: var(--text-xs); font-weight: var(--weight-medium); padding: 2px var(--space-3); border-radius: var(--radius-full); background: var(--color-bg-alt); color: var(--color-text-muted); border: 1px solid var(--color-border); text-decoration: none; }
+    .tag-badge.accent { background: var(--color-accent-soft); color: var(--color-accent); border-color: #f0c4b0; }
+    .hero-subtitle { font-size: var(--text-sm); color: var(--color-text-faint); font-weight: var(--weight-medium); letter-spacing: 0.02em; text-transform: uppercase; margin-bottom: var(--space-4); }
+    .hero-title { font-size: var(--text-4xl); font-weight: var(--weight-bold); line-height: var(--leading-tight); color: var(--color-text); margin-bottom: var(--space-6); letter-spacing: -0.02em; }
+    .summary-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-left: 4px solid var(--color-accent); border-radius: var(--radius-md); padding: var(--space-5) var(--space-6); box-shadow: var(--shadow-sm); }
+    .summary-card p { font-size: var(--text-base); color: var(--color-text-muted); line-height: var(--leading-normal); }
+
+    .article-section { margin-bottom: var(--space-12); scroll-margin-top: 64px; }
+    .section-header { display: flex; align-items: baseline; gap: var(--space-4); margin-bottom: var(--space-6); padding-bottom: var(--space-4); border-bottom: 2px solid var(--color-border); }
+    .section-number { font-size: var(--text-3xl); font-weight: var(--weight-bold); color: var(--color-accent); line-height: 1; flex-shrink: 0; }
+    .section-title { font-size: var(--text-2xl); font-weight: var(--weight-bold); line-height: var(--leading-tight); color: var(--color-text); letter-spacing: -0.01em; }
+    .article-section p { font-size: var(--text-base); color: var(--color-text); line-height: var(--leading-normal); margin-bottom: var(--space-4); }
+    .article-section p:last-child { margin-bottom: 0; }
+    .lead-text { font-size: var(--text-lg); color: var(--color-text-muted); line-height: var(--leading-normal); margin-bottom: var(--space-5); }
+    strong { font-weight: var(--weight-semibold); color: var(--color-text); }
+
+    /* Callouts */
+    .callout { display: flex; gap: var(--space-4); border-radius: var(--radius-md); padding: var(--space-5); margin: var(--space-6) 0; border: 1px solid transparent; }
+    .callout-icon { flex-shrink: 0; width: 22px; height: 22px; margin-top: 1px; }
+    .callout-body { flex: 1; min-width: 0; }
+    .callout-title { font-size: var(--text-sm); font-weight: var(--weight-semibold); margin-bottom: var(--space-2); }
+    .callout-body p { font-size: var(--text-sm); line-height: var(--leading-normal); margin-bottom: var(--space-2); }
+    .callout-body p:last-child { margin-bottom: 0; }
+    .callout-info { background: var(--color-blue-soft); border-color: #c0d4ea; border-left: 4px solid var(--color-blue); }
+    .callout-info .callout-title, .callout-info .callout-icon { color: var(--color-blue); }
+    .callout-warning { background: var(--color-yellow-soft); border-color: #e8d8a0; border-left: 4px solid var(--color-yellow); }
+    .callout-warning .callout-title, .callout-warning .callout-icon { color: var(--color-yellow); }
+    .callout-success { background: var(--color-green-soft); border-color: #b8d4c0; border-left: 4px solid var(--color-green); }
+    .callout-success .callout-title, .callout-success .callout-icon { color: var(--color-green); }
+    .callout-important { background: #f0edf8; border-color: #d0c4e8; border-left: 4px solid #6b48c8; }
+    .callout-important .callout-title, .callout-important .callout-icon { color: #6b48c8; }
+    .callout-example { background: var(--color-accent-soft); border-color: #f0c4b0; border-left: 4px solid var(--color-accent); }
+    .callout-example .callout-title, .callout-example .callout-icon { color: var(--color-accent); }
+    .callout-abstract { background: #e6f5f5; border-color: #b0d8d8; border-left: 4px solid #2a7a7a; }
+    .callout-abstract .callout-title, .callout-abstract .callout-icon { color: #2a7a7a; }
+
+    /* Tables */
+    .table-wrapper { overflow-x: auto; margin: var(--space-6) 0; border-radius: var(--radius-md); border: 1px solid var(--color-border); box-shadow: var(--shadow-sm); }
+    table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); background: var(--color-bg-card); }
+    thead th { background: var(--color-bg-alt); color: var(--color-text-muted); font-size: var(--text-xs); font-weight: var(--weight-semibold); text-transform: uppercase; letter-spacing: 0.06em; padding: var(--space-3) var(--space-4); text-align: left; border-bottom: 1px solid var(--color-border); white-space: nowrap; }
+    tbody td { padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border); color: var(--color-text); vertical-align: top; line-height: var(--leading-normal); }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--color-bg-alt); }
+
+    /* Code block */
+    .code-block { margin: var(--space-6) 0; border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .code-block-header { background: #2d2d2b; color: #a09f97; font-size: var(--text-xs); font-family: var(--font-mono); padding: var(--space-2) var(--space-4); display: flex; align-items: center; justify-content: space-between; }
+    .code-block pre { background: var(--color-bg-code); padding: var(--space-5) var(--space-6); overflow-x: auto; margin: 0; }
+    .code-block code { font-family: var(--font-mono); font-size: var(--text-sm); line-height: 1.7; color: #d4d4d4; }
+
+    /* Flow diagram */
+    .diagram-wrapper { margin: var(--space-6) 0; background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-8) var(--space-6); box-shadow: var(--shadow-sm); overflow-x: auto; text-align: center; }
+    .diagram-caption { font-size: var(--text-xs); color: var(--color-text-faint); text-align: center; margin-top: var(--space-4); font-style: italic; }
+
+    /* Step list */
+    .step-list { display: flex; flex-direction: column; gap: var(--space-4); margin: var(--space-6) 0; }
+    .step-item { display: flex; gap: var(--space-4); align-items: flex-start; }
+    .step-num { flex-shrink: 0; width: 32px; height: 32px; background: var(--color-accent); color: white; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; font-size: var(--text-sm); font-weight: var(--weight-bold); margin-top: 2px; }
+    .step-body { flex: 1; }
+    .step-title { font-size: var(--text-base); font-weight: var(--weight-semibold); color: var(--color-text); margin-bottom: var(--space-1); }
+    .step-desc { font-size: var(--text-sm); color: var(--color-text-muted); line-height: var(--leading-normal); }
+
+    /* File card */
+    .file-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-5) var(--space-6); margin: var(--space-5) 0; box-shadow: var(--shadow-sm); }
+    .file-card-path { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-text-faint); background: var(--color-bg-alt); padding: 2px var(--space-2); border-radius: var(--radius-sm); display: inline-block; margin-bottom: var(--space-3); }
+    .file-card-title { font-size: var(--text-base); font-weight: var(--weight-semibold); color: var(--color-text); margin-bottom: var(--space-2); }
+    .file-card p { font-size: var(--text-sm); color: var(--color-text-muted); line-height: var(--leading-normal); margin-bottom: var(--space-2); }
+    .file-card p:last-child { margin-bottom: 0; }
+
+    /* Summary section */
+    .summary-section { scroll-margin-top: 64px; margin-bottom: var(--space-12); }
+    .summary-section-header { display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-6); padding-bottom: var(--space-4); border-bottom: 2px solid var(--color-border); }
+    .summary-section-title { font-size: var(--text-2xl); font-weight: var(--weight-bold); color: var(--color-text); }
+
+    .section-divider { border: none; border-top: 1px solid var(--color-border); margin: var(--space-10) 0; }
+
+    #back-to-top { position: fixed; bottom: var(--space-6); right: var(--space-6); width: 44px; height: 44px; background: var(--color-accent); color: white; border: none; border-radius: var(--radius-full); cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(217,95,43,0.35); opacity: 0; transform: translateY(8px); transition: opacity 0.25s, transform 0.25s, background 0.15s; pointer-events: none; z-index: 800; }
+    #back-to-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    #back-to-top:hover { background: var(--color-accent-hover); }
+
+    @media (max-width: 768px) {
+      .page-wrapper { padding: var(--space-8) var(--space-4); }
+      .hero-title { font-size: var(--text-3xl); }
+      .nav-title { display: none; }
+      .section-number { font-size: var(--text-2xl); }
+      .section-title { font-size: var(--text-xl); }
+      #back-to-top { bottom: var(--space-4); right: var(--space-4); }
+    }
+  </style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<nav class="top-nav" aria-label="Article navigation">
+  <div class="top-nav-inner">
+    <span class="nav-title">GitHub Actions 자동 배포</span>
+    <div class="nav-links">
+      <a href="#section-1" id="nav-1">전체 그림</a>
+      <a href="#section-2" id="nav-2">폴더 구조</a>
+      <a href="#section-3" id="nav-3">파일별 역할</a>
+      <a href="#section-4" id="nav-4">발행 과정</a>
+      <a href="#section-5" id="nav-5">GitHub 설정</a>
+      <a href="#summary" id="nav-summary">핵심 정리</a>
+    </div>
+  </div>
+</nav>
+
+<main class="page-wrapper">
+
+  <header class="hero">
+    <div class="hero-meta">
+      <span class="hero-date">2026년 5월 18일</span>
+      <span class="tag-badge accent">GitHub Actions</span>
+      <span class="tag-badge">GitHub Pages</span>
+      <span class="tag-badge">자동화</span>
+      <span class="tag-badge">CI/CD</span>
+      <span class="tag-badge">Python</span>
+    </div>
+    <p class="hero-subtitle">개발 경험이 없어도 이해할 수 있는 배포 자동화 안내</p>
+    <h1 class="hero-title">GitHub Actions로 HTML 아티클 자동 배포하기</h1>
+    <div class="summary-card">
+      <p>HTML 파일을 <code>articles/</code> 폴더에 넣고 <code>main</code> 브랜치에 머지하면, GitHub Actions가 자동으로 목차 페이지를 생성하고 GitHub Pages에 배포하는 구조를 설명한다. 각 파일이 어떤 역할을 하는지, 글이 발행되기까지 어떤 단계를 거치는지를 다룬다.</p>
+    </div>
+  </header>
+
+  <!-- SECTION 1 -->
+  <section class="article-section" id="section-1">
+    <div class="section-header">
+      <span class="section-number">01</span>
+      <h2 class="section-title">전체 그림 먼저 보기</h2>
+    </div>
+    <p class="lead-text">이 프로젝트는 <strong>HTML로 작성한 글(아티클)을 웹에 자동으로 발행하는 시스템</strong>이다. 글을 정해진 폴더에 넣기만 하면, 나머지는 자동으로 처리된다.</p>
+    <p>목차 페이지가 만들어지고, 인터넷에 공개되는 것까지 사람이 추가로 할 일이 없다. 블로그 플랫폼(네이버 블로그, 티스토리 등)을 직접 만든 것과 비슷한데, 외부 서비스에 의존하지 않고 <strong>GitHub</strong>라는 개발자 도구 위에서 모든 것을 운영한다는 차이가 있다.</p>
+
+    <div class="diagram-wrapper">
+      <svg viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:680px;">
+        <defs>
+          <marker id="arr" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+            <polygon points="0 0, 9 3.5, 0 7" fill="#d95f2b"/>
+          </marker>
+        </defs>
+        <rect x="10" y="25" width="130" height="50" rx="9" fill="#faeee7" stroke="#d95f2b" stroke-width="1.7"/>
+        <text x="75" y="47" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#c2521f">HTML 파일 작성</text>
+        <text x="75" y="64" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#c2521f">articles/ 폴더</text>
+        <line x1="142" y1="50" x2="168" y2="50" stroke="#d95f2b" stroke-width="2" marker-end="url(#arr)"/>
+        <rect x="170" y="25" width="130" height="50" rx="9" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.7"/>
+        <text x="235" y="47" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#2d5a8e">main 브랜치에</text>
+        <text x="235" y="64" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#2d5a8e">머지</text>
+        <line x1="302" y1="50" x2="328" y2="50" stroke="#d95f2b" stroke-width="2" marker-end="url(#arr)"/>
+        <rect x="330" y="25" width="140" height="50" rx="9" fill="#f0edf8" stroke="#6b48c8" stroke-width="1.7"/>
+        <text x="400" y="47" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#6b48c8">GitHub Actions</text>
+        <text x="400" y="64" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#6b48c8">자동 실행</text>
+        <line x1="472" y1="50" x2="498" y2="50" stroke="#d95f2b" stroke-width="2" marker-end="url(#arr)"/>
+        <rect x="500" y="25" width="130" height="50" rx="9" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="1.7"/>
+        <text x="565" y="47" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#3a6b4a">GitHub Pages</text>
+        <text x="565" y="64" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#3a6b4a">배포 완료</text>
+      </svg>
+      <p class="diagram-caption">글 작성 → main 머지 → Actions 자동 실행 → 웹 배포까지의 전체 흐름</p>
+    </div>
+  </section>
+
+  <!-- SECTION 2 -->
+  <section class="article-section" id="section-2">
+    <div class="section-header">
+      <span class="section-number">02</span>
+      <h2 class="section-title">프로젝트 폴더 구조</h2>
+    </div>
+    <p class="lead-text">프로젝트는 아래와 같은 구조로 이루어져 있다. 각 파일과 폴더는 독립적인 역할을 맡고 있다.</p>
+    <div class="code-block">
+      <div class="code-block-header"><span>프로젝트 구조</span></div>
+      <pre><code>my-html/
+├── .claude/                        ← Claude Code 설정
+│   └── commands/html.md            ← /html 커맨드 작성 규칙
+├── .github/
+│   └── workflows/
+│       └── deploy.yml              ← 자동 배포 규칙 (GitHub Actions)
+├── scripts/
+│   └── generate_index.py           ← 목차 페이지 생성 스크립트
+├── articles/
+│   └── 2026-05-19-ontology.html    ← 아티클 (글)
+├── design-system.html              ← 디자인 규칙 참고 파일
+├── html-skill-for-claude-ai.md     ← Claude 글 작성 지시문
+└── index.html                      ← 자동 생성되는 목차 페이지</code></pre>
+    </div>
+    <div class="callout callout-info">
+      <div class="callout-icon">
+        <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" width="22" height="22"><circle cx="11" cy="11" r="9" stroke="#2d5a8e" stroke-width="1.8"/><path d="M11 10v5" stroke="#2d5a8e" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="7.5" r="1" fill="#2d5a8e"/></svg>
+      </div>
+      <div class="callout-body">
+        <p class="callout-title">index.html은 자동 생성 파일이다</p>
+        <p>목차 파일인 <code>index.html</code>은 직접 편집하는 파일이 아니다. <code>generate_index.py</code> 스크립트가 매번 새로 만들어낸다. 직접 수정해도 다음 배포 시점에 덮어씌워진다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3 -->
+  <section class="article-section" id="section-3">
+    <div class="section-header">
+      <span class="section-number">03</span>
+      <h2 class="section-title">각 파일이 하는 일</h2>
+    </div>
+
+    <div class="file-card">
+      <span class="file-card-path">.github/workflows/deploy.yml</span>
+      <p class="file-card-title">deploy.yml — 자동화의 두뇌</p>
+      <p>GitHub Actions에게 <strong>"언제, 무엇을, 어떻게 실행할지"</strong> 알려주는 설계도다. 이 파일이 <code>.github/workflows/</code> 폴더 안에 존재하는 것만으로 자동화가 등록된다. 별도로 활성화 버튼을 누를 필요가 없다.</p>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr><th>항목</th><th>내용</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>언제?</strong></td><td><code>main</code> 브랜치에 코드가 푸시되면</td></tr>
+          <tr><td><strong>어디서?</strong></td><td>GitHub가 제공하는 클라우드 서버(Ubuntu)에서</td></tr>
+          <tr><td><strong>무엇을?</strong></td><td>Python 스크립트를 실행하고, 결과를 웹에 배포</td></tr>
+          <tr><td><strong>수동 실행?</strong></td><td>Actions 탭 → "Run workflow" 버튼으로 언제든 가능</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="file-card">
+      <span class="file-card-path">scripts/generate_index.py</span>
+      <p class="file-card-title">generate_index.py — 목차 자동 생성기</p>
+      <p><code>articles/</code> 폴더를 스캔해서 안에 있는 HTML 파일 목록을 모두 수집한 뒤, 각 글로 연결되는 링크 카드가 포함된 <code>index.html</code>을 자동으로 만들어낸다.</p>
+    </div>
+
+    <div class="callout callout-important">
+      <div class="callout-icon">
+        <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" width="22" height="22"><circle cx="11" cy="11" r="9" stroke="#6b48c8" stroke-width="1.8"/><path d="M11 7v6" stroke="#6b48c8" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="15.5" r="1" fill="#6b48c8"/></svg>
+      </div>
+      <div class="callout-body">
+        <p class="callout-title">핵심 포인트</p>
+        <p>기존 <code>index.html</code>에 링크를 하나 추가하는 것이 아니라 <strong>매번 처음부터 새로 생성</strong>한다. 글을 추가하든, 삭제하든, 파일명을 바꾸든 항상 그 시점의 최신 상태가 반영된다.</p>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <span class="file-card-path">articles/</span>
+      <p class="file-card-title">articles/ 폴더 — 글이 저장되는 곳</p>
+      <p>실제 아티클 HTML 파일이 들어가는 폴더다. 새 글을 발행하고 싶으면 이 폴더에 HTML 파일을 넣으면 된다. 파일명은 <code>2026-05-18-title.html</code>처럼 날짜와 주제를 조합해서 짓는다.</p>
+    </div>
+
+    <div class="file-card">
+      <span class="file-card-path">design-system.html</span>
+      <p class="file-card-title">design-system.html — 디자인 규칙서</p>
+      <p>아티클의 색상, 폰트, 간격, 카드 모양 같은 <strong>시각 디자인 규칙</strong>이 정의된 참고 파일이다. 새 글을 만들 때 이 파일을 기준으로 삼으면 모든 아티클의 디자인이 통일된다.</p>
+    </div>
+
+    <div class="file-card">
+      <span class="file-card-path">html-skill-for-claude-ai.md</span>
+      <p class="file-card-title">html-skill-for-claude-ai.md — Claude를 위한 작성 지시문</p>
+      <p>Claude에게 HTML 아티클을 만들어달라고 요청할 때 따르는 <strong>작성 규칙서</strong>다. <code>/html article ○○○</code>처럼 명령하면, Claude가 이 규칙에 맞춰 디자인 시스템을 적용한 완성도 높은 HTML을 만들어준다.</p>
+    </div>
+
+    <div class="callout callout-example">
+      <div class="callout-icon">
+        <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" width="22" height="22"><rect x="3" y="3" width="16" height="16" rx="3" stroke="#d95f2b" stroke-width="1.8"/><path d="M7 11h8M7 7.5h8M7 14.5h5" stroke="#d95f2b" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </div>
+      <div class="callout-body">
+        <p class="callout-title">두 파일의 관계</p>
+        <p><code>design-system.html</code>은 <strong>"어떤 모양으로 만들지"</strong>를 정의하고, <code>html-skill-for-claude-ai.md</code>는 <strong>"어떤 내용 구성으로 만들지"</strong>를 정의한다. 잡지로 비유하면, 하나는 아트디렉터의 디자인 매뉴얼이고, 다른 하나는 편집장의 기사 작성 가이드다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 4 -->
+  <section class="article-section" id="section-4">
+    <div class="section-header">
+      <span class="section-number">04</span>
+      <h2 class="section-title">새 글이 발행되는 전체 과정</h2>
+    </div>
+
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <p class="step-title">글 작성</p>
+          <p class="step-desc">Claude에게 <code>/html article ○○○</code>라고 요청하면 디자인 규칙에 맞는 HTML 파일이 만들어진다. 또는 직접 HTML을 작성해도 된다.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <p class="step-title">articles/ 폴더에 파일 추가</p>
+          <p class="step-desc">만들어진 HTML 파일을 <code>articles/</code> 폴더에 넣고 커밋한다. 이 시점에서는 아직 배포되지 않는다.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <p class="step-title">main 브랜치에 푸시</p>
+          <p class="step-desc"><code>git push origin HEAD:main</code>으로 main에 직접 반영한다. 이 순간 GitHub Actions가 트리거된다.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <p class="step-title">GitHub Actions 자동 실행</p>
+          <p class="step-desc"><code>deploy.yml</code>이 실행되어 <code>generate_index.py</code>가 새 아티클을 포함한 <code>index.html</code>을 재생성한다.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <p class="step-title">GitHub Pages 배포 완료</p>
+          <p class="step-desc">생성된 파일 전체가 GitHub Pages에 업로드되고, 약 1~2분 후 웹에서 확인할 수 있다.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-success">
+      <div class="callout-icon">
+        <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" width="22" height="22"><circle cx="11" cy="11" r="9" stroke="#3a6b4a" stroke-width="1.8"/><path d="M7 11.5l3 3 5-6" stroke="#3a6b4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="callout-body">
+        <p class="callout-title">3단계부터는 사람이 할 일이 없다</p>
+        <p>main에 푸시하는 순간부터 목차 재생성 → 배포까지 전부 자동이다. 평균 1~2분이면 웹에서 새 글을 확인할 수 있다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5 -->
+  <section class="article-section" id="section-5">
+    <div class="section-header">
+      <span class="section-number">05</span>
+      <h2 class="section-title">배포를 위해 필요한 GitHub 설정</h2>
+    </div>
+    <p class="lead-text">자동 배포가 처음 작동하려면 GitHub 레포지토리에서 두 가지 설정을 해두어야 한다.</p>
+
+    <div class="callout callout-warning">
+      <div class="callout-icon">
+        <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" width="22" height="22"><path d="M11 3L20 19H2L11 3Z" stroke="#8a6a00" stroke-width="1.8" stroke-linejoin="round"/><path d="M11 9v5" stroke="#8a6a00" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="16.5" r="1" fill="#8a6a00"/></svg>
+      </div>
+      <div class="callout-body">
+        <p class="callout-title">이 설정이 빠지면 배포가 실패한다</p>
+        <p>아래 두 설정은 레포지토리를 처음 만들 때 한 번만 하면 된다. 이후에는 건드릴 필요가 없다.</p>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr><th>설정 위치</th><th>변경 값</th><th>이유</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Settings → Pages → Source</strong></td>
+            <td><code>GitHub Actions</code> 선택</td>
+            <td>GitHub에게 "배포는 워크플로가 처리한다"고 알려줌</td>
+          </tr>
+          <tr>
+            <td><strong>Settings → Environments → github-pages</strong></td>
+            <td><code>main</code> 브랜치 배포 허용</td>
+            <td>이 설정이 없으면 <em>Branch "main" is not allowed to deploy</em> 에러 발생</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- SUMMARY -->
+  <section class="summary-section" id="summary">
+    <div class="summary-section-header">
+      <h2 class="summary-section-title">핵심 정리</h2>
+    </div>
+
+    <div class="callout callout-abstract">
+      <div class="callout-icon">
+        <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" width="22" height="22"><rect x="3" y="3" width="16" height="16" rx="3" stroke="#2a7a7a" stroke-width="1.8"/><circle cx="11" cy="11" r="4" stroke="#2a7a7a" stroke-width="1.6"/><path d="M11 7V3M11 19v-4M7 11H3M19 11h-4" stroke="#2a7a7a" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </div>
+      <div class="callout-body">
+        <p class="callout-title">한 문장 요약</p>
+        <p><strong>글을 <code>articles/</code> 폴더에 넣고 main에 머지하면, 나머지는 GitHub Actions가 알아서 목차를 만들고 웹에 배포해준다.</strong></p>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr><th>파일</th><th>역할</th><th>누가 건드리나</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>deploy.yml</code></td><td>자동화 설계도</td><td>처음 한 번만 설정</td></tr>
+          <tr><td><code>generate_index.py</code></td><td>목차 자동 생성</td><td>GitHub Actions가 실행</td></tr>
+          <tr><td><code>articles/*.html</code></td><td>실제 글 파일</td><td>글 쓸 때마다 추가</td></tr>
+          <tr><td><code>index.html</code></td><td>목차 페이지</td><td>자동 생성 (직접 편집 ✗)</td></tr>
+          <tr><td><code>design-system.html</code></td><td>디자인 규칙서</td><td>디자인 변경 시</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="맨 위로">
+  <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18">
+    <path d="M10 15V5M5 10l5-5 5 5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
+<script>
+  const progressBar = document.getElementById('progress-bar');
+  const backToTop = document.getElementById('back-to-top');
+  const sections = [
+    {id:'section-1',navId:'nav-1'},{id:'section-2',navId:'nav-2'},
+    {id:'section-3',navId:'nav-3'},{id:'section-4',navId:'nav-4'},
+    {id:'section-5',navId:'nav-5'},{id:'summary',navId:'nav-summary'},
+  ];
+  let ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    requestAnimationFrame(() => {
+      const scrollTop = window.scrollY;
+      const docH = document.documentElement.scrollHeight - window.innerHeight;
+      progressBar.style.width = (docH > 0 ? Math.min(scrollTop/docH*100,100) : 0) + '%';
+      backToTop.classList.toggle('visible', scrollTop > 400);
+      const y = scrollTop + 80;
+      let active = null;
+      for (let i = sections.length-1; i >= 0; i--) {
+        const el = document.getElementById(sections[i].id);
+        if (el && el.offsetTop <= y) { active = sections[i].navId; break; }
+      }
+      sections.forEach(s => {
+        const l = document.getElementById(s.navId);
+        if (l) l.classList.toggle('active', s.navId === active);
+      });
+      ticking = false;
+    });
+    ticking = true;
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+</script>
+
+
+<!-- Back to index -->
+<a id="back-to-index" href="../index.html" aria-label="목록으로 돌아가기" title="목록으로"><svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M8.5 15L3 10l5.5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10h14" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></a>
+<style>
+#back-to-index{position:fixed;bottom:1.5rem;left:1.5rem;width:44px;height:44px;background:#6b6a63;color:#fff;border-radius:9999px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.18);transition:background .15s,transform .15s;z-index:800;}
+#back-to-index:hover{background:#d95f2b;transform:translateX(-2px);}
+@media(max-width:600px){#back-to-index{bottom:1rem;left:1rem;}}
+</style>
+</body>
+</html>
