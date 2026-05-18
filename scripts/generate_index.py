@@ -225,15 +225,15 @@ header .meta{{font-size:var(--text-sm);color:var(--color-text-faint);margin-left
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
   text-shadow:0 1px 4px rgba(0,0,0,0.3);
 }}
-.card-body{{padding:var(--space-4) var(--space-4) var(--space-5);flex:1;display:flex;flex-direction:column;gap:var(--space-2);}}
+.card-body{{padding:var(--space-5) var(--space-5) var(--space-6);flex:1;display:flex;flex-direction:column;gap:var(--space-3);}}
 .card-header{{display:flex;align-items:center;justify-content:space-between;}}
 .card-folder{{
   font-size:var(--text-sm);font-weight:var(--weight-medium);color:var(--color-accent);
   background:var(--color-accent-soft);padding:2px var(--space-2);border-radius:var(--radius-md);
 }}
 .card-date{{font-size:var(--text-sm);color:var(--color-text-faint)}}
-.card-title{{font-size:var(--text-lg);font-weight:var(--weight-semibold);line-height:1.4}}
-.card-desc{{font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.6}}
+.card-title{{font-size:var(--text-lg);font-weight:var(--weight-semibold);line-height:1.45;letter-spacing:-0.01em;}}
+.card-desc{{font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.65;margin-top:var(--space-1);}}
 .empty{{text-align:center;color:var(--color-text-faint);padding:var(--space-12);font-size:var(--text-lg)}}
 footer{{text-align:center;padding:var(--space-8);color:var(--color-text-faint);font-size:var(--text-sm);border-top:1px solid var(--color-border);margin-top:var(--space-12)}}
 @media(max-width:600px){{
