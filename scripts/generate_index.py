@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Scans all HTML files and generates a beautiful index.html."""
 
-import os
 import re
 from pathlib import Path
 from datetime import datetime
@@ -18,6 +17,16 @@ FOLDER_LABELS = {
     "explore":  "Explore",
     "tools":    "Tools",
 }
+
+FOLDER_GRADIENTS = {
+    "articles": ("d95f2b", "c2521f"),
+    "specs":    ("2d5a8e", "1e3d6b"),
+    "reviews":  ("3a6b4a", "2a4f38"),
+    "reports":  ("8a6a00", "6b5200"),
+    "explore":  ("6b48c8", "4e34a0"),
+    "tools":    ("2a7a7a", "1d5555"),
+}
+FOLDER_GRADIENT_DEFAULT = ("6b6a63", "4a4a45")
 
 
 def get_title(path: Path) -> str:
@@ -37,6 +46,14 @@ def get_date(path: Path) -> str:
     return m.group(1) if m else ""
 
 
+def get_og_image(path: Path) -> str:
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    m = re.search(r'<meta\s+property=["\']og:image["\']\s+content=["\'](.*?)["\']', text, re.IGNORECASE)
+    if not m:
+        m = re.search(r'<meta\s+content=["\'](.*?)["\']\s+property=["\']og:image["\']', text, re.IGNORECASE)
+    return m.group(1).strip() if m else ""
+
+
 def collect_files():
     folders = {}
     for html in sorted(ROOT.rglob("*.html"), reverse=True):
@@ -52,9 +69,54 @@ def collect_files():
             "title": get_title(html),
             "description": get_description(html),
             "date": get_date(html),
+            "og_image": get_og_image(html),
         })
     return folders
 
+
+# ── Back-to-index button injection ──────────────────────────────────────────
+
+BACK_BUTTON_MARKER = 'id="back-to-index"'
+
+
+def _back_button_snippet(depth: int) -> str:
+    prefix = "../" * depth
+    return (
+        '\n<!-- Back to index -->\n'
+        f'<a id="back-to-index" href="{prefix}index.html"'
+        ' aria-label="목록으로 돌아가기" title="목록으로">'
+        '<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"'
+        ' width="18" height="18">'
+        '<path d="M8.5 15L3 10l5.5-5" stroke="white" stroke-width="2"'
+        ' stroke-linecap="round" stroke-linejoin="round"/>'
+        '<path d="M3 10h14" stroke="white" stroke-width="2" stroke-linecap="round"/>'
+        '</svg></a>\n'
+        '<style>\n'
+        '#back-to-index{position:fixed;bottom:1.5rem;left:1.5rem;width:44px;height:44px;'
+        'background:#6b6a63;color:#fff;border-radius:9999px;display:flex;'
+        'align-items:center;justify-content:center;text-decoration:none;'
+        'box-shadow:0 4px 16px rgba(0,0,0,.18);transition:background .15s,transform .15s;z-index:800;}\n'
+        '#back-to-index:hover{background:#d95f2b;transform:translateX(-2px);}\n'
+        '@media(max-width:600px){#back-to-index{bottom:1rem;left:1rem;}}\n'
+        '</style>\n'
+    )
+
+
+def inject_back_button(path: Path) -> bool:
+    """Inject back-to-index button before </body> if not already present."""
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    if BACK_BUTTON_MARKER in text:
+        return False
+    if "</body>" not in text:
+        return False
+    rel = path.relative_to(ROOT)
+    depth = len(rel.parts) - 1
+    snippet = _back_button_snippet(depth)
+    path.write_text(text.replace("</body>", snippet + "</body>", 1), encoding="utf-8")
+    return True
+
+
+# ── Card rendering ───────────────────────────────────────────────────────────
 
 def render_tab_buttons(folders):
     all_btn = '<button class="tab-btn active" onclick="filterFolder(\'all\', this)">All</button>'
@@ -69,17 +131,32 @@ def render_cards(folders):
     html = ""
     for folder, files in folders.items():
         label = FOLDER_LABELS.get(folder, folder.title())
+        c1, c2 = FOLDER_GRADIENTS.get(folder, FOLDER_GRADIENT_DEFAULT)
         for f in files:
             date_str = f"<span class='card-date'>{f['date']}</span>" if f["date"] else ""
             desc_str = f"<p class='card-desc'>{f['description']}</p>" if f["description"] else ""
+
+            if f["og_image"]:
+                thumb = f"<div class='card-thumb'><img src='{f['og_image']}' alt='' loading='lazy'></div>"
+            else:
+                safe_title = f["title"].replace("<", "&lt;").replace(">", "&gt;")
+                thumb = (
+                    f"<div class='card-thumb card-thumb-grad'"
+                    f" style='background:linear-gradient(135deg,#{c1},#{c2})'>"
+                    f"<span class='card-thumb-text'>{safe_title}</span></div>"
+                )
+
             html += f"""
     <a class="card" href="{f['path']}" data-folder="{folder}">
-      <div class="card-header">
-        <span class="card-folder">{label}</span>
-        {date_str}
+      {thumb}
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-folder">{label}</span>
+          {date_str}
+        </div>
+        <h3 class="card-title">{f['title']}</h3>
+        {desc_str}
       </div>
-      <h3 class="card-title">{f['title']}</h3>
-      {desc_str}
     </a>"""
     return html
 
@@ -135,17 +212,27 @@ header .meta{{font-size:var(--text-sm);color:var(--color-text-faint);margin-left
 .grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--space-4)}}
 .card{{
   background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);
-  padding:var(--space-6);text-decoration:none;color:inherit;display:block;
+  text-decoration:none;color:inherit;display:flex;flex-direction:column;overflow:hidden;
   box-shadow:var(--shadow-sm);transition:all 180ms ease;
 }}
 .card:hover{{box-shadow:var(--shadow-md);border-color:var(--color-accent);transform:translateY(-2px)}}
-.card-header{{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)}}
+.card-thumb{{width:100%;height:140px;overflow:hidden;flex-shrink:0;}}
+.card-thumb img{{width:100%;height:100%;object-fit:cover;display:block;}}
+.card-thumb-grad{{display:flex;align-items:flex-end;padding:var(--space-4);}}
+.card-thumb-text{{
+  font-size:var(--text-sm);font-weight:var(--weight-semibold);
+  color:rgba(255,255,255,0.92);line-height:1.4;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+  text-shadow:0 1px 4px rgba(0,0,0,0.3);
+}}
+.card-body{{padding:var(--space-4) var(--space-4) var(--space-5);flex:1;display:flex;flex-direction:column;gap:var(--space-2);}}
+.card-header{{display:flex;align-items:center;justify-content:space-between;}}
 .card-folder{{
   font-size:var(--text-sm);font-weight:var(--weight-medium);color:var(--color-accent);
   background:var(--color-accent-soft);padding:2px var(--space-2);border-radius:var(--radius-md);
 }}
 .card-date{{font-size:var(--text-sm);color:var(--color-text-faint)}}
-.card-title{{font-size:var(--text-lg);font-weight:var(--weight-semibold);line-height:1.4;margin-bottom:var(--space-2)}}
+.card-title{{font-size:var(--text-lg);font-weight:var(--weight-semibold);line-height:1.4}}
 .card-desc{{font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.6}}
 .empty{{text-align:center;color:var(--color-text-faint);padding:var(--space-12);font-size:var(--text-lg)}}
 footer{{text-align:center;padding:var(--space-8);color:var(--color-text-faint);font-size:var(--text-sm);border-top:1px solid var(--color-border);margin-top:var(--space-12)}}
@@ -204,9 +291,22 @@ function filterSearch(val) {{
 
 
 if __name__ == "__main__":
+    # Inject back-to-index button into all article files
+    injected = 0
+    for html in sorted(ROOT.rglob("*.html")):
+        if html.name in SKIP:
+            continue
+        rel = html.relative_to(ROOT)
+        if rel.parts[0].startswith("."):
+            continue
+        if inject_back_button(html):
+            injected += 1
+    if injected:
+        print(f"Injected back-to-index button into {injected} file(s)")
+
     folders = collect_files()
-    html = build(folders)
+    html_out = build(folders)
     out = ROOT / "index.html"
-    out.write_text(html, encoding="utf-8")
+    out.write_text(html_out, encoding="utf-8")
     total = sum(len(v) for v in folders.values())
     print(f"Generated index.html — {total} files across {len(folders)} folders")
