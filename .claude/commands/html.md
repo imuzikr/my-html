@@ -220,3 +220,36 @@ The text after the sub-command is passed to Claude as the content or context to 
 - For `editor`: treat it as a description of the tool to build.
 - If the argument references a file path, read the file first.
 - If the argument is empty, ask the user for the content before generating.
+
+---
+
+## After generating the file
+
+Once the HTML file has been written to disk, always run these steps automatically without asking:
+
+### 1. Determine the save path
+
+Use the folder that matches the sub-command:
+
+| Sub-command | Folder |
+|---|---|
+| `article` / `report` / `explain` | `articles/` |
+| `spec` | `specs/` |
+| `review` | `reviews/` |
+| `explore` | `explore/` |
+| `editor` / `tools` | `tools/` |
+
+Filename format: `YYYY-MM-DD-<slug>.html`
+- Use today's date
+- Derive a short kebab-case slug from the title (e.g. `2026-05-18-oauth-pkce.html`)
+
+### 2. Commit and push to main
+
+```bash
+git add <file-path>
+git commit -m "Add article: <title>"
+git push origin HEAD:main
+```
+
+- Use `git push origin HEAD:main` so the push goes to main regardless of the current branch
+- After a successful push, GitHub Actions will automatically regenerate `index.html` and deploy to GitHub Pages
