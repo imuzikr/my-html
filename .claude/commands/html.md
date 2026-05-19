@@ -329,6 +329,7 @@ Follow these rules for every HTML file generated, regardless of sub-command:
   ```
 
 ### Responsiveness
+- **기본 콘텐츠 너비: `max-width: 900px`** — 모든 아티클·리포트·설명 문서의 `main`, `.hero-inner`, `.nav-inner`에 일관되게 적용한다.
 - Use CSS Grid with `grid-template-columns: repeat(auto-fill, minmax(..., 1fr))` for card layouts.
 - For content + sidebar layouts use `grid-template-columns: 1fr 320px`; collapse to single column below 880px.
 - Add `@media (max-width: 768px)` breakpoints to collapse multi-column layouts to single column.
