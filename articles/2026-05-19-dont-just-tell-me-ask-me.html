@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>말하지 말고 물어보라 — AI가 설명 대신 질문을 던질 때 인간의 논리적 판단력이 향상된다</title>
+<meta name="description" content="CHI 2023 논문 요약: AI가 설명을 진술이 아닌 질문으로 제시할 때 인간의 비판적 사고와 논리적 변별 정확도가 유의미하게 향상됨을 204명 실험으로 입증한 MIT 미디어랩 연구.">
+<style>
+:root {
+  --color-bg:#f5f2ed; --color-bg-alt:#eceae4; --color-bg-card:#ffffff;
+  --color-bg-code:#1e1e1e;
+  --color-text:#1a1a18; --color-text-muted:#6b6a63; --color-text-faint:#a09f97;
+  --color-border:#dedad2; --color-border-strong:#b8b5ac;
+  --color-accent:#d95f2b; --color-accent-hover:#c2521f; --color-accent-soft:#faeee7;
+  --color-green:#3a6b4a; --color-green-soft:#e6f0e9;
+  --color-blue:#2d5a8e; --color-blue-soft:#e5eef7;
+  --color-yellow:#8a6a00; --color-yellow-soft:#fdf5d9;
+  --color-red:#b03a2e; --color-red-soft:#fdecea;
+  --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --font-mono:"SF Mono","Fira Code",Consolas,"Liberation Mono",monospace;
+  --text-xs:0.75rem; --text-sm:0.875rem; --text-base:1rem; --text-lg:1.125rem;
+  --text-xl:1.25rem; --text-2xl:1.5rem; --text-3xl:1.875rem; --text-4xl:2.25rem;
+  --weight-medium:500; --weight-semibold:600; --weight-bold:700;
+  --leading-tight:1.25; --leading-snug:1.4; --leading-normal:1.6; --leading-loose:1.8;
+  --space-1:0.25rem; --space-2:0.5rem; --space-3:0.75rem; --space-4:1rem;
+  --space-5:1.25rem; --space-6:1.5rem; --space-8:2rem; --space-10:2.5rem;
+  --space-12:3rem; --space-16:4rem;
+  --radius-sm:4px; --radius-md:8px; --radius-lg:12px; --radius-full:9999px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.07); --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--color-bg);color:var(--color-text);line-height:var(--leading-normal);}
+
+/* Progress bar */
+#progress-bar{position:fixed;top:0;left:0;height:3px;background:var(--color-accent);width:0%;transition:width 80ms linear;z-index:200;}
+
+/* Nav */
+nav{position:sticky;top:0;background:rgba(245,242,237,0.92);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--color-border);z-index:100;padding:0 var(--space-8);}
+.nav-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:var(--space-6);height:52px;overflow-x:auto;scrollbar-width:none;}
+.nav-inner::-webkit-scrollbar{display:none;}
+.nav-link{font-size:var(--text-sm);color:var(--color-text-muted);text-decoration:none;white-space:nowrap;padding:var(--space-1) 0;border-bottom:2px solid transparent;transition:all 150ms ease;}
+.nav-link:hover,.nav-link.active{color:var(--color-accent);border-bottom-color:var(--color-accent);}
+
+/* Hero */
+.hero{background:linear-gradient(135deg,#2d2c28 0%,#1a1a18 100%);color:#fff;padding:var(--space-16) var(--space-8) var(--space-12);}
+.hero-inner{max-width:760px;margin:0 auto;}
+.hero-badge{display:inline-flex;align-items:center;gap:var(--space-2);background:rgba(217,95,43,0.25);color:#f4a87a;
+  font-size:var(--text-xs);font-weight:var(--weight-semibold);padding:var(--space-1) var(--space-3);
+  border-radius:var(--radius-full);border:1px solid rgba(217,95,43,0.4);margin-bottom:var(--space-6);letter-spacing:0.05em;text-transform:uppercase;}
+.hero h1{font-size:clamp(1.75rem,4vw,2.6rem);font-weight:var(--weight-bold);line-height:var(--leading-tight);margin-bottom:var(--space-6);letter-spacing:-0.02em;}
+.hero-lead{font-size:var(--text-lg);color:rgba(255,255,255,0.7);line-height:var(--leading-loose);margin-bottom:var(--space-8);}
+.hero-meta{display:flex;flex-wrap:wrap;gap:var(--space-4);font-size:var(--text-sm);color:rgba(255,255,255,0.5);}
+.hero-meta span{display:flex;align-items:center;gap:var(--space-2);}
+
+/* Main layout */
+main{max-width:760px;margin:0 auto;padding:var(--space-12) var(--space-8);}
+section{margin-bottom:var(--space-12);}
+h2{font-size:var(--text-2xl);font-weight:var(--weight-bold);line-height:var(--leading-tight);
+  margin-bottom:var(--space-6);padding-bottom:var(--space-3);border-bottom:2px solid var(--color-border);
+  display:flex;align-items:center;gap:var(--space-3);}
+.section-num{display:inline-flex;align-items:center;justify-content:center;
+  width:32px;height:32px;background:var(--color-accent);color:#fff;
+  border-radius:var(--radius-full);font-size:var(--text-sm);font-weight:var(--weight-bold);flex-shrink:0;}
+h3{font-size:var(--text-xl);font-weight:var(--weight-semibold);margin-bottom:var(--space-4);color:var(--color-text);}
+p{margin-bottom:var(--space-4);line-height:var(--leading-loose);}
+
+/* Cards */
+.card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);box-shadow:var(--shadow-sm);}
+.card+.card{margin-top:var(--space-4);}
+
+/* Stat row */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4);margin-bottom:var(--space-8);}
+.stat-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);text-align:center;box-shadow:var(--shadow-sm);}
+.stat-value{font-size:var(--text-3xl);font-weight:var(--weight-bold);color:var(--color-accent);line-height:1;margin-bottom:var(--space-2);}
+.stat-label{font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-snug);}
+
+/* Callouts */
+.callout{padding:var(--space-5) var(--space-6);border-radius:var(--radius-lg);margin-bottom:var(--space-6);border-left:4px solid;}
+.callout-blue{background:var(--color-blue-soft);border-color:var(--color-blue);}
+.callout-green{background:var(--color-green-soft);border-color:var(--color-green);}
+.callout-yellow{background:var(--color-yellow-soft);border-color:var(--color-yellow);}
+.callout-title{font-weight:var(--weight-semibold);margin-bottom:var(--space-2);font-size:var(--text-sm);text-transform:uppercase;letter-spacing:0.05em;}
+.callout-blue .callout-title{color:var(--color-blue);}
+.callout-green .callout-title{color:var(--color-green);}
+.callout-yellow .callout-title{color:var(--color-yellow);}
+
+/* Comparison boxes */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin:var(--space-6) 0;}
+.compare-box{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);}
+.compare-box.bad{border-top:3px solid var(--color-red);}
+.compare-box.good{border-top:3px solid var(--color-green);}
+.compare-label{font-size:var(--text-xs);font-weight:var(--weight-semibold);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:var(--space-3);}
+.compare-box.bad .compare-label{color:var(--color-red);}
+.compare-box.good .compare-label{color:var(--color-green);}
+.compare-text{font-size:var(--text-base);line-height:var(--leading-loose);color:var(--color-text);}
+.compare-text em{font-style:italic;color:var(--color-text-muted);}
+
+/* Condition cards */
+.conditions{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4);margin:var(--space-6) 0;}
+.cond-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);text-align:center;}
+.cond-num{font-size:var(--text-2xl);font-weight:var(--weight-bold);margin-bottom:var(--space-2);}
+.cond-name{font-size:var(--text-sm);font-weight:var(--weight-semibold);margin-bottom:var(--space-3);}
+.cond-desc{font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-snug);}
+.cond-card:nth-child(1) .cond-num{color:var(--color-text-faint);}
+.cond-card:nth-child(2) .cond-num{color:var(--color-blue);}
+.cond-card:nth-child(3) .cond-num{color:var(--color-green);}
+
+/* SVG diagram */
+.diagram-wrap{margin:var(--space-6) 0;overflow-x:auto;}
+
+/* Takeaway list */
+.takeaway-list{list-style:none;display:flex;flex-direction:column;gap:var(--space-4);}
+.takeaway-list li{display:flex;gap:var(--space-4);align-items:flex-start;background:var(--color-bg-card);
+  border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);}
+.takeaway-icon{flex-shrink:0;width:36px;height:36px;border-radius:var(--radius-full);
+  display:flex;align-items:center;justify-content:center;font-size:var(--text-lg);}
+.takeaway-body{flex:1;}
+.takeaway-title{font-weight:var(--weight-semibold);margin-bottom:var(--space-1);}
+.takeaway-desc{font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-snug);}
+
+/* Citation */
+.citation{background:var(--color-bg-alt);border:1px solid var(--color-border);border-radius:var(--radius-lg);
+  padding:var(--space-5) var(--space-6);font-size:var(--text-sm);color:var(--color-text-muted);
+  line-height:var(--leading-loose);}
+.citation a{color:var(--color-accent);text-decoration:none;}
+.citation a:hover{text-decoration:underline;}
+
+/* Table */
+.table-wrap{overflow-x:auto;margin:var(--space-6) 0;}
+table{width:100%;border-collapse:collapse;font-size:var(--text-sm);}
+thead th{background:var(--color-bg-alt);padding:var(--space-3) var(--space-4);text-align:left;
+  font-weight:var(--weight-semibold);font-size:var(--text-xs);text-transform:uppercase;
+  letter-spacing:0.05em;color:var(--color-text-muted);border-bottom:2px solid var(--color-border);}
+tbody td{padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--color-border);line-height:var(--leading-snug);}
+tbody tr:hover td{background:var(--color-bg-alt);}
+
+/* Footer */
+footer{background:var(--color-bg-alt);border-top:1px solid var(--color-border);
+  padding:var(--space-8);text-align:center;font-size:var(--text-sm);color:var(--color-text-faint);}
+
+/* Responsive */
+@media(max-width:640px){
+  .hero{padding:var(--space-10) var(--space-4) var(--space-8);}
+  main{padding:var(--space-8) var(--space-4);}
+  nav{padding:0 var(--space-4);}
+  .stat-row{grid-template-columns:1fr;}
+  .compare-grid{grid-template-columns:1fr;}
+  .conditions{grid-template-columns:1fr;}
+  h2{font-size:var(--text-xl);}
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-link" href="#background">배경</a>
+    <a class="nav-link" href="#concept">핵심 개념</a>
+    <a class="nav-link" href="#method">연구 방법</a>
+    <a class="nav-link" href="#results">결과</a>
+    <a class="nav-link" href="#implications">시사점</a>
+    <a class="nav-link" href="#takeaways">요약</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#f4a87a" stroke-width="1.5"/><path d="M6 4v2.5L7.5 8" stroke="#f4a87a" stroke-width="1.5" stroke-linecap="round"/></svg>
+      CHI 2023 · 논문 요약
+    </div>
+    <h1>말하지 말고 물어보라<br>AI가 설명 대신 질문을 던질 때</h1>
+    <p class="hero-lead">AI 시스템이 판단 근거를 진술로 제시하는 대신 질문으로 되물을 때,<br>인간의 논리적 변별 정확도가 유의미하게 향상된다는 사실을 204명 실험으로 입증했다.</p>
+    <div class="hero-meta">
+      <span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="5" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Valdemar Danry, Pat Pataranutaporn, Yaoli Mao, Pattie Maes
+      </span>
+      <span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M1 5.5h12M4 1v2M10 1v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        ACM CHI 2023 · Hamburg, Germany
+      </span>
+      <span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.8 3.6L13 5.3l-3 2.9.7 4.1L7 10.3l-3.7 2L4 8.2 1 5.3l4.2-.7L7 1z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        MIT Media Lab · Columbia University
+      </span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Key stats -->
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="stat-value">204</div>
+      <div class="stat-label">실험 참가자</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">3</div>
+      <div class="stat-label">실험 조건<br>(통제·진술·질문)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">↑</div>
+      <div class="stat-label">질문 조건에서<br>논리 변별 정확도 유의 향상</div>
+    </div>
+  </div>
+
+  <!-- Section 1: 배경 -->
+  <section id="background">
+    <h2><span class="section-num">1</span>연구 배경 — 비판적 사고의 위기</h2>
+    <p>비판적 사고는 현대 사회에서 점점 더 중요해지고 있다. 정보가 폭발적으로 늘어나고 AI가 의사결정에 깊이 관여하는 환경에서, 인간이 정보를 맹목적으로 수용하지 않고 스스로 판단하는 능력은 필수적이다.</p>
+    <p>그러나 인지과학 연구들은 인간의 추론이 개인적 편향과 인지 자원의 한계로 인해 심각하게 저해된다는 사실을 반복적으로 보여 왔다. 특히 사회적으로 분열적인 주제에 대해서는, 감정적 반응이 논리적 판단을 압도하는 경향이 있다.</p>
+
+    <div class="callout callout-yellow">
+      <div class="callout-title">핵심 문제</div>
+      <p style="margin:0">현재의 설명 가능한 AI(XAI) 시스템은 대부분 AI의 판단 근거를 <strong>진술(statement)</strong> 형태로 제공한다. 그러나 이 방식이 실제로 인간의 비판적 사고를 촉진하는지, 아니면 오히려 AI에 대한 과도한 의존을 강화하는지는 충분히 검증되지 않았다.</p>
+    </div>
+
+    <p>연구팀은 여기서 근본적인 질문을 던진다: <strong>AI가 결론을 말해주는 대신 생각하도록 유도한다면 어떻게 될까?</strong></p>
+
+    <!-- SVG: 문제 구조 다이어그램 -->
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 680 180" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="기존 XAI의 한계: AI가 진술로 설명 → 인간이 수동적으로 수용">
+        <defs>
+          <marker id="arr" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+            <polygon points="0 0,9 3.5,0 7" fill="#b8b5ac"/>
+          </marker>
+          <marker id="arr-r" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+            <polygon points="0 0,9 3.5,0 7" fill="#b03a2e"/>
+          </marker>
+        </defs>
+        <!-- AI box -->
+        <rect x="20" y="55" width="140" height="70" rx="10" fill="#eceae4" stroke="#dedad2" stroke-width="1.5"/>
+        <text x="90" y="84" text-anchor="middle" font-size="13" font-weight="600" fill="#1a1a18" font-family="-apple-system,sans-serif">AI 시스템</text>
+        <text x="90" y="104" text-anchor="middle" font-size="11" fill="#6b6a63" font-family="-apple-system,sans-serif">(XAI 설명 생성)</text>
+        <!-- Arrow: AI → Statement -->
+        <line x1="162" y1="90" x2="240" y2="90" stroke="#b8b5ac" stroke-width="1.5" marker-end="url(#arr)"/>
+        <!-- Statement box -->
+        <rect x="242" y="55" width="160" height="70" rx="10" fill="#fdecea" stroke="#e8b4b0" stroke-width="1.5"/>
+        <text x="322" y="81" text-anchor="middle" font-size="12" font-weight="600" fill="#b03a2e" font-family="-apple-system,sans-serif">진술 형태 설명</text>
+        <text x="322" y="99" text-anchor="middle" font-size="10" fill="#b03a2e" font-family="-apple-system,sans-serif">"환자는 독감입니다,</text>
+        <text x="322" y="113" text-anchor="middle" font-size="10" fill="#b03a2e" font-family="-apple-system,sans-serif">두통이 있으니까."</text>
+        <!-- Arrow: Statement → Human -->
+        <line x1="404" y1="90" x2="482" y2="90" stroke="#b8b5ac" stroke-width="1.5" marker-end="url(#arr)"/>
+        <!-- Human box -->
+        <rect x="484" y="55" width="160" height="70" rx="10" fill="#eceae4" stroke="#dedad2" stroke-width="1.5"/>
+        <text x="564" y="84" text-anchor="middle" font-size="13" font-weight="600" fill="#1a1a18" font-family="-apple-system,sans-serif">인간 판단</text>
+        <text x="564" y="104" text-anchor="middle" font-size="11" fill="#6b6a63" font-family="-apple-system,sans-serif">수동적 수용 경향</text>
+        <!-- Problem label -->
+        <text x="322" y="148" text-anchor="middle" font-size="11" fill="#b03a2e" font-family="-apple-system,sans-serif">⚠ 비판적 사고 미촉진 · AI 의존 심화 가능성</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Section 2: 핵심 개념 -->
+  <section id="concept">
+    <h2><span class="section-num">2</span>핵심 개념 — AI-framed Questioning</h2>
+    <p>연구팀이 제안한 <strong>"AI-framed Questioning(AI 프레임 질문법)"</strong>은 AI의 분류 판단에 관련된 정보를 진술이 아닌 <strong>질문</strong>으로 전환하여 제시하는 방식이다. 이를 통해 사용자가 스스로 추론 과정에 능동적으로 참여하도록 유도한다.</p>
+
+    <div class="compare-grid">
+      <div class="compare-box bad">
+        <div class="compare-label">기존 방식 — 인과 진술(Causal Statement)</div>
+        <div class="compare-text">
+          "환자는 두통이 있기 때문에 독감입니다."<br>
+          <em>→ AI가 결론을 제시하고 인간은 수용</em>
+        </div>
+      </div>
+      <div class="compare-box good">
+        <div class="compare-label">새로운 방식 — AI 질문(AI-framed Question)</div>
+        <div class="compare-text">
+          "환자에게 두통이 있다면, 그것이 독감이라는 결론으로 이어지나요?"<br>
+          <em>→ 인간이 스스로 추론하도록 유도</em>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-blue">
+      <div class="callout-title">이론적 배경</div>
+      <p style="margin:0">이 접근법은 소크라테스식 문답법(Socratic questioning)과 비계 이론(scaffolding theory)에 기반한다. 질문은 인간이 자신의 추론을 메타인지적으로 점검하도록 강제하며, 단순히 AI의 판단을 따르는 것보다 더 깊은 인지적 처리를 유발한다.</p>
+    </div>
+
+    <!-- SVG: 두 방식 비교 -->
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 680 220" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AI 진술 방식 vs AI 질문 방식 비교">
+        <defs>
+          <marker id="arr2" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+            <polygon points="0 0,9 3.5,0 7" fill="#6b6a63"/>
+          </marker>
+          <marker id="arr2g" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+            <polygon points="0 0,9 3.5,0 7" fill="#3a6b4a"/>
+          </marker>
+        </defs>
+        <!-- Top row: Statement path -->
+        <text x="20" y="30" font-size="11" font-weight="600" fill="#b03a2e" font-family="-apple-system,sans-serif">기존: 진술 방식</text>
+        <rect x="20" y="40" width="100" height="44" rx="8" fill="#fdecea" stroke="#e8b4b0" stroke-width="1.3"/>
+        <text x="70" y="58" text-anchor="middle" font-size="11" fill="#b03a2e" font-family="-apple-system,sans-serif">AI 판단</text>
+        <text x="70" y="74" text-anchor="middle" font-size="10" fill="#b03a2e" font-family="-apple-system,sans-serif">+ 이유 진술</text>
+        <line x1="122" y1="62" x2="192" y2="62" stroke="#b8b5ac" stroke-width="1.3" marker-end="url(#arr2)"/>
+        <rect x="194" y="40" width="110" height="44" rx="8" fill="#eceae4" stroke="#dedad2" stroke-width="1.3"/>
+        <text x="249" y="58" text-anchor="middle" font-size="11" fill="#6b6a63" font-family="-apple-system,sans-serif">수동 수용</text>
+        <text x="249" y="74" text-anchor="middle" font-size="10" fill="#6b6a63" font-family="-apple-system,sans-serif">(낮은 참여)</text>
+        <line x1="306" y1="62" x2="376" y2="62" stroke="#b8b5ac" stroke-width="1.3" marker-end="url(#arr2)"/>
+        <rect x="378" y="40" width="130" height="44" rx="8" fill="#eceae4" stroke="#dedad2" stroke-width="1.3"/>
+        <text x="443" y="58" text-anchor="middle" font-size="11" fill="#6b6a63" font-family="-apple-system,sans-serif">논리 변별력</text>
+        <text x="443" y="74" text-anchor="middle" font-size="10" fill="#b03a2e" font-family="-apple-system,sans-serif">개선 제한적</text>
+
+        <!-- Bottom row: Question path -->
+        <text x="20" y="135" font-size="11" font-weight="600" fill="#3a6b4a" font-family="-apple-system,sans-serif">제안: 질문 방식</text>
+        <rect x="20" y="145" width="100" height="44" rx="8" fill="#e6f0e9" stroke="#a8c8b0" stroke-width="1.3"/>
+        <text x="70" y="163" text-anchor="middle" font-size="11" fill="#3a6b4a" font-family="-apple-system,sans-serif">AI 판단</text>
+        <text x="70" y="179" text-anchor="middle" font-size="10" fill="#3a6b4a" font-family="-apple-system,sans-serif">+ 질문 제시</text>
+        <line x1="122" y1="167" x2="192" y2="167" stroke="#3a6b4a" stroke-width="1.3" marker-end="url(#arr2g)"/>
+        <rect x="194" y="145" width="110" height="44" rx="8" fill="#e6f0e9" stroke="#a8c8b0" stroke-width="1.3"/>
+        <text x="249" y="163" text-anchor="middle" font-size="11" fill="#3a6b4a" font-family="-apple-system,sans-serif">능동 추론</text>
+        <text x="249" y="179" text-anchor="middle" font-size="10" fill="#3a6b4a" font-family="-apple-system,sans-serif">(높은 참여)</text>
+        <line x1="306" y1="167" x2="376" y2="167" stroke="#3a6b4a" stroke-width="1.3" marker-end="url(#arr2g)"/>
+        <rect x="378" y="145" width="130" height="44" rx="8" fill="#e6f0e9" stroke="#a8c8b0" stroke-width="1.3"/>
+        <text x="443" y="163" text-anchor="middle" font-size="11" fill="#3a6b4a" font-family="-apple-system,sans-serif">논리 변별력</text>
+        <text x="443" y="179" text-anchor="middle" font-size="10" fill="#3a6b4a" font-family="-apple-system,sans-serif">유의미한 향상 ↑</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Section 3: 연구 방법 -->
+  <section id="method">
+    <h2><span class="section-num">3</span>연구 방법</h2>
+
+    <h3>실험 설계</h3>
+    <p>연구팀은 <strong>204명의 참가자</strong>를 대상으로 온라인 실험을 진행했다. 참가자들은 사회적으로 분열적인 주제에 관한 논증의 <strong>논리적 타당성</strong>을 판단하는 과제를 수행했다.</p>
+
+    <p>핵심 과제는 <strong>내용은 그럴듯하지만 논리적으로 결함이 있는 진술</strong>과 실제로 논리적으로 타당한 진술을 구별하는 것이었다. 사회적으로 분열적인 주제를 선택한 이유는, 이런 주제에서 감정적 편향이 논리 판단을 가장 강하게 방해하기 때문이다.</p>
+
+    <h3>세 가지 실험 조건</h3>
+    <div class="conditions">
+      <div class="cond-card">
+        <div class="cond-num">①</div>
+        <div class="cond-name">통제 조건<br>(No AI)</div>
+        <div class="cond-desc">AI 피드백 없이 참가자 혼자 판단. 기준선(baseline) 역할.</div>
+      </div>
+      <div class="cond-card">
+        <div class="cond-num">②</div>
+        <div class="cond-name">인과 진술 조건<br>(Causal Statement)</div>
+        <div class="cond-desc">AI가 판단 근거를 진술 형태로 제공. 기존 XAI 방식.</div>
+      </div>
+      <div class="cond-card">
+        <div class="cond-num">③</div>
+        <div class="cond-name">AI 질문 조건<br>(AI Questioning)</div>
+        <div class="cond-desc">AI가 동일한 정보를 질문 형태로 제시. 이 연구의 핵심 개입.</div>
+      </div>
+    </div>
+
+    <div class="callout callout-blue">
+      <div class="callout-title">AI 정확도 통제</div>
+      <p style="margin:0">실험에서 AI는 항상 정확한 판단을 제공하도록 설계되었다. 이는 AI의 실제 판단 품질과 무관하게 <em>설명 방식 자체</em>가 인간의 추론에 미치는 영향을 순수하게 측정하기 위한 통제였다.</p>
+    </div>
+
+    <h3>측정 지표</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>지표</th><th>측정 방법</th><th>목적</th></tr></thead>
+        <tbody>
+          <tr><td><strong>논리 변별 정확도</strong></td><td>논리적으로 결함 있는 진술을 올바르게 식별한 비율</td><td>주요 종속 변수</td></tr>
+          <tr><td><strong>인지 부하</strong></td><td>과제 수행 중 주관적 어려움 보고</td><td>질문 방식의 부작용 확인</td></tr>
+          <tr><td><strong>AI 신뢰도</strong></td><td>AI 판단에 대한 주관적 신뢰 수준</td><td>과도한 의존 여부 확인</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Section 4: 결과 -->
+  <section id="results">
+    <h2><span class="section-num">4</span>주요 결과</h2>
+
+    <div class="callout callout-green">
+      <div class="callout-title">핵심 발견</div>
+      <p style="margin:0"><strong>AI 질문 조건</strong>은 AI 피드백이 없는 통제 조건과 기존 인과 진술 조건 <em>모두</em>에 비해 논리적으로 결함 있는 진술에 대한 변별 정확도를 <strong>유의미하게 향상</strong>시켰다.</p>
+    </div>
+
+    <p>특히 주목할 만한 것은 단순히 "AI 도움이 있으면 더 잘한다"는 수준을 넘어, <strong>기존 XAI 방식(인과 진술)보다도 질문 방식이 더 효과적</strong>이었다는 점이다. 이는 설명의 내용이 아니라 <em>형식</em>이 인간의 추론에 결정적인 영향을 미친다는 것을 시사한다.</p>
+
+    <!-- SVG: 결과 시각화 막대 그래프 -->
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 600 260" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="세 조건별 논리 변별 정확도 비교">
+        <defs>
+          <marker id="arr3" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0,8 3,0 6" fill="#6b6a63"/>
+          </marker>
+        </defs>
+        <!-- Y axis -->
+        <line x1="80" y1="20" x2="80" y2="200" stroke="#dedad2" stroke-width="1.5"/>
+        <line x1="80" y1="200" x2="560" y2="200" stroke="#dedad2" stroke-width="1.5"/>
+        <!-- Y labels -->
+        <text x="72" y="204" text-anchor="end" font-size="10" fill="#a09f97" font-family="-apple-system,sans-serif">0%</text>
+        <text x="72" y="154" text-anchor="end" font-size="10" fill="#a09f97" font-family="-apple-system,sans-serif">25%</text>
+        <text x="72" y="104" text-anchor="end" font-size="10" fill="#a09f97" font-family="-apple-system,sans-serif">50%</text>
+        <text x="72" y="54" text-anchor="end" font-size="10" fill="#a09f97" font-family="-apple-system,sans-serif">75%</text>
+        <!-- Grid lines -->
+        <line x1="80" y1="150" x2="560" y2="150" stroke="#dedad2" stroke-width="0.8" stroke-dasharray="4,4"/>
+        <line x1="80" y1="100" x2="560" y2="100" stroke="#dedad2" stroke-width="0.8" stroke-dasharray="4,4"/>
+        <line x1="80" y1="50" x2="560" y2="50" stroke="#dedad2" stroke-width="0.8" stroke-dasharray="4,4"/>
+        <!-- Bar 1: No AI (대략 40% 수준 — 상대적 비교) -->
+        <rect x="120" y="120" width="100" height="80" rx="6" fill="#c8c7be"/>
+        <text x="170" y="115" text-anchor="middle" font-size="12" font-weight="600" fill="#6b6a63" font-family="-apple-system,sans-serif">기준</text>
+        <text x="170" y="218" text-anchor="middle" font-size="11" fill="#6b6a63" font-family="-apple-system,sans-serif">① 통제 조건</text>
+        <text x="170" y="231" text-anchor="middle" font-size="10" fill="#a09f97" font-family="-apple-system,sans-serif">(No AI)</text>
+        <!-- Bar 2: Causal (대략 50% 수준) -->
+        <rect x="270" y="96" width="100" height="104" rx="6" fill="#2d5a8e"/>
+        <text x="320" y="91" text-anchor="middle" font-size="12" font-weight="600" fill="#2d5a8e" font-family="-apple-system,sans-serif">↑ 부분 향상</text>
+        <text x="320" y="218" text-anchor="middle" font-size="11" fill="#2d5a8e" font-family="-apple-system,sans-serif">② 인과 진술</text>
+        <text x="320" y="231" text-anchor="middle" font-size="10" fill="#a09f97" font-family="-apple-system,sans-serif">(Causal Statement)</text>
+        <!-- Bar 3: AI Questioning (대략 66%+ 수준) -->
+        <rect x="420" y="56" width="100" height="144" rx="6" fill="#3a6b4a"/>
+        <text x="470" y="51" text-anchor="middle" font-size="12" font-weight="600" fill="#3a6b4a" font-family="-apple-system,sans-serif">↑↑ 유의 향상</text>
+        <text x="470" y="218" text-anchor="middle" font-size="11" fill="#3a6b4a" font-family="-apple-system,sans-serif">③ AI 질문</text>
+        <text x="470" y="231" text-anchor="middle" font-size="10" fill="#a09f97" font-family="-apple-system,sans-serif">(AI Questioning)</text>
+        <!-- Title -->
+        <text x="320" y="255" text-anchor="middle" font-size="10" fill="#a09f97" font-family="-apple-system,sans-serif">논리 변별 정확도 (개념적 상대 비교 — 구체 수치는 원문 참조)</text>
+      </svg>
+    </div>
+
+    <h3>추가 발견</h3>
+    <div class="card">
+      <p><strong>인지 부하 측면:</strong> 질문 방식이 진술 방식보다 더 많은 인지적 노력을 요구할 것이라는 우려와 달리, 실험 결과는 두 조건 간 인지 부하에 유의미한 차이가 없었다. 즉, 정확도 향상이 인지 부담 증가 없이 달성됐다.</p>
+      <p style="margin-bottom:0"><strong>참여 방식의 차이:</strong> 질문 방식은 사용자가 단순히 AI의 결론을 따르는 것이 아니라 스스로 추론 과정에 참여하게 만들었다. 이는 장기적으로 AI 과의존(over-reliance)을 방지하는 데도 기여할 가능성이 있다.</p>
+    </div>
+  </section>
+
+  <!-- Section 5: 시사점 -->
+  <section id="implications">
+    <h2><span class="section-num">5</span>시사점과 한계</h2>
+
+    <h3>HCI·AI 디자인에 대한 시사점</h3>
+    <p>이 연구는 AI 시스템 설계에 있어 <strong>"무엇을 알려주느냐"만큼 "어떻게 알려주느냐"</strong>가 중요함을 보여준다. 같은 정보라도 질문으로 제시하면 인간의 인지 처리 방식이 바뀌고, 더 나은 판단으로 이어진다.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>적용 영역</th><th>기존 방식</th><th>AI 질문 방식 적용</th></tr></thead>
+        <tbody>
+          <tr><td>의료 진단 지원</td><td>"환자는 X 질환입니다 (근거: Y)"</td><td>"Y 증상이 X 질환을 시사한다고 볼 수 있나요?"</td></tr>
+          <tr><td>가짜뉴스 판별</td><td>"이 기사는 허위입니다 (이유: Z)"</td><td>"Z를 근거로 할 때 이 주장은 타당한가요?"</td></tr>
+          <tr><td>법적 판단 보조</td><td>"판례에 따르면 결론은 A입니다"</td><td>"이 판례가 현재 상황에 적용된다면 어떤 결론이 나오나요?"</td></tr>
+          <tr><td>교육 AI 튜터</td><td>"정답은 B입니다, 왜냐하면…"</td><td>"이 단계에서 B와 C 중 어느 것이 더 합리적인가요?"</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>연구의 한계</h3>
+    <div class="callout callout-yellow">
+      <div class="callout-title">한계점</div>
+      <ul style="padding-left:var(--space-5);line-height:var(--leading-loose);margin:0;">
+        <li>실험 AI는 항상 정확했지만, 실제 AI는 오류를 범한다. AI가 틀렸을 때 질문 방식이 어떻게 작용하는지는 추가 연구가 필요하다.</li>
+        <li>온라인 실험 환경이라는 특성상, 의료·법률 등 고위험 실제 맥락에서의 효과는 별도 검증이 필요하다.</li>
+        <li>질문을 생성하는 AI의 품질 자체가 결과에 영향을 미칠 수 있으며, 이 연구에서는 질문 생성 방식이 통제되었다.</li>
+        <li>장기적 효과(반복 사용 시 습관화 여부 등)는 측정되지 않았다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Section 6: 요약 -->
+  <section id="takeaways">
+    <h2><span class="section-num">6</span>핵심 요약</h2>
+    <ul class="takeaway-list">
+      <li>
+        <div class="takeaway-icon" style="background:var(--color-accent-soft);">💬</div>
+        <div class="takeaway-body">
+          <div class="takeaway-title">형식이 내용만큼 중요하다</div>
+          <div class="takeaway-desc">AI가 제공하는 정보의 내용이 동일하더라도, 진술보다 질문 형식으로 전달할 때 인간의 논리적 판단력이 유의미하게 향상됐다.</div>
+        </div>
+      </li>
+      <li>
+        <div class="takeaway-icon" style="background:var(--color-green-soft);">🧠</div>
+        <div class="takeaway-body">
+          <div class="takeaway-title">능동적 참여가 핵심</div>
+          <div class="takeaway-desc">AI 질문 방식은 사용자를 수동적 수용자에서 능동적 추론자로 전환시킨다. 이는 장기적으로 AI 과의존을 방지하는 데 기여할 수 있다.</div>
+        </div>
+      </li>
+      <li>
+        <div class="takeaway-icon" style="background:var(--color-blue-soft);">⚖️</div>
+        <div class="takeaway-body">
+          <div class="takeaway-title">인지 부담 없이 정확도 향상</div>
+          <div class="takeaway-desc">질문 방식이 인지 부하를 유의미하게 증가시키지 않으면서도 정확도를 높였다. 사용성을 희생하지 않고도 더 나은 판단을 이끌어낼 수 있다.</div>
+        </div>
+      </li>
+      <li>
+        <div class="takeaway-icon" style="background:var(--color-yellow-soft);">🎯</div>
+        <div class="takeaway-body">
+          <div class="takeaway-title">XAI 설계의 새로운 방향</div>
+          <div class="takeaway-desc">기존 설명 가능한 AI(XAI)는 "왜"를 설명하는 데 집중했다. 이 연구는 "어떻게 설명하느냐"—진술 vs. 질문—가 결과에 결정적 차이를 만든다는 것을 보여준다.</div>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- Citation -->
+  <section>
+    <div class="citation">
+      <strong>논문 인용</strong><br>
+      Valdemar Danry, Pat Pataranutaporn, Yaoli Mao, and Pattie Maes. 2023.
+      <em>Don't Just Tell Me, Ask Me: AI Systems that Intelligently Frame Explanations as Questions Improve Human Logical Discernment Accuracy over Causal AI explanations.</em>
+      In Proceedings of the 2023 CHI Conference on Human Factors in Computing Systems (CHI '23), Article 352, 1–13.
+      ACM. <a href="https://doi.org/10.1145/3544548.3580672">https://doi.org/10.1145/3544548.3580672</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  CHI 2023 논문 요약 · MIT Media Lab &amp; Columbia University · 2026-05-19
+</footer>
+
+<script>
+// Progress bar
+const bar = document.getElementById('progress-bar');
+function updateProgress() {
+  const h = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  bar.style.width = pct + '%';
+}
+document.addEventListener('scroll', updateProgress, { passive: true });
+
+// Active nav link
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-link');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const link = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { threshold: 0.3 });
+sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
