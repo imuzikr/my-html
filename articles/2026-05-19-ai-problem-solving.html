@@ -457,20 +457,24 @@
     }
     .check-item {
       position: relative;
+      display: grid;
+      grid-template-columns: 32px minmax(0, 1fr);
+      column-gap: var(--space-4);
+      row-gap: var(--space-2);
+      align-items: start;
       background: var(--color-bg-card);
       border: 1px solid var(--color-border);
       border-radius: var(--radius-lg);
-      padding: var(--space-5) var(--space-5) var(--space-5) var(--space-12);
+      padding: var(--space-5);
       box-shadow: var(--shadow-sm);
       counter-increment: steps;
     }
     .check-item::before {
       content: counter(steps);
-      position: absolute;
-      left: var(--space-5);
-      top: var(--space-5);
-      width: 28px;
-      height: 28px;
+      grid-column: 1;
+      grid-row: 1 / span 2;
+      width: 32px;
+      height: 32px;
       border-radius: var(--radius-full);
       background: var(--color-accent);
       color: #fff;
@@ -481,8 +485,13 @@
       font-weight: var(--weight-bold);
     }
     .check-item h3 {
+      grid-column: 2;
       font-size: var(--text-lg);
-      margin-bottom: var(--space-2);
+      line-height: var(--leading-snug);
+      margin-bottom: 0;
+    }
+    .check-item p {
+      grid-column: 2;
     }
     .diagram-card {
       background: var(--color-bg-card);
@@ -585,8 +594,7 @@
         grid-template-columns: 1fr;
       }
       .check-item {
-        padding-left: var(--space-5);
-        padding-top: var(--space-12);
+        padding: var(--space-5);
       }
     }
   </style>
