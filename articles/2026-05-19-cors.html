@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CORS는 왜 막고, 무엇으로 푸는가</title>
+  <meta name="description" content="동일 출처 정책(SOP)이 막고 CORS가 푼다. 브라우저 보안의 핵심 메커니즘을 미들웨어·라우터·개발 프록시까지 SVG 다이어그램으로 완전 해부한다.">
+  <style>
+    :root {
+      --color-bg:#f5f2ed; --color-bg-alt:#eceae4; --color-bg-card:#ffffff;
+      --color-text:#1a1a18; --color-text-muted:#6b6a63; --color-text-faint:#a09f97;
+      --color-border:#dedad2; --color-accent:#d95f2b; --color-accent-hover:#c2521f;
+      --color-accent-soft:#faeee7;
+      --color-green:#3a6b4a; --color-green-soft:#e6f0e9;
+      --color-blue:#2d5a8e; --color-blue-soft:#e5eef7;
+      --color-yellow:#8a6a00; --color-yellow-soft:#fdf5d9;
+      --color-red:#b03a2e; --color-red-soft:#fdecea;
+      --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+      --font-mono:"SF Mono","Fira Code",Consolas,"Liberation Mono",monospace;
+      --text-xs:0.75rem; --text-sm:0.875rem; --text-base:1rem; --text-lg:1.125rem;
+      --text-xl:1.25rem; --text-2xl:1.5rem; --text-3xl:1.875rem;
+      --weight-medium:500; --weight-semibold:600; --weight-bold:700;
+      --leading-tight:1.25; --leading-normal:1.6; --leading-loose:1.8;
+      --space-1:0.25rem; --space-2:0.5rem; --space-3:0.75rem; --space-4:1rem;
+      --space-5:1.25rem; --space-6:1.5rem; --space-8:2rem; --space-12:3rem;
+      --radius-md:8px; --radius-lg:12px; --radius-full:9999px;
+      --shadow-sm:0 1px 3px rgba(0,0,0,0.07); --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-sans);
+      font-size: var(--text-base);
+      color: var(--color-text);
+      background: var(--color-bg);
+      line-height: var(--leading-normal);
+    }
+
+    /* Progress bar */
+    #progress-bar {
+      position: fixed; top: 0; left: 0;
+      height: 3px; width: 0%;
+      background: var(--color-accent);
+      z-index: 200;
+      transition: width 80ms linear;
+    }
+
+    /* Hero */
+    .hero {
+      background: var(--color-bg-alt);
+      border-bottom: 1px solid var(--color-border);
+      padding: var(--space-12) var(--space-6) var(--space-8);
+    }
+    .hero-inner { max-width: 900px; margin: 0 auto; }
+    .hero-tag {
+      display: inline-block;
+      font-size: var(--text-xs);
+      font-weight: var(--weight-semibold);
+      color: var(--color-accent);
+      background: var(--color-accent-soft);
+      border-radius: var(--radius-full);
+      padding: 2px var(--space-3);
+      margin-bottom: var(--space-4);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .hero h1 {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: var(--weight-bold);
+      line-height: var(--leading-tight);
+      margin-bottom: var(--space-4);
+    }
+    .hero-lead {
+      font-size: var(--text-lg);
+      color: var(--color-text-muted);
+      max-width: 620px;
+      line-height: var(--leading-loose);
+      margin-bottom: var(--space-6);
+    }
+    .hero-meta {
+      display: flex; gap: var(--space-4);
+      align-items: center; flex-wrap: wrap;
+    }
+    .hero-meta span { font-size: var(--text-sm); color: var(--color-text-faint); }
+
+    /* Layout */
+    .layout {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: var(--space-8) var(--space-6);
+      display: grid;
+      grid-template-columns: 1fr 210px;
+      gap: var(--space-8);
+      align-items: start;
+    }
+    @media (max-width: 880px) {
+      .layout { grid-template-columns: 1fr; }
+      .toc-sidebar { display: none; }
+    }
+    @media (max-width: 768px) {
+      .layout { padding: var(--space-6) var(--space-4); }
+    }
+
+    /* TOC */
+    .toc-sidebar { position: sticky; top: var(--space-8); }
+    .toc-title {
+      font-size: var(--text-xs);
+      font-weight: var(--weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-faint);
+      margin-bottom: var(--space-3);
+    }
+    .toc-list { list-style: none; }
+    .toc-list li { margin-bottom: 2px; }
+    .toc-list a {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      text-decoration: none;
+      display: block;
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-md);
+      border-left: 2px solid transparent;
+      transition: all 140ms ease;
+    }
+    .toc-list a:hover { color: var(--color-text); background: var(--color-bg-alt); }
+    .toc-list a.active {
+      color: var(--color-accent);
+      border-left-color: var(--color-accent);
+      background: var(--color-accent-soft);
+    }
+
+    /* Sections */
+    .section { margin-bottom: var(--space-12); scroll-margin-top: var(--space-8); }
+    .section-num {
+      font-size: var(--text-sm);
+      font-weight: var(--weight-semibold);
+      color: var(--color-accent);
+      margin-bottom: var(--space-2);
+    }
+    .section h2 {
+      font-size: var(--text-2xl);
+      font-weight: var(--weight-bold);
+      line-height: var(--leading-tight);
+      margin-bottom: var(--space-4);
+    }
+    .section h3 {
+      font-size: var(--text-xl);
+      font-weight: var(--weight-semibold);
+      margin: var(--space-6) 0 var(--space-3);
+    }
+    .section p {
+      margin-bottom: var(--space-4);
+      color: var(--color-text-muted);
+      line-height: var(--leading-loose);
+    }
+    .section p strong { color: var(--color-text); font-weight: var(--weight-semibold); }
+
+    /* Diagram box */
+    .diagram-box {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      margin: var(--space-6) 0;
+      box-shadow: var(--shadow-sm);
+      overflow-x: auto;
+    }
+    .diagram-caption {
+      font-size: var(--text-sm);
+      color: var(--color-text-faint);
+      text-align: center;
+      margin-top: var(--space-4);
+      font-style: italic;
+    }
+    .diagram-caption code { font-family: var(--font-mono); font-style: normal; font-size: 0.85em; }
+
+    /* Callouts */
+    .callout {
+      border-radius: var(--radius-md);
+      padding: var(--space-4) var(--space-5);
+      margin: var(--space-4) 0;
+      border-left: 3px solid;
+    }
+    .callout-title {
+      font-size: var(--text-sm);
+      font-weight: var(--weight-semibold);
+      margin-bottom: var(--space-2);
+    }
+    .callout p { margin-bottom: 0; font-size: var(--text-sm); color: var(--color-text-muted); }
+    .callout p strong { color: var(--color-text); }
+    .callout code { font-family: var(--font-mono); font-size: 0.85em; background: rgba(0,0,0,0.06); border-radius: 3px; padding: 1px 4px; }
+    .ci { background: var(--color-blue-soft); border-color: var(--color-blue); }
+    .ci .callout-title { color: var(--color-blue); }
+    .cw { background: var(--color-yellow-soft); border-color: var(--color-yellow); }
+    .cw .callout-title { color: var(--color-yellow); }
+    .cs { background: var(--color-green-soft); border-color: var(--color-green); }
+    .cs .callout-title { color: var(--color-green); }
+    .ce { background: var(--color-red-soft); border-color: var(--color-red); }
+    .ce .callout-title { color: var(--color-red); }
+
+    /* Table */
+    .table-wrap { overflow-x: auto; margin: var(--space-4) 0; border-radius: var(--radius-md); border: 1px solid var(--color-border); }
+    table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    thead th {
+      background: var(--color-bg-alt);
+      font-weight: var(--weight-semibold);
+      text-transform: uppercase;
+      font-size: var(--text-xs);
+      letter-spacing: 0.06em;
+      color: var(--color-text-faint);
+      padding: var(--space-3) var(--space-4);
+      text-align: left;
+      border-bottom: 1px solid var(--color-border);
+    }
+    tbody td {
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--color-border);
+      color: var(--color-text-muted);
+      vertical-align: top;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--color-bg-alt); }
+    td strong { color: var(--color-text); font-weight: var(--weight-semibold); }
+
+    /* Code */
+    .code-block { background: #1a1a2e; border-radius: var(--radius-md); overflow: hidden; margin: var(--space-4) 0; }
+    .code-block-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: var(--space-2) var(--space-4);
+      background: #16213e;
+      color: #8892b0;
+      font-size: var(--text-xs);
+      font-family: var(--font-mono);
+    }
+    .copy-btn {
+      background: none; border: none; color: #8892b0;
+      cursor: pointer; font-size: var(--text-xs);
+      padding: 2px var(--space-2);
+      border-radius: 4px;
+      transition: all 140ms ease;
+    }
+    .copy-btn:hover { background: rgba(255,255,255,0.1); color: #ccd6f6; }
+    .code-block pre { padding: var(--space-4); overflow-x: auto; }
+    .code-block code { font-family: var(--font-mono); color: #e2e8f0; line-height: 1.7; font-size: var(--text-sm); }
+    .tok-comment { color: #546e7a; }
+    .tok-keyword { color: #82aaff; }
+    .tok-string { color: #c3e88d; }
+    .tok-property { color: #ffcb6b; }
+    .tok-fn { color: #82aaff; }
+
+    /* Inline code */
+    code.ic {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--color-bg-alt);
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      padding: 1px 5px;
+      color: var(--color-text);
+    }
+
+    /* Key message */
+    .key-message {
+      background: linear-gradient(135deg, var(--color-accent-soft), #fdf5e8);
+      border: 1px solid #e8a584;
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      margin: var(--space-6) 0;
+      text-align: center;
+    }
+    .key-message p { font-size: var(--text-base); color: var(--color-text); line-height: var(--leading-loose); margin: 0; }
+    .key-message strong { color: var(--color-accent); }
+
+    /* Section divider */
+    .sep { height: 1px; background: var(--color-border); margin: var(--space-8) 0; }
+
+    /* Summary grid */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: var(--space-3);
+      margin: var(--space-6) 0;
+    }
+    .summary-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      box-shadow: var(--shadow-sm);
+    }
+    .summary-card-term { font-size: var(--text-sm); font-weight: var(--weight-semibold); margin-bottom: var(--space-2); }
+    .summary-card-def { font-size: var(--text-sm); color: var(--color-text-muted); line-height: var(--leading-normal); }
+  </style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="hero-tag">웹 보안 · 백엔드 기초</span>
+    <h1>CORS는 왜 막고,<br>무엇으로 푸는가</h1>
+    <p class="hero-lead">
+      막고 있는 진짜 주체는 동일 출처 정책(SOP)이며, CORS는 그 차단을 안전하게 푸는 약속이다.
+      미들웨어·라우터·개발 프록시까지 SVG 다이어그램으로 한 번에 이해한다.
+    </p>
+    <div class="hero-meta">
+      <span>대상: 백엔드를 처음 다루는 프론트엔드 개발자</span>
+      <span>·</span>
+      <span>2026-05-19</span>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <main>
+
+    <div class="key-message">
+      <p>
+        <strong>핵심 메시지</strong><br>
+        CORS는 차단하는 규칙이 아니라, 차단을 <strong>풀기 위한 약속</strong>이다.<br>
+        막고 있는 진짜 주체는 <strong>동일 출처 정책(SOP)</strong>이며,<br>
+        CORS는 서버가 응답 헤더를 통해 "이 출처는 읽어도 좋다"고 표시하면<br>
+        브라우저가 그 표시를 보고 응답을 통과시키는 표준 메커니즘이다.
+      </p>
+    </div>
+
+    <!-- ── Section 1 ── -->
+    <section class="section" id="s1">
+      <div class="section-num">01</div>
+      <h2>막는 것은 CORS가 아니라 동일 출처 정책이다</h2>
+      <p>
+        가장 먼저 바로잡아야 할 오해는 <strong>"CORS가 요청을 막는다"</strong>는 표현이다.
+        실제로 막고 있는 것은 <strong>동일 출처 정책(Same-Origin Policy, SOP)</strong>이라는,
+        브라우저에 내장된 더 근본적인 보안 정책이다. SOP는 "브라우저에서 실행되는 스크립트는
+        자신이 로드된 출처와 다른 출처의 응답을 자유롭게 읽을 수 없다"고 못 박는다.
+        악의적인 사이트가 사용자의 인증 쿠키를 이용해 다른 사이트의 데이터를 몰래
+        가져가는 것을 원천 차단하기 위함이다.
+      </p>
+
+      <!-- Diagram 1: SOP overview -->
+      <div class="diagram-box">
+        <svg width="100%" viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg" style="display:block;max-width:700px;margin:0 auto;">
+          <defs>
+            <marker id="d1-ok" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0,10 3.5,0 7" fill="#3a6b4a"/>
+            </marker>
+            <marker id="d1-err" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0,10 3.5,0 7" fill="#b03a2e"/>
+            </marker>
+          </defs>
+
+          <!-- Browser -->
+          <rect x="30" y="100" width="140" height="80" rx="10" fill="#e5eef7" stroke="#2d5a8e" stroke-width="2"/>
+          <text x="100" y="130" text-anchor="middle" font-size="13" font-family="-apple-system,sans-serif" fill="#2d5a8e" font-weight="700">브라우저</text>
+          <text x="100" y="150" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#6b6a63">myapp.com</text>
+          <text x="100" y="168" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#a09f97">SOP 내장됨</text>
+
+          <!-- Same-origin server -->
+          <rect x="300" y="30" width="160" height="75" rx="10" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="2"/>
+          <text x="380" y="58" text-anchor="middle" font-size="13" font-family="-apple-system,sans-serif" fill="#3a6b4a" font-weight="700">같은 출처 서버</text>
+          <text x="380" y="76" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#3a6b4a">myapp.com/api</text>
+          <text x="380" y="94" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#3a6b4a">✓ 응답 허용</text>
+
+          <!-- Cross-origin server -->
+          <rect x="300" y="175" width="160" height="75" rx="10" fill="#fdecea" stroke="#b03a2e" stroke-width="2"/>
+          <text x="380" y="203" text-anchor="middle" font-size="13" font-family="-apple-system,sans-serif" fill="#b03a2e" font-weight="700">다른 출처 서버</text>
+          <text x="380" y="221" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#b03a2e">api.other.com</text>
+          <text x="380" y="239" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#b03a2e">✗ SOP가 차단</text>
+
+          <!-- Arrow: browser → same origin -->
+          <line x1="170" y1="115" x2="298" y2="72" stroke="#3a6b4a" stroke-width="2" marker-end="url(#d1-ok)"/>
+          <text x="225" y="80" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#3a6b4a">요청 · 응답 ✓</text>
+
+          <!-- Arrow: browser → cross origin (dashed, blocked) -->
+          <line x1="170" y1="165" x2="230" y2="212" stroke="#b03a2e" stroke-width="2" stroke-dasharray="5,4"/>
+          <circle cx="242" cy="220" r="18" fill="#fdecea" stroke="#b03a2e" stroke-width="2"/>
+          <line x1="231" y1="209" x2="253" y2="231" stroke="#b03a2e" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="253" y1="209" x2="231" y2="231" stroke="#b03a2e" stroke-width="2.5" stroke-linecap="round"/>
+          <text x="242" y="255" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#b03a2e">SOP 차단</text>
+
+          <!-- Legend -->
+          <rect x="520" y="60" width="160" height="90" rx="8" fill="#f5f2ed" stroke="#dedad2" stroke-width="1"/>
+          <text x="600" y="82" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#6b6a63" font-weight="600">범례</text>
+          <line x1="535" y1="98" x2="565" y2="98" stroke="#3a6b4a" stroke-width="2" marker-end="url(#d1-ok)"/>
+          <text x="575" y="102" font-size="10" font-family="-apple-system,sans-serif" fill="#3a6b4a">허용 (같은 출처)</text>
+          <line x1="535" y1="122" x2="565" y2="122" stroke="#b03a2e" stroke-width="2" stroke-dasharray="5,4"/>
+          <text x="575" y="126" font-size="10" font-family="-apple-system,sans-serif" fill="#b03a2e">차단 (다른 출처)</text>
+        </svg>
+        <p class="diagram-caption">그림 1. SOP는 브라우저에 내장된 정책으로, 다른 출처 서버의 응답을 스크립트가 읽지 못하게 막는다</p>
+      </div>
+
+      <h3>출처(Origin)란 정확히 무엇인가</h3>
+      <p>
+        출처는 <strong>스킴 + 호스트 + 포트</strong> 세 요소의 조합이다.
+        세 요소 중 하나라도 다르면 브라우저는 즉시 "다른 출처"로 판정한다.
+        로컬 개발에서 <code class="ic">localhost:5173</code>과 <code class="ic">localhost:3000</code>이
+        부딪히는 것도 포트 하나가 달라서다.
+      </p>
+
+      <!-- Diagram 2: Origin breakdown -->
+      <div class="diagram-box">
+        <svg width="100%" viewBox="0 0 680 195" xmlns="http://www.w3.org/2000/svg" style="display:block;max-width:680px;margin:0 auto;">
+          <!-- URL dark bar -->
+          <rect x="20" y="16" width="640" height="52" rx="8" fill="#1a1a2e"/>
+          <text x="44" y="49" font-size="20" font-family="'SF Mono',Consolas,monospace">
+            <tspan fill="#82aaff">https</tspan><tspan fill="#546e7a">://</tspan><tspan fill="#c3e88d">api.example.com</tspan><tspan fill="#546e7a">:</tspan><tspan fill="#ffcb6b">3000</tspan><tspan fill="#546e7a">/users</tspan>
+          </text>
+
+          <!-- Scheme bracket -->
+          <path d="M44,70 L44,82 L108,82 L108,70" fill="none" stroke="#82aaff" stroke-width="1.5"/>
+          <text x="76" y="100" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#82aaff" font-weight="600">스킴</text>
+          <text x="76" y="116" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#a09f97">(프로토콜)</text>
+
+          <!-- Host bracket -->
+          <path d="M126,70 L126,90 L310,90 L310,70" fill="none" stroke="#c3e88d" stroke-width="1.5"/>
+          <text x="218" y="112" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#c3e88d" font-weight="600">호스트</text>
+          <text x="218" y="128" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#a09f97">(도메인 + 서브도메인)</text>
+
+          <!-- Port bracket -->
+          <path d="M322,70 L322,82 L388,82 L388,70" fill="none" stroke="#ffcb6b" stroke-width="1.5"/>
+          <text x="355" y="100" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#ffcb6b" font-weight="600">포트</text>
+          <text x="355" y="116" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#a09f97">(접속 포트)</text>
+
+          <!-- Path note -->
+          <text x="430" y="80" font-size="10" font-family="-apple-system,sans-serif" fill="#a09f97" font-style="italic">← 출처에 포함 안 됨</text>
+
+          <!-- Origin = 3 things banner -->
+          <rect x="20" y="148" width="640" height="36" rx="8" fill="#faeee7" stroke="#d95f2b" stroke-width="1.5"/>
+          <text x="340" y="171" text-anchor="middle" font-size="12" font-family="-apple-system,sans-serif" fill="#d95f2b" font-weight="700">출처(Origin) = 스킴 + 호스트 + 포트 — 셋 중 하나라도 다르면 다른 출처</text>
+        </svg>
+        <p class="diagram-caption">그림 2. 출처를 구성하는 세 요소. <code>localhost:5173</code>과 <code>localhost:3000</code>도 포트가 달라 다른 출처로 판정된다</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>구성 요소</th><th>의미</th><th>다른 출처가 되는 예</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code class="ic">scheme</code></td><td>통신 프로토콜</td><td><code class="ic">http://</code> ↔ <code class="ic">https://</code></td></tr>
+            <tr><td><code class="ic">host</code></td><td>도메인 + 서브도메인</td><td><code class="ic">example.com</code> ↔ <code class="ic">api.example.com</code></td></tr>
+            <tr><td><code class="ic">port</code></td><td>접속 포트</td><td><code class="ic">localhost:5173</code> ↔ <code class="ic">localhost:3000</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout cw">
+        <div class="callout-title">⚠ 흔한 오해 바로잡기</div>
+        <p>"CORS 때문에 막혔다"는 말은 일상적으로 통용되지만, 정확히는 <strong>SOP가 막고 있고, 그 제약을 풀어주는 약속이 CORS</strong>다. CORS(Cross-Origin Resource Sharing)는 "다른 출처 자원의 공유"라는 이름 그대로, 차단을 푸는 쪽의 표준이다.</p>
+      </div>
+    </section>
+
+    <div class="sep"></div>
+
+    <!-- ── Section 2 ── -->
+    <section class="section" id="s2">
+      <div class="section-num">02</div>
+      <h2>서버가 "허용한다"고 말하는 방법: 응답 헤더</h2>
+      <p>
+        CORS의 핵심 아이디어는 단순하다. 서버가 응답을 보낼 때
+        <strong>"이 출처에서 오는 요청은 받아들이겠다"는 메시지</strong>를 함께 첨부하는 것이다.
+        이 메시지가 담기는 곳이 <strong>HTTP 응답 헤더(Response Header)</strong>다.
+        헤더는 본문(데이터) 앞에 붙는 메타정보로, 우편물의 봉투에 적힌 발신·수신 정보와 같은 역할을 한다.
+      </p>
+      <p>
+        브라우저는 응답이 도착하면 본문보다 먼저 헤더를 읽는다.
+        <code class="ic">Access-Control-Allow-Origin</code>에 자신의 출처가 적혀 있으면 응답을 스크립트에 넘겨주고,
+        헤더가 없거나 다른 출처가 적혀 있으면 응답은 이미 도착했더라도 폐기된다.
+      </p>
+
+      <!-- Diagram 3: CORS header flow -->
+      <div class="diagram-box">
+        <svg width="100%" viewBox="0 0 700 370" xmlns="http://www.w3.org/2000/svg" style="display:block;max-width:700px;margin:0 auto;">
+          <defs>
+            <marker id="d3-right" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0,10 3.5,0 7" fill="#6b6a63"/>
+            </marker>
+            <marker id="d3-left" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0,10 3.5,0 7" fill="#3a6b4a"/>
+            </marker>
+            <marker id="d3-left-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0,10 3.5,0 7" fill="#b03a2e"/>
+            </marker>
+          </defs>
+
+          <!-- Browser panel -->
+          <rect x="16" y="16" width="210" height="338" rx="10" fill="#e5eef7" stroke="#2d5a8e" stroke-width="2"/>
+          <text x="121" y="42" text-anchor="middle" font-size="13" font-family="-apple-system,sans-serif" fill="#2d5a8e" font-weight="700">브라우저</text>
+
+          <!-- Server panel -->
+          <rect x="474" y="16" width="210" height="338" rx="10" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="2"/>
+          <text x="579" y="42" text-anchor="middle" font-size="13" font-family="-apple-system,sans-serif" fill="#3a6b4a" font-weight="700">서버</text>
+          <text x="579" y="60" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#6b6a63">api.example.com</text>
+
+          <!-- Request packet -->
+          <rect x="26" y="60" width="190" height="92" rx="6" fill="#ffffff" stroke="#2d5a8e" stroke-width="1"/>
+          <text x="40" y="82" font-size="10" font-family="'SF Mono',Consolas,monospace" fill="#82aaff">GET /api/users HTTP/1.1</text>
+          <text x="40" y="100" font-size="10" font-family="'SF Mono',Consolas,monospace" fill="#a09f97">Host: api.example.com</text>
+          <text x="40" y="118" font-size="10" font-family="'SF Mono',Consolas,monospace" fill="#c3e88d">Origin: https://myapp.com</text>
+          <text x="40" y="142" font-size="9" font-family="-apple-system,sans-serif" fill="#6b6a63">← 브라우저가 자동으로 추가</text>
+
+          <!-- Request arrow -->
+          <line x1="228" y1="106" x2="470" y2="106" stroke="#6b6a63" stroke-width="2" marker-end="url(#d3-right)"/>
+          <text x="349" y="98" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#6b6a63">요청</text>
+
+          <!-- Server checking -->
+          <rect x="484" y="60" width="190" height="50" rx="6" fill="rgba(58,107,74,0.12)" stroke="#3a6b4a" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="579" y="82" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#3a6b4a" font-weight="600">"myapp.com 허용 목록에 있음 ✓"</text>
+          <text x="579" y="100" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#3a6b4a">허용 헤더를 응답에 추가</text>
+
+          <!-- Response packet -->
+          <rect x="484" y="170" width="190" height="130" rx="6" fill="#ffffff" stroke="#3a6b4a" stroke-width="1"/>
+          <text x="494" y="192" font-size="10" font-family="'SF Mono',Consolas,monospace" fill="#a09f97">HTTP/1.1 200 OK</text>
+          <text x="494" y="210" font-size="10" font-family="'SF Mono',Consolas,monospace" fill="#a09f97">Content-Type: application/json</text>
+          <text x="494" y="232" font-size="10" font-family="'SF Mono',Consolas,monospace" fill="#c3e88d">Access-Control-Allow-Origin:</text>
+          <text x="504" y="250" font-size="10" font-family="'SF Mono',Consolas,monospace" fill="#c3e88d"> https://myapp.com</text>
+          <text x="494" y="272" font-size="10" font-family="'SF Mono',Consolas,monospace" fill="#a09f97">{"users": [...]}</text>
+
+          <!-- Response arrow -->
+          <line x1="472" y1="240" x2="230" y2="240" stroke="#3a6b4a" stroke-width="2" marker-end="url(#d3-left)"/>
+          <text x="349" y="230" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#3a6b4a">응답 (CORS 헤더 포함)</text>
+
+          <!-- Browser result: OK -->
+          <rect x="26" y="268" width="190" height="70" rx="6" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="1"/>
+          <text x="121" y="292" text-anchor="middle" font-size="12" font-family="-apple-system,sans-serif" fill="#3a6b4a" font-weight="700">✓ 허용됨</text>
+          <text x="121" y="310" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#6b6a63">Allow-Origin에 내 출처가 있음</text>
+          <text x="121" y="326" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#6b6a63">→ 스크립트에 응답 전달</text>
+        </svg>
+        <p class="diagram-caption">그림 3. 브라우저는 응답 헤더의 <code>Access-Control-Allow-Origin</code>을 확인하고, 허용된 경우에만 응답을 스크립트에 전달한다</p>
+      </div>
+
+      <div class="callout ci">
+        <div class="callout-title">ℹ 핵심 정리</div>
+        <p>CORS 해결의 본질은 <strong>서버가 응답 헤더를 통해 신뢰를 명시적으로 표시하는 것</strong>이다. 클라이언트가 할 수 있는 일은 없으며, 결정권은 전적으로 서버 쪽에 있다. 응답이 이미 도착했더라도 헤더가 없으면 브라우저가 폐기한다.</p>
+      </div>
+    </section>
+
+    <div class="sep"></div>
+
+    <!-- ── Section 3 ── -->
+    <section class="section" id="s3">
+      <div class="section-num">03</div>
+      <h2>단순 요청과 사전 요청(Preflight)</h2>
+      <p>
+        CORS 요청은 두 종류로 나뉜다. 브라우저는 <strong>위험할 수 있는 요청</strong>에 대해
+        본 요청을 보내기 전에 <code class="ic">OPTIONS</code> 메서드로 "보내도 되는가?"를 먼저 물어본다.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>구분</th><th>조건</th><th>동작</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>단순 요청</strong></td>
+              <td>GET·HEAD·POST 중 하나, CORS 안전 목록 헤더만, <code class="ic">Content-Type</code>이 text/plain · urlencoded · multipart 중 하나</td>
+              <td>본 요청을 곧바로 보내고 응답 헤더로 허용 여부 판단</td>
+            </tr>
+            <tr>
+              <td><strong>사전 요청 (Preflight)</strong></td>
+              <td>PUT·DELETE, <code class="ic">Content-Type: application/json</code>, <code class="ic">Authorization</code> 헤더 등 위 조건을 벗어나는 모든 경우</td>
+              <td>OPTIONS로 먼저 허락 구한 뒤 본 요청 전송 (왕복 1회 추가)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Diagram 4: Preflight sequence -->
+      <div class="diagram-box">
+        <svg width="100%" viewBox="0 0 700 430" xmlns="http://www.w3.org/2000/svg" style="display:block;max-width:700px;margin:0 auto;">
+          <defs>
+            <marker id="d4-br" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0,10 3.5,0 7" fill="#8a6a00"/>
+            </marker>
+            <marker id="d4-bl" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0,10 3.5,0 7" fill="#3a6b4a"/>
+            </marker>
+            <marker id="d4-r" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0,10 3.5,0 7" fill="#2d5a8e"/>
+            </marker>
+            <marker id="d4-l" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0,10 3.5,0 7" fill="#3a6b4a"/>
+            </marker>
+          </defs>
+
+          <!-- Lifeline: Browser -->
+          <rect x="60" y="16" width="130" height="44" rx="8" fill="#e5eef7" stroke="#2d5a8e" stroke-width="2"/>
+          <text x="125" y="43" text-anchor="middle" font-size="13" font-family="-apple-system,sans-serif" fill="#2d5a8e" font-weight="700">브라우저</text>
+          <line x1="125" y1="60" x2="125" y2="410" stroke="#2d5a8e" stroke-width="1.5" stroke-dasharray="5,4"/>
+
+          <!-- Lifeline: Server -->
+          <rect x="510" y="16" width="130" height="44" rx="8" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="2"/>
+          <text x="575" y="43" text-anchor="middle" font-size="13" font-family="-apple-system,sans-serif" fill="#3a6b4a" font-weight="700">서버</text>
+          <line x1="575" y1="60" x2="575" y2="410" stroke="#3a6b4a" stroke-width="1.5" stroke-dasharray="5,4"/>
+
+          <!-- Phase 1 label -->
+          <rect x="200" y="72" width="300" height="26" rx="6" fill="#fdf5d9"/>
+          <text x="350" y="89" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#8a6a00" font-weight="700">① 사전 요청 (Preflight)</text>
+
+          <!-- OPTIONS request -->
+          <line x1="135" y1="118" x2="562" y2="118" stroke="#8a6a00" stroke-width="2" marker-end="url(#d4-br)"/>
+          <rect x="190" y="102" width="300" height="18" rx="4" fill="rgba(138,106,0,0.08)"/>
+          <text x="350" y="115" text-anchor="middle" font-size="10" font-family="'SF Mono',Consolas,monospace" fill="#8a6a00">OPTIONS /api/users</text>
+          <text x="350" y="136" text-anchor="middle" font-size="10" font-family="'SF Mono',Consolas,monospace" fill="#8a6a00">Access-Control-Request-Method: PUT</text>
+          <text x="350" y="152" text-anchor="middle" font-size="10" font-family="'SF Mono',Consolas,monospace" fill="#8a6a00">Origin: https://myapp.com</text>
+
+          <!-- Preflight response -->
+          <line x1="562" y1="198" x2="138" y2="198" stroke="#3a6b4a" stroke-width="2" marker-end="url(#d4-bl)"/>
+          <text x="350" y="190" text-anchor="middle" font-size="10" font-family="'SF Mono',Consolas,monospace" fill="#3a6b4a">200 OK</text>
+          <text x="350" y="216" text-anchor="middle" font-size="10" font-family="'SF Mono',Consolas,monospace" fill="#3a6b4a">Access-Control-Allow-Origin: https://myapp.com</text>
+          <text x="350" y="232" text-anchor="middle" font-size="10" font-family="'SF Mono',Consolas,monospace" fill="#3a6b4a">Access-Control-Allow-Methods: GET, PUT, DELETE</text>
+          <text x="350" y="248" text-anchor="middle" font-size="10" font-family="'SF Mono',Consolas,monospace" fill="#3a6b4a">Access-Control-Allow-Headers: Content-Type</text>
+
+          <!-- Browser check bubble -->
+          <rect x="30" y="262" width="185" height="44" rx="8" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1"/>
+          <text x="122" y="283" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#2d5a8e" font-weight="700">✓ 허용 확인됨</text>
+          <text x="122" y="299" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#6b6a63">이제 본 요청을 보내도 됨</text>
+
+          <!-- Phase 2 label -->
+          <rect x="200" y="318" width="300" height="26" rx="6" fill="#e5eef7"/>
+          <text x="350" y="335" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#2d5a8e" font-weight="700">② 본 요청</text>
+
+          <!-- Actual request -->
+          <line x1="135" y1="365" x2="562" y2="365" stroke="#2d5a8e" stroke-width="2" marker-end="url(#d4-r)"/>
+          <text x="350" y="357" text-anchor="middle" font-size="10" font-family="'SF Mono',Consolas,monospace" fill="#2d5a8e">PUT /api/users (실제 요청)</text>
+
+          <!-- Actual response -->
+          <line x1="562" y1="405" x2="138" y2="405" stroke="#3a6b4a" stroke-width="2" marker-end="url(#d4-l)"/>
+          <text x="350" y="397" text-anchor="middle" font-size="10" font-family="'SF Mono',Consolas,monospace" fill="#3a6b4a">200 OK + 데이터</text>
+        </svg>
+        <p class="diagram-caption">그림 4. Preflight 흐름. PUT·DELETE·JSON 요청은 OPTIONS로 먼저 허락을 구하고, 허용 응답을 받은 뒤에야 본 요청을 보낸다</p>
+      </div>
+
+      <div class="callout ci">
+        <div class="callout-title">ℹ 왜 사전 요청이 필요한가</div>
+        <p>한 번의 본 요청만으로 데이터가 변경되거나 삭제되는 사고를 막기 위해서다. 위험할 수 있는 요청은 <strong>보내기 전에 허락을 먼저 받는다</strong>는 안전장치인 셈이다.</p>
+      </div>
+
+      <h3>인증 쿠키가 있을 때 추가 제약</h3>
+      <p>
+        인증 쿠키를 함께 보내는 요청이라면 <code class="ic">Access-Control-Allow-Credentials: true</code>까지 필요하다.
+        이 경우 <code class="ic">Allow-Origin</code>을 와일드카드 <code class="ic">*</code>로 둘 수 없다는 제약이 따라온다.
+        반드시 특정 출처를 명시해야 한다.
+      </p>
+    </section>
+
+    <div class="sep"></div>
+
+    <!-- ── Section 4 ── -->
+    <section class="section" id="s4">
+      <div class="section-num">04</div>
+      <h2>누가 헤더를 붙이는가: 미들웨어·라우터·라우트 핸들러</h2>
+      <p>
+        CORS 헤더를 자동으로 챙겨주는 것은 백엔드 서버의 <strong>미들웨어(Middleware)</strong>라는 부품이다.
+        미들웨어를 이해하려면 함께 등장하는 라우터·라우트 핸들러까지 한 묶음으로 보아야 한다.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>부품</th><th>역할</th><th>비유</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>미들웨어</strong></td>
+              <td>요청이 최종 처리자에게 가기 전후에 끼어들어 공통 작업 수행 (CORS 헤더, 인증 검사, 로그 기록 등)</td>
+              <td>컨베이어 벨트 위 각 공정</td>
+            </tr>
+            <tr>
+              <td><strong>라우터</strong></td>
+              <td>들어온 요청의 URL과 메서드를 보고 어느 핸들러에 보낼지 분배하는 시스템</td>
+              <td>전화 교환대</td>
+            </tr>
+            <tr>
+              <td><strong>라우트 핸들러</strong></td>
+              <td>특정 경로·메서드 한 쌍에 대응해 실제 비즈니스 로직을 수행하고 응답을 만드는 함수</td>
+              <td>전화를 받아 업무를 처리하는 담당자</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Diagram 5: Middleware pipeline -->
+      <div class="diagram-box">
+        <svg width="100%" viewBox="0 0 700 255" xmlns="http://www.w3.org/2000/svg" style="display:block;max-width:700px;margin:0 auto;">
+          <defs>
+            <marker id="d5-arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0,8 3,0 6" fill="#a09f97"/>
+            </marker>
+            <marker id="d5-resp" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0,8 3,0 6" fill="#3a6b4a"/>
+            </marker>
+          </defs>
+
+          <!-- REQUEST -->
+          <rect x="10" y="90" width="64" height="40" rx="8" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.5"/>
+          <text x="42" y="108" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#2d5a8e" font-weight="700">요청</text>
+          <text x="42" y="122" text-anchor="middle" font-size="9" font-family="-apple-system,sans-serif" fill="#6b6a63">도착</text>
+          <line x1="74" y1="110" x2="88" y2="110" stroke="#a09f97" stroke-width="1.5" marker-end="url(#d5-arr)"/>
+
+          <!-- Logger middleware -->
+          <rect x="90" y="80" width="80" height="60" rx="8" fill="#fdf5d9" stroke="#8a6a00" stroke-width="1.5"/>
+          <text x="130" y="107" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#8a6a00" font-weight="600">로깅</text>
+          <text x="130" y="125" text-anchor="middle" font-size="9" font-family="-apple-system,sans-serif" fill="#a09f97">미들웨어</text>
+          <line x1="170" y1="110" x2="184" y2="110" stroke="#a09f97" stroke-width="1.5" marker-end="url(#d5-arr)"/>
+
+          <!-- CORS middleware (highlighted) -->
+          <rect x="186" y="76" width="88" height="68" rx="8" fill="#faeee7" stroke="#d95f2b" stroke-width="2.5"/>
+          <text x="230" y="107" text-anchor="middle" font-size="12" font-family="-apple-system,sans-serif" fill="#d95f2b" font-weight="700">CORS</text>
+          <text x="230" y="125" text-anchor="middle" font-size="9" font-family="-apple-system,sans-serif" fill="#d95f2b">미들웨어</text>
+          <!-- Annotation -->
+          <line x1="230" y1="76" x2="230" y2="48" stroke="#d95f2b" stroke-width="1" stroke-dasharray="3,2"/>
+          <rect x="174" y="24" width="112" height="26" rx="5" fill="#faeee7" stroke="#d95f2b" stroke-width="1"/>
+          <text x="230" y="41" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#d95f2b" font-weight="600">응답 헤더 예약</text>
+          <line x1="274" y1="110" x2="288" y2="110" stroke="#a09f97" stroke-width="1.5" marker-end="url(#d5-arr)"/>
+
+          <!-- JSON parser -->
+          <rect x="290" y="80" width="80" height="60" rx="8" fill="#fdf5d9" stroke="#8a6a00" stroke-width="1.5"/>
+          <text x="330" y="107" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#8a6a00" font-weight="600">JSON</text>
+          <text x="330" y="123" text-anchor="middle" font-size="9" font-family="-apple-system,sans-serif" fill="#a09f97">파서</text>
+          <line x1="370" y1="110" x2="384" y2="110" stroke="#a09f97" stroke-width="1.5" marker-end="url(#d5-arr)"/>
+
+          <!-- Auth -->
+          <rect x="386" y="80" width="80" height="60" rx="8" fill="#fdf5d9" stroke="#8a6a00" stroke-width="1.5"/>
+          <text x="426" y="107" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#8a6a00" font-weight="600">인증</text>
+          <text x="426" y="123" text-anchor="middle" font-size="9" font-family="-apple-system,sans-serif" fill="#a09f97">미들웨어</text>
+          <line x1="466" y1="110" x2="480" y2="110" stroke="#a09f97" stroke-width="1.5" marker-end="url(#d5-arr)"/>
+
+          <!-- Router -->
+          <rect x="482" y="80" width="72" height="60" rx="8" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.5"/>
+          <text x="518" y="107" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#2d5a8e" font-weight="600">라우터</text>
+          <text x="518" y="123" text-anchor="middle" font-size="9" font-family="-apple-system,sans-serif" fill="#a09f97">경로 분배</text>
+          <line x1="554" y1="110" x2="568" y2="110" stroke="#a09f97" stroke-width="1.5" marker-end="url(#d5-arr)"/>
+
+          <!-- Route Handler -->
+          <rect x="570" y="76" width="114" height="68" rx="8" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="2.5"/>
+          <text x="627" y="103" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#3a6b4a" font-weight="700">라우트</text>
+          <text x="627" y="119" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#3a6b4a" font-weight="700">핸들러</text>
+          <text x="627" y="135" text-anchor="middle" font-size="9" font-family="-apple-system,sans-serif" fill="#6b6a63">비즈니스 로직</text>
+
+          <!-- Response arrow (goes back underneath) -->
+          <path d="M627,144 L627,188 L42,188 L42,132" fill="none" stroke="#3a6b4a" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#d5-resp)"/>
+          <text x="350" y="210" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#3a6b4a">응답 반환 (CORS 헤더 자동 포함)</text>
+
+          <!-- CORS note: covers all responses -->
+          <line x1="230" y1="144" x2="230" y2="176" stroke="#d95f2b" stroke-width="1" stroke-dasharray="3,2"/>
+          <rect x="162" y="172" width="136" height="24" rx="5" fill="#faeee7" stroke="#d95f2b" stroke-width="1"/>
+          <text x="230" y="188" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#d95f2b" font-weight="600">모든 응답에 자동 부착</text>
+        </svg>
+        <p class="diagram-caption">그림 5. 요청 처리 파이프라인. CORS 미들웨어는 라우터보다 앞단에 등록되어, 어느 경로로 가든 응답에 헤더가 일관되게 붙는다</p>
+      </div>
+
+      <div class="callout cs">
+        <div class="callout-title">✓ 실무 팁 (Node.js · Express)</div>
+        <p>직접 만들 필요 없이 <strong><code>cors</code> npm 패키지를 설치해 한 줄로 등록</strong>하는 것이 표준이다.</p>
+      </div>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <span>JavaScript · Express</span>
+          <button class="copy-btn" onclick="copyCode(this)">복사</button>
+        </div>
+        <pre><code><span class="tok-keyword">const</span> express = <span class="tok-fn">require</span>(<span class="tok-string">'express'</span>);
+<span class="tok-keyword">const</span> cors = <span class="tok-fn">require</span>(<span class="tok-string">'cors'</span>);
+<span class="tok-keyword">const</span> app = <span class="tok-fn">express</span>();
+
+<span class="tok-comment">// CORS 미들웨어를 라우터보다 앞에 등록</span>
+app.<span class="tok-fn">use</span>(<span class="tok-fn">cors</span>({
+  origin: <span class="tok-string">'https://myapp.com'</span>,   <span class="tok-comment">// 허용할 출처 명시</span>
+  credentials: <span class="tok-keyword">true</span>             <span class="tok-comment">// 쿠키 포함 허용</span>
+}));
+
+<span class="tok-comment">// 이후 라우터 등록</span>
+app.<span class="tok-fn">get</span>(<span class="tok-string">'/api/users'</span>, (req, res) =&gt; {
+  res.<span class="tok-fn">json</span>({ users: [] });
+});</code></pre>
+      </div>
+
+      <div class="callout cw">
+        <div class="callout-title">⚠ 라우터와 핸들러 혼동 주의</div>
+        <p><strong>라우터는 분배 시스템</strong>이고, <strong>라우트 핸들러는 분배의 종착지</strong>다. 라우터는 다른 서버로 전달하는 게 아니라, 같은 서버 안에서 적절한 함수에 연결할 뿐이다. 실제 데이터 처리와 응답 생성은 핸들러가 직접 끝낸다.</p>
+      </div>
+    </section>
+
+    <div class="sep"></div>
+
+    <!-- ── Section 5 ── -->
+    <section class="section" id="s5">
+      <div class="section-num">05</div>
+      <h2>개발용 프록시의 진짜 동작과 한계</h2>
+      <p>
+        개발 중에는 백엔드 코드를 한 줄도 짜지 않았는데도 외부 API를 잘 불러오는 경험을 한다.
+        흔히 "Vite 프록시가 CORS 헤더를 붙여서 돌려준다"고 설명하지만, 이는 정확하지 않다.
+        <strong>개발 서버 프록시는 헤더를 추가하지 않는다.</strong>
+        대신 요청을 동일 출처에서 받게 만들어 CORS 검사가 발생할 여지 자체를 없앤다.
+      </p>
+      <p>
+        핵심은 <strong>CORS는 브라우저↔서버 통신에만 적용되고, 서버↔서버 통신에는 적용되지 않는다</strong>는 점이다.
+        프록시는 이 비대칭을 활용해 브라우저 입장에서는 동일 출처로 통신하는 것처럼 만들어 준다.
+      </p>
+
+      <!-- Diagram 6: Proxy before/after -->
+      <div class="diagram-box">
+        <svg width="100%" viewBox="0 0 700 390" xmlns="http://www.w3.org/2000/svg" style="display:block;max-width:700px;margin:0 auto;">
+          <defs>
+            <marker id="d6-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0,10 3.5,0 7" fill="#b03a2e"/>
+            </marker>
+            <marker id="d6-ok" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0,10 3.5,0 7" fill="#3a6b4a"/>
+            </marker>
+            <marker id="d6-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0,10 3.5,0 7" fill="#8a6a00"/>
+            </marker>
+          </defs>
+
+          <!-- BEFORE panel -->
+          <rect x="10" y="10" width="320" height="185" rx="12" fill="#fdecea" stroke="#b03a2e" stroke-width="2"/>
+          <text x="170" y="36" text-anchor="middle" font-size="13" font-family="-apple-system,sans-serif" fill="#b03a2e" font-weight="700">✗ 프록시 없이 직접 호출</text>
+
+          <rect x="24" y="55" width="95" height="50" rx="8" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.5"/>
+          <text x="71" y="77" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#2d5a8e" font-weight="600">브라우저</text>
+          <text x="71" y="93" text-anchor="middle" font-size="9" font-family="-apple-system,sans-serif" fill="#6b6a63">:5173</text>
+
+          <rect x="221" y="55" width="95" height="50" rx="8" fill="#fdecea" stroke="#b03a2e" stroke-width="1.5"/>
+          <text x="268" y="77" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#b03a2e" font-weight="600">외부 API</text>
+          <text x="268" y="93" text-anchor="middle" font-size="9" font-family="-apple-system,sans-serif" fill="#b03a2e">api.other.com</text>
+
+          <!-- Block in middle -->
+          <circle cx="169" cy="80" r="22" fill="#fdecea" stroke="#b03a2e" stroke-width="2"/>
+          <line x1="155" y1="66" x2="183" y2="94" stroke="#b03a2e" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="183" y1="66" x2="155" y2="94" stroke="#b03a2e" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="119" y1="80" x2="145" y2="80" stroke="#b03a2e" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <line x1="193" y1="80" x2="219" y2="80" stroke="#b03a2e" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+          <text x="170" y="130" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#b03a2e">다른 출처 → SOP 차단</text>
+          <text x="170" y="152" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#6b6a63">응답이 도착해도</text>
+          <text x="170" y="168" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#6b6a63">브라우저가 폐기</text>
+
+          <!-- AFTER panel -->
+          <rect x="350" y="10" width="340" height="375" rx="12" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="2"/>
+          <text x="520" y="36" text-anchor="middle" font-size="13" font-family="-apple-system,sans-serif" fill="#3a6b4a" font-weight="700">✓ 개발 서버 프록시 경유</text>
+
+          <!-- Browser (after) -->
+          <rect x="364" y="55" width="95" height="50" rx="8" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.5"/>
+          <text x="411" y="77" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#2d5a8e" font-weight="600">브라우저</text>
+          <text x="411" y="93" text-anchor="middle" font-size="9" font-family="-apple-system,sans-serif" fill="#6b6a63">:5173</text>
+
+          <!-- External API (after) -->
+          <rect x="574" y="55" width="102" height="50" rx="8" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.5"/>
+          <text x="625" y="77" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" fill="#2d5a8e" font-weight="600">외부 API</text>
+          <text x="625" y="93" text-anchor="middle" font-size="9" font-family="-apple-system,sans-serif" fill="#6b6a63">api.other.com</text>
+
+          <!-- Vite Dev Server (middle) -->
+          <rect x="452" y="190" width="135" height="68" rx="10" fill="#fdf5d9" stroke="#8a6a00" stroke-width="2"/>
+          <text x="519" y="215" text-anchor="middle" font-size="12" font-family="-apple-system,sans-serif" fill="#8a6a00" font-weight="700">Vite 개발 서버</text>
+          <text x="519" y="232" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#6b6a63">localhost:5173</text>
+          <text x="519" y="248" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#8a6a00">(프록시 기능)</text>
+
+          <!-- Step labels -->
+          <text x="424" y="134" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#3a6b4a" font-weight="600">① 같은 출처 요청</text>
+          <text x="424" y="148" text-anchor="middle" font-size="9" font-family="-apple-system,sans-serif" fill="#6b6a63">SOP 검사 없음</text>
+
+          <!-- Arrow: Browser → Vite -->
+          <line x1="411" y1="105" x2="492" y2="189" stroke="#3a6b4a" stroke-width="2" marker-end="url(#d6-ok)"/>
+
+          <!-- Step 2: server-server -->
+          <text x="613" y="155" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#8a6a00" font-weight="600">② 서버↔서버</text>
+          <text x="613" y="169" text-anchor="middle" font-size="9" font-family="-apple-system,sans-serif" fill="#6b6a63">(CORS 무관)</text>
+
+          <!-- Arrow: Vite → External API -->
+          <line x1="585" y1="196" x2="636" y2="107" stroke="#8a6a00" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#d6-gray)"/>
+
+          <!-- Arrow: External API → Vite (return) -->
+          <line x1="628" y1="107" x2="578" y2="196" stroke="#8a6a00" stroke-width="1" stroke-dasharray="3,3"/>
+
+          <!-- Step 3 -->
+          <text x="413" y="282" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#3a6b4a" font-weight="600">③ 같은 출처로 응답</text>
+          <text x="413" y="296" text-anchor="middle" font-size="9" font-family="-apple-system,sans-serif" fill="#6b6a63">브라우저 입장에서 동일 출처</text>
+
+          <!-- Arrow: Vite → Browser (return) -->
+          <line x1="455" y1="210" x2="413" y2="107" stroke="#3a6b4a" stroke-width="2" marker-end="url(#d6-ok)"/>
+
+          <!-- Browser OK bubble -->
+          <rect x="360" y="314" width="150" height="52" rx="8" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="1.5"/>
+          <text x="435" y="338" text-anchor="middle" font-size="12" font-family="-apple-system,sans-serif" fill="#3a6b4a" font-weight="700">✓ CORS 검사 없음</text>
+          <text x="435" y="356" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" fill="#6b6a63">동일 출처이므로 SOP 적용 안 됨</text>
+        </svg>
+        <p class="diagram-caption">그림 6. 프록시는 CORS 헤더를 추가하는 게 아니라, 요청을 동일 출처로 받아 CORS 검사 자체를 발생시키지 않는다</p>
+      </div>
+
+      <div class="callout ce">
+        <div class="callout-title">✗ 프록시의 결정적 한계</div>
+        <p>프록시는 <strong>개발용 서버가 띄워져 있을 때만 작동</strong>한다. 빌드 후 정적 파일로 배포하면 프록시 서버는 사라지고, 브라우저는 다시 외부 API에 직접 요청을 보내야 한다. 운영 환경에서는 <strong>자체 백엔드 서버에 CORS 미들웨어를 두거나, 백엔드가 외부 API를 대신 호출하는 구조</strong>로 바꿔야 한다.</p>
+      </div>
+
+      <p>
+        이 한계를 이해하고 나면, 왜 많은 글이 "API 서버를 직접 만들라"고 권하는지가 분명해진다.
+        개발 중의 편의는 잠깐의 임시방편일 뿐이고, 배포된 앱이 외부 API를 안정적으로 다루려면
+        결국 자기 출처에서 응답해 줄 수 있는 서버가 있어야 하기 때문이다.
+      </p>
+    </section>
+
+    <div class="sep"></div>
+
+    <!-- ── Section 6: Summary ── -->
+    <section class="section" id="s6">
+      <div class="section-num">핵심 정리</div>
+      <h2>개념 총정리</h2>
+
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="summary-card-term">동일 출처 정책 (SOP)</div>
+          <div class="summary-card-def">다른 출처의 응답을 스크립트가 읽지 못하게 막는 브라우저 기본 정책. 막는 진짜 주체.</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-term">CORS</div>
+          <div class="summary-card-def">SOP의 제약을 안전하게 푸는 표준. 차단하는 규칙이 아니라 차단을 여는 약속.</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-term">출처 (Origin)</div>
+          <div class="summary-card-def">스킴 + 호스트 + 포트의 조합. 셋 중 하나라도 달라지면 다른 출처.</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-term">사전 요청 (Preflight)</div>
+          <div class="summary-card-def">위험할 수 있는 요청 전에 OPTIONS로 미리 묻는 절차. 왕복 1회 추가.</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-term">응답 헤더</div>
+          <div class="summary-card-def">본문 앞에 붙는 메타정보. Access-Control-Allow-Origin이 CORS의 핵심 헤더.</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-term">미들웨어</div>
+          <div class="summary-card-def">요청·응답 사이에서 공통 작업을 수행. CORS 헤더를 모든 응답에 자동으로 붙임.</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-term">라우터</div>
+          <div class="summary-card-def">요청 URL·메서드를 보고 적절한 핸들러로 분배하는 시스템. 전화 교환대.</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-term">개발용 프록시</div>
+          <div class="summary-card-def">같은 출처로 요청을 받아 외부 서버에 대신 전달. 배포 시 사라지는 임시 방편.</div>
+        </div>
+      </div>
+
+      <div class="key-message" style="margin-top:var(--space-8);">
+        <p>
+          <strong>막는 주체는 SOP, 푸는 약속은 CORS</strong><br>
+          서버는 응답 헤더로 신뢰를 표시하고, 위험한 요청엔 Preflight가 추가된다.<br>
+          이 헤더를 일관되게 붙이는 건 <strong>미들웨어</strong>가 맡고,<br>
+          개발 프록시는 헤더를 추가하는 게 아니라 <strong>CORS 검사 자체를 우회</strong>시키는 것이며<br>
+          배포 시엔 사라지므로 운영 환경엔 자체 API 서버가 필요하다.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- TOC Sidebar -->
+  <aside class="toc-sidebar">
+    <div class="toc-title">목차</div>
+    <nav>
+      <ul class="toc-list">
+        <li><a href="#s1" id="toc-s1">01. SOP vs CORS</a></li>
+        <li><a href="#s2" id="toc-s2">02. 응답 헤더</a></li>
+        <li><a href="#s3" id="toc-s3">03. Preflight</a></li>
+        <li><a href="#s4" id="toc-s4">04. 미들웨어 · 라우터</a></li>
+        <li><a href="#s5" id="toc-s5">05. 개발용 프록시</a></li>
+        <li><a href="#s6" id="toc-s6">핵심 정리</a></li>
+      </ul>
+    </nav>
+  </aside>
+</div>
+
+<script>
+  // Progress bar
+  const bar = document.getElementById('progress-bar');
+  window.addEventListener('scroll', () => {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + '%';
+  }, { passive: true });
+
+  // TOC active highlight
+  const sections = Array.from(document.querySelectorAll('.section'));
+  const tocLinks = Array.from(document.querySelectorAll('.toc-list a'));
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        tocLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px' });
+  sections.forEach(s => io.observe(s));
+
+  // Code copy
+  function copyCode(btn) {
+    const text = btn.closest('.code-block').querySelector('code').textContent;
+    const orig = btn.textContent;
+    const flash = ok => {
+      btn.textContent = ok ? '복사됨 ✓' : '실패';
+      btn.disabled = true;
+      setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 1500);
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => flash(true)).catch(() => flash(false));
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      try { flash(document.execCommand('copy')); } catch { flash(false); }
+      document.body.removeChild(ta);
+    }
+  }
+</script>
+</body>
+</html>
