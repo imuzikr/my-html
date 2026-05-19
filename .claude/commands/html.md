@@ -367,6 +367,368 @@ Follow these rules for every HTML file generated, regardless of sub-command:
 
 ---
 
+## Implementation templates
+
+Copy these verbatim when the pattern is needed. Do not rewrite from memory.
+
+---
+
+### T1 · CSS scroll-snap slide deck
+
+```html
+<!-- Container -->
+<div id="deck" style="height:100vh;overflow-y:scroll;scroll-snap-type:y mandatory;">
+  <section class="slide" style="height:100vh;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;">
+    <!-- slide content -->
+  </section>
+  <!-- repeat <section class="slide"> for each slide -->
+</div>
+
+<!-- Progress bar -->
+<div id="progress" style="position:fixed;top:0;left:0;height:3px;background:var(--color-accent);width:0%;transition:width 200ms ease;z-index:100;"></div>
+
+<!-- Slide counter -->
+<div id="counter" style="position:fixed;bottom:1.5rem;right:1.5rem;font-size:var(--text-sm);color:var(--color-text-muted);"></div>
+
+<!-- Prev / Next buttons -->
+<button id="btn-prev" onclick="navSlide(-1)" style="position:fixed;bottom:1.5rem;left:50%;transform:translateX(-60px);...">&#8592;</button>
+<button id="btn-next" onclick="navSlide(1)"  style="position:fixed;bottom:1.5rem;left:50%;transform:translateX(12px);...">&#8594;</button>
+
+<script>
+const slides = Array.from(document.querySelectorAll('.slide'));
+let current = 0;
+
+// IntersectionObserver — do NOT use scroll events
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting && e.intersectionRatio >= 0.6) {
+      current = slides.indexOf(e.target);
+      updateUI();
+    }
+  });
+}, { threshold: 0.6 });
+slides.forEach(s => observer.observe(s));
+
+function updateUI() {
+  const pct = slides.length > 1 ? (current / (slides.length - 1)) * 100 : 100;
+  document.getElementById('progress').style.width = pct + '%';
+  document.getElementById('counter').textContent = (current + 1) + ' / ' + slides.length;
+  document.getElementById('btn-prev').style.opacity = current === 0 ? '0' : '1';
+  document.getElementById('btn-next').style.opacity = current === slides.length - 1 ? '0' : '1';
+}
+
+function navSlide(dir) {
+  const next = Math.max(0, Math.min(slides.length - 1, current + dir));
+  slides[next].scrollIntoView({ behavior: 'smooth' });
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navSlide(1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   navSlide(-1);
+});
+
+updateUI();
+</script>
+```
+
+---
+
+### T2 · SVG arrowhead marker
+
+```html
+<svg width="600" height="300" viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- solid arrow (sync / required) -->
+    <marker id="arrow" markerWidth="10" markerHeight="7"
+            refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6b6a63"/>
+    </marker>
+    <!-- dashed arrow (async / optional) -->
+    <marker id="arrow-dashed" markerWidth="10" markerHeight="7"
+            refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#a09f97"/>
+    </marker>
+  </defs>
+
+  <!-- Solid connection -->
+  <line x1="100" y1="150" x2="280" y2="150"
+        stroke="#6b6a63" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Dashed connection (async) -->
+  <line x1="320" y1="150" x2="500" y2="150"
+        stroke="#a09f97" stroke-width="1.5" stroke-dasharray="5,4"
+        marker-end="url(#arrow-dashed)"/>
+
+  <!-- Box -->
+  <rect x="20" y="120" width="80" height="40" rx="6"
+        fill="#ffffff" stroke="#dedad2" stroke-width="1.5"/>
+  <text x="60" y="145" text-anchor="middle" font-size="12" fill="#1a1a18">Service A</text>
+</svg>
+```
+
+---
+
+### T3 · HTML5 drag-and-drop (Kanban columns)
+
+```html
+<div class="board" style="display:flex;gap:var(--space-4);">
+  <div class="column" data-col="backlog">
+    <h3>Backlog <span class="count">0</span></h3>
+    <div class="drop-zone"></div>
+  </div>
+  <div class="column" data-col="in-progress">
+    <h3>In Progress <span class="count">0</span></h3>
+    <div class="drop-zone"></div>
+  </div>
+  <div class="column" data-col="done">
+    <h3>Done <span class="count">0</span></h3>
+    <div class="drop-zone"></div>
+  </div>
+</div>
+
+<style>
+.card { cursor: grab; padding: var(--space-3); background: var(--color-bg-card);
+        border: 1px solid var(--color-border); border-radius: var(--radius-md);
+        margin-bottom: var(--space-2); transition: opacity 150ms ease; }
+.card.dragging { opacity: 0.4; cursor: grabbing; }
+.drop-zone.drag-over { background: var(--color-accent-soft);
+                        border: 2px dashed var(--color-accent); border-radius: var(--radius-md); }
+</style>
+
+<script>
+let dragCard = null;
+
+document.querySelectorAll('.drop-zone').forEach(zone => {
+  zone.addEventListener('dragover', e => {
+    e.preventDefault();                        // must preventDefault to allow drop
+    zone.classList.add('drag-over');
+  });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    if (dragCard) { zone.appendChild(dragCard); updateCounts(); }
+  });
+});
+
+function makeCard(text, priority = 'normal') {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.draggable = true;
+  card.innerHTML = `<span>${text}</span>`;
+  card.addEventListener('dragstart', () => { dragCard = card; card.classList.add('dragging'); });
+  card.addEventListener('dragend',   () => { dragCard = null; card.classList.remove('dragging'); });
+  return card;
+}
+
+function updateCounts() {
+  document.querySelectorAll('.column').forEach(col => {
+    col.querySelector('.count').textContent = col.querySelectorAll('.card').length;
+  });
+}
+</script>
+```
+
+---
+
+### T4 · Clipboard with execCommand fallback
+
+```js
+function copyToClipboard(text, btn) {
+  const restore = btn.textContent;
+  const flash = ok => {
+    btn.textContent = ok ? 'Copied ✓' : 'Failed';
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = restore; btn.disabled = false; }, 1500);
+  };
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => flash(true)).catch(() => fallback());
+  } else {
+    fallback();
+  }
+
+  function fallback() {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { flash(document.execCommand('copy')); }
+    catch { flash(false); }
+    document.body.removeChild(ta);
+  }
+}
+```
+
+---
+
+### T5 · CSS toggle switch
+
+```html
+<label class="toggle">
+  <input type="checkbox" class="toggle-input">
+  <span class="toggle-track">
+    <span class="toggle-thumb"></span>
+  </span>
+  <span class="toggle-label">Enable feature</span>
+</label>
+
+<style>
+.toggle { display:flex; align-items:center; gap:var(--space-3); cursor:pointer; }
+.toggle-input { position:absolute; opacity:0; width:0; height:0; }
+.toggle-track {
+  position:relative; width:40px; height:22px; border-radius:11px;
+  background:#c8c7be; transition:background 140ms ease; flex-shrink:0;
+}
+.toggle-input:checked + .toggle-track { background:var(--color-accent); }
+.toggle-thumb {
+  position:absolute; top:3px; left:3px;
+  width:16px; height:16px; border-radius:50%;
+  background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.2);
+  transition:transform 140ms ease;
+}
+.toggle-input:checked + .toggle-track .toggle-thumb { transform:translateX(18px); }
+.toggle-input:focus-visible + .toggle-track { outline:2px solid var(--color-accent); outline-offset:2px; }
+</style>
+```
+
+---
+
+### T6 · contenteditable prompt editor with slot highlighting
+
+```html
+<div id="editor" contenteditable="true" spellcheck="false"
+     style="font-family:var(--font-mono);min-height:160px;padding:var(--space-4);
+            border:1px solid var(--color-border);border-radius:var(--radius-md);
+            outline:none;white-space:pre-wrap;line-height:1.7;">
+</div>
+
+<script>
+const editor = document.getElementById('editor');
+const SLOT_RE = /\{\{([^}]+)\}\}/g;
+let raf = null;
+
+// Extract plain text (handles browser-injected <div>/<br> on Enter)
+function getPlainText(el) {
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+  let text = '', node;
+  while ((node = walker.nextNode())) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      text += node.textContent;
+    } else if (node.nodeName === 'BR' || (node.nodeName === 'DIV' && text)) {
+      text += '\n';
+    }
+  }
+  return text;
+}
+
+// Save and restore caret position by character offset
+function getCaretOffset(el) {
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return 0;
+  const range = sel.getRangeAt(0).cloneRange();
+  range.selectNodeContents(el);
+  range.setEnd(sel.getRangeAt(0).endContainer, sel.getRangeAt(0).endOffset);
+  return range.toString().length;
+}
+
+function setCaretOffset(el, offset) {
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  let remaining = offset, node;
+  while ((node = walker.nextNode())) {
+    if (remaining <= node.textContent.length) {
+      const range = document.createRange();
+      range.setStart(node, remaining);
+      range.collapse(true);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      return;
+    }
+    remaining -= node.textContent.length;
+  }
+}
+
+function highlight() {
+  const offset = getCaretOffset(editor);
+  const text = getPlainText(editor);
+
+  // Build highlighted HTML
+  let html = '', last = 0;
+  SLOT_RE.lastIndex = 0;
+  let m;
+  while ((m = SLOT_RE.exec(text)) !== null) {
+    html += escHtml(text.slice(last, m.index));
+    html += `<span style="background:#f0ead8;border-radius:3px;padding:0 2px;">\{\{${escHtml(m[1])}\}\}</span>`;
+    last = m.index + m[0].length;
+  }
+  html += escHtml(text.slice(last));
+
+  editor.innerHTML = html;
+  setCaretOffset(editor, offset);
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+editor.addEventListener('input', () => {
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(highlight);
+});
+
+// Paste as plain text only
+editor.addEventListener('paste', e => {
+  e.preventDefault();
+  const text = e.clipboardData.getData('text/plain');
+  document.execCommand('insertText', false, text);
+});
+
+// Insert real newline on Enter (prevent nested divs)
+editor.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    document.execCommand('insertText', false, '\n');
+  }
+});
+</script>
+```
+
+---
+
+### T7 · SVG download button
+
+```js
+function downloadSVG(svgId, filename) {
+  const svg = document.getElementById(svgId);
+  const serializer = new XMLSerializer();
+  const svgStr = '<?xml version="1.0" encoding="utf-8"?>\n' + serializer.serializeToString(svg);
+  const blob = new Blob([svgStr], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename || 'diagram.svg';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+```
+
+```html
+<button onclick="downloadSVG('my-diagram', 'architecture.svg')"
+        style="display:inline-flex;align-items:center;gap:var(--space-2);...">
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M8 2v8M5 7l3 3 3-3M2 12h12" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  Download SVG
+</button>
+```
+
+---
+
 ## Argument passing
 
 The text after the sub-command is passed to Claude as the content or context to work with.
