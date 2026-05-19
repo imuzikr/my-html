@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 시대, 문제해결 역량이 중요한 이유</title>
+  <meta name="description" content="AI가 구현 비용을 낮춘 시대에 왜 문제 정의력, 도메인 이해, 판단의 기록이 더 중요한 경쟁력이 되는지 설명하는 글.">
+  <style>
+    :root {
+      --color-bg: #f5f2ed;
+      --color-bg-alt: #eceae4;
+      --color-bg-card: #ffffff;
+      --color-bg-code: #1e1e1e;
+      --color-text: #1a1a18;
+      --color-text-muted: #6b6a63;
+      --color-text-faint: #a09f97;
+      --color-border: #dedad2;
+      --color-border-strong: #b8b5ac;
+      --color-accent: #d95f2b;
+      --color-accent-hover: #c2521f;
+      --color-accent-soft: #faeee7;
+      --color-green: #3a6b4a;
+      --color-green-soft: #e6f0e9;
+      --color-blue: #2d5a8e;
+      --color-blue-soft: #e5eef7;
+      --color-yellow: #8a6a00;
+      --color-yellow-soft: #fdf5d9;
+      --color-red: #b03a2e;
+      --color-red-soft: #fdecea;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --font-mono: "SF Mono", "Fira Code", "Cascadia Code", Consolas, "Liberation Mono", monospace;
+      --text-xs: 0.75rem;
+      --text-sm: 0.875rem;
+      --text-base: 1rem;
+      --text-lg: 1.125rem;
+      --text-xl: 1.25rem;
+      --text-2xl: 1.5rem;
+      --text-3xl: 1.875rem;
+      --text-4xl: 2.25rem;
+      --weight-normal: 400;
+      --weight-medium: 500;
+      --weight-semibold: 600;
+      --weight-bold: 700;
+      --leading-tight: 1.25;
+      --leading-snug: 1.4;
+      --leading-normal: 1.6;
+      --leading-loose: 1.8;
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.25rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --space-10: 2.5rem;
+      --space-12: 3rem;
+      --space-16: 4rem;
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --radius-full: 9999px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+      --shadow-lg: 0 10px 28px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.05);
+      --transition-fast: 100ms ease;
+      --transition-base: 180ms ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-family: var(--font-sans);
+      font-size: var(--text-base);
+      line-height: var(--leading-normal);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--color-accent); text-decoration: none; }
+    a:hover { color: var(--color-accent-hover); text-decoration: underline; }
+    strong { color: var(--color-text); font-weight: var(--weight-semibold); }
+    mark {
+      background: var(--color-accent-soft);
+      color: var(--color-accent-hover);
+      padding: 0 var(--space-1);
+      border-radius: var(--radius-sm);
+    }
+    .page {
+      min-height: 100vh;
+    }
+    .progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 3px;
+      background: var(--color-accent);
+      z-index: 50;
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(245, 242, 237, 0.95);
+      border-bottom: 1px solid var(--color-border);
+      backdrop-filter: blur(10px);
+    }
+    .topbar-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: var(--space-3) var(--space-6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      color: var(--color-text);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-semibold);
+      white-space: nowrap;
+    }
+    .brand-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-md);
+      background: var(--color-accent);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: var(--weight-bold);
+    }
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      font-size: var(--text-sm);
+    }
+    .nav a { color: var(--color-text-muted); }
+    .nav a:hover { color: var(--color-accent); text-decoration: none; }
+    .hero {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: var(--space-16) var(--space-6) var(--space-12);
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
+      gap: var(--space-10);
+      align-items: center;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin-bottom: var(--space-4);
+      color: var(--color-accent);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-semibold);
+    }
+    .eyebrow::before {
+      content: "";
+      width: 28px;
+      height: 2px;
+      background: var(--color-accent);
+      border-radius: var(--radius-full);
+    }
+    h1 {
+      max-width: 12ch;
+      color: var(--color-text);
+      font-size: var(--text-4xl);
+      line-height: var(--leading-tight);
+      letter-spacing: 0;
+      font-weight: var(--weight-bold);
+      margin-bottom: var(--space-5);
+    }
+    .lede {
+      max-width: 58ch;
+      color: var(--color-text-muted);
+      font-size: var(--text-lg);
+      line-height: var(--leading-loose);
+    }
+    .quote-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-left: 5px solid var(--color-accent);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      box-shadow: var(--shadow-md);
+    }
+    .quote-label {
+      color: var(--color-text-faint);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: var(--space-3);
+    }
+    .quote-card blockquote {
+      color: var(--color-text);
+      font-size: var(--text-xl);
+      font-weight: var(--weight-semibold);
+      line-height: var(--leading-snug);
+    }
+    .content {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 var(--space-6) var(--space-16);
+    }
+    .section {
+      margin-bottom: var(--space-16);
+      scroll-margin-top: var(--space-16);
+    }
+    .section-header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+      padding-bottom: var(--space-4);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .section-kicker {
+      color: var(--color-accent);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: var(--space-2);
+    }
+    h2 {
+      color: var(--color-text);
+      font-size: var(--text-2xl);
+      line-height: var(--leading-tight);
+      font-weight: var(--weight-semibold);
+    }
+    h3 {
+      color: var(--color-text);
+      font-size: var(--text-xl);
+      line-height: var(--leading-snug);
+      font-weight: var(--weight-semibold);
+      margin-bottom: var(--space-3);
+    }
+    p {
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-4);
+    }
+    p:last-child { margin-bottom: 0; }
+    .alert {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: var(--space-4);
+      align-items: start;
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: var(--space-5);
+    }
+    .alert-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .alert-title {
+      color: var(--color-text);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-semibold);
+      margin-bottom: var(--space-1);
+    }
+    .alert-body {
+      color: var(--color-text-muted);
+      font-size: var(--text-base);
+      line-height: var(--leading-normal);
+    }
+    .alert-warning { border-left: 4px solid var(--color-yellow); }
+    .alert-warning .alert-icon { background: var(--color-yellow-soft); color: var(--color-yellow); }
+    .alert-info { border-left: 4px solid var(--color-blue); }
+    .alert-info .alert-icon { background: var(--color-blue-soft); color: var(--color-blue); }
+    .alert-success { border-left: 4px solid var(--color-green); }
+    .alert-success .alert-icon { background: var(--color-green-soft); color: var(--color-green); }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-4);
+      margin-bottom: var(--space-8);
+    }
+    .stat-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-label {
+      color: var(--color-text-faint);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: var(--space-2);
+    }
+    .stat-value {
+      color: var(--color-text);
+      font-size: var(--text-2xl);
+      font-weight: var(--weight-bold);
+      line-height: var(--leading-tight);
+      margin-bottom: var(--space-2);
+    }
+    .stat-desc {
+      color: var(--color-text-muted);
+      font-size: var(--text-sm);
+      line-height: var(--leading-normal);
+    }
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      background: var(--color-bg-card);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--text-sm);
+      min-width: 720px;
+    }
+    thead tr {
+      background: var(--color-bg-alt);
+      border-bottom: 1px solid var(--color-border);
+    }
+    th {
+      padding: var(--space-3) var(--space-4);
+      text-align: left;
+      color: var(--color-text-faint);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+    td {
+      padding: var(--space-4);
+      color: var(--color-text-muted);
+      border-bottom: 1px solid var(--color-border);
+      vertical-align: top;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--color-bg); }
+    td strong { display: inline-block; margin-bottom: var(--space-1); }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-4);
+    }
+    .card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      box-shadow: var(--shadow-sm);
+    }
+    .card p { font-size: var(--text-sm); }
+    .example-list {
+      list-style: none;
+      display: grid;
+      gap: var(--space-3);
+    }
+    .example-list li {
+      position: relative;
+      padding-left: var(--space-6);
+      color: var(--color-text-muted);
+    }
+    .example-list li::before {
+      content: "";
+      position: absolute;
+      top: 0.7em;
+      left: 0;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-accent);
+    }
+    .tabs {
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      gap: 0;
+      margin-bottom: var(--space-6);
+      overflow-x: auto;
+    }
+    .tab-btn {
+      min-height: 44px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: var(--space-3) var(--space-4);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      white-space: nowrap;
+      transition: color var(--transition-base), border-color var(--transition-base);
+    }
+    .tab-btn:hover { color: var(--color-text); }
+    .tab-btn.active {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .comparison {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-4);
+    }
+    .before { border-left: 4px solid var(--color-red); }
+    .after { border-left: 4px solid var(--color-green); }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: 2px var(--space-2);
+      border-radius: var(--radius-full);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-semibold);
+      line-height: 1.4;
+      margin-bottom: var(--space-3);
+    }
+    .badge-red { background: var(--color-red-soft); color: var(--color-red); }
+    .badge-green { background: var(--color-green-soft); color: var(--color-green); }
+    .badge-blue { background: var(--color-blue-soft); color: var(--color-blue); }
+    .badge-accent { background: var(--color-accent-soft); color: var(--color-accent); }
+    .decision-list {
+      list-style: none;
+      display: grid;
+      gap: var(--space-3);
+    }
+    .decision-list li {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-3) var(--space-4);
+      color: var(--color-text-muted);
+      font-size: var(--text-sm);
+    }
+    .checklist {
+      display: grid;
+      gap: var(--space-4);
+      counter-reset: steps;
+    }
+    .check-item {
+      position: relative;
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5) var(--space-5) var(--space-5) var(--space-12);
+      box-shadow: var(--shadow-sm);
+      counter-increment: steps;
+    }
+    .check-item::before {
+      content: counter(steps);
+      position: absolute;
+      left: var(--space-5);
+      top: var(--space-5);
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-full);
+      background: var(--color-accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--text-sm);
+      font-weight: var(--weight-bold);
+    }
+    .check-item h3 {
+      font-size: var(--text-lg);
+      margin-bottom: var(--space-2);
+    }
+    .diagram-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      box-shadow: var(--shadow-sm);
+    }
+    .diagram-card svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .summary {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
+      box-shadow: var(--shadow-md);
+    }
+    .summary ul {
+      list-style: none;
+      display: grid;
+      gap: var(--space-3);
+      margin-top: var(--space-4);
+    }
+    .summary li {
+      position: relative;
+      padding-left: var(--space-6);
+      color: var(--color-text-muted);
+    }
+    .summary li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.65em;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--color-green);
+    }
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      margin-top: var(--space-5);
+    }
+    .link-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: var(--space-2) var(--space-4);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-full);
+      background: var(--color-bg);
+      color: var(--color-text-muted);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+    }
+    .link-pill:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+      text-decoration: none;
+    }
+    footer {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: var(--space-8) var(--space-6);
+      border-top: 1px solid var(--color-border);
+      color: var(--color-text-faint);
+      font-size: var(--text-sm);
+    }
+    @media (max-width: 900px) {
+      .hero,
+      .grid-2,
+      .comparison,
+      .stats {
+        grid-template-columns: 1fr;
+      }
+      h1 { max-width: 16ch; }
+      .nav { display: none; }
+    }
+    @media (max-width: 600px) {
+      .topbar-inner,
+      .hero,
+      .content,
+      footer {
+        padding-left: var(--space-4);
+        padding-right: var(--space-4);
+      }
+      .hero {
+        padding-top: var(--space-10);
+      }
+      h1 { font-size: var(--text-3xl); }
+      .section-header {
+        align-items: start;
+        flex-direction: column;
+      }
+      .alert {
+        grid-template-columns: 1fr;
+      }
+      .check-item {
+        padding-left: var(--space-5);
+        padding-top: var(--space-12);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress" id="progress"></div>
+  <div class="page">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="../index.html" aria-label="HTML Library index">
+          <span class="brand-mark">AI</span>
+          <span>Problem Solving</span>
+        </a>
+        <nav class="nav" aria-label="문서 섹션">
+          <a href="#shift">전환</a>
+          <a href="#definition">문제 정의</a>
+          <a href="#thinking">사고 과정</a>
+          <a href="#education">교육</a>
+          <a href="#summary">요약</a>
+        </nav>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <div class="eyebrow">AI 시대의 경쟁력</div>
+        <h1>AI 시대, 문제해결 역량이 중요한 이유</h1>
+        <p class="lede">
+          AI가 구현의 비용을 낮춘 지금, 차별화는 더 많은 기능을 빠르게 만드는 능력에서
+          <mark>문제를 정의하고 판단을 설명하는 능력</mark>으로 이동하고 있다.
+        </p>
+      </div>
+      <aside class="quote-card" aria-label="핵심 메시지">
+        <div class="quote-label">Core Message</div>
+        <blockquote>
+          "결국 살아남는 사람은 구현에 머무는 사람이 아니라,
+          문제를 정의하고 해결하는 사람이다."
+        </blockquote>
+      </aside>
+    </section>
+
+    <main class="content">
+      <section class="section" id="background">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">Background</div>
+            <h2>코드는 넘치는데 왜 경쟁력은 떨어질까?</h2>
+          </div>
+        </div>
+        <div class="alert alert-warning">
+          <div class="alert-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+              <path d="M12 3l9 16H3L12 3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M12 9v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="12" cy="17" r="1" fill="currentColor"/>
+            </svg>
+          </div>
+          <div>
+            <div class="alert-title">역설적 현상</div>
+            <div class="alert-body">
+              프로젝트는 많아졌는데 서류 합격률은 떨어진다. 기능은 많지만 문제는 흐릿하고,
+              기술은 다양하지만 판단은 보이지 않는 상태가 반복된다.
+            </div>
+          </div>
+        </div>
+        <p>
+          AI 도구의 발전으로 누구나 빠르게 코드를 작성하고 프로젝트를 완성할 수 있게 되었다.
+          하지만 실행의 비용이 낮아질수록 더 희소해지는 역량이 있다. 바로
+          <strong>무엇을 만들 것인지, 왜 만들어야 하는지, 어떤 맥락에서 가치가 있는지</strong>를
+          판단하는 능력이다.
+        </p>
+      </section>
+
+      <section class="section" id="shift">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">Core Shift</div>
+            <h2>구현력에서 문제 정의력으로</h2>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat-card">
+            <div class="stat-label">역량의 중심</div>
+            <div class="stat-value">구현에서 정의로</div>
+            <div class="stat-desc">코드 작성보다 진짜 문제를 식별하는 능력이 더 큰 차이를 만든다.</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">평가의 기준</div>
+            <div class="stat-value">결과에서 판단으로</div>
+            <div class="stat-desc">무엇을 만들었는가보다 왜 그렇게 설계했는지가 중요해진다.</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">희소한 자원</div>
+            <div class="stat-value">맥락 이해</div>
+            <div class="stat-desc">도메인, 사용자, 팀의 제약을 함께 보는 사람이 더 설득력 있다.</div>
+          </div>
+        </div>
+
+        <div class="table-wrap" role="region" aria-label="AI 이전과 이후 역량 비교" tabindex="0">
+          <table>
+            <thead>
+              <tr>
+                <th>구분</th>
+                <th>AI 이전</th>
+                <th>AI 이후</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>핵심 역량</strong></td>
+                <td>코드 작성 능력</td>
+                <td>문제 정의 능력</td>
+              </tr>
+              <tr>
+                <td><strong>평가 기준</strong></td>
+                <td>무엇을 만들었는가</td>
+                <td>왜 만들었는가</td>
+              </tr>
+              <tr>
+                <td><strong>경쟁 우위</strong></td>
+                <td>구현 속도와 정확성</td>
+                <td>판단력과 맥락 이해</td>
+              </tr>
+              <tr>
+                <td><strong>희소성</strong></td>
+                <td>기술 숙련도</td>
+                <td>도메인 이해와 사고 과정</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="definition">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">Problem Definition</div>
+            <h2>문제 정의력이란 무엇인가?</h2>
+          </div>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="문제 정의 설명">
+          <button class="tab-btn active" onclick="switchTab(this, 'tab-what')" type="button">무엇을 풀 것인가</button>
+          <button class="tab-btn" onclick="switchTab(this, 'tab-domain')" type="button">도메인 현실감</button>
+          <button class="tab-btn" onclick="switchTab(this, 'tab-ai')" type="button">AI와 협업하기</button>
+        </div>
+
+        <div class="tab-panel active" id="tab-what">
+          <div class="grid-2">
+            <div class="card">
+              <h3>"어떻게"보다 먼저 오는 질문</h3>
+              <p>
+                실무에서 가장 어려운 질문은 "어떻게 만들지?"가 아니라
+                <strong>"무엇을 풀어야 하지?"</strong>이다. 구현 방법은 AI가 빠르게 제안할 수 있지만,
+                문제의 우선순위와 맥락은 사람이 붙잡아야 한다.
+              </p>
+            </div>
+            <div class="card">
+              <h3>스터디 모집 서비스 예시</h3>
+              <ul class="example-list">
+                <li>사람들은 모집글을 꼼꼼히 읽을까?</li>
+                <li>신청만 하고 잠수 타는 경우는 없을까?</li>
+                <li>모집자와 지원자의 기대가 다를 때 어떤 문제가 생길까?</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="tab-domain">
+          <div class="alert alert-info">
+            <div class="alert-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 7v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="alert-title">도메인 이해력은 현실감이다</div>
+              <div class="alert-body">
+                박사급 전문지식보다 중요한 것은 "이 서비스가 현실에서 어떻게 작동할까?"를
+                끝까지 묻는 태도다. 실제 사용자 반응은 상상 속 문제와 현실 문제의 차이를 보여준다.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="tab-ai">
+          <div class="diagram-card">
+            <svg viewBox="0 0 760 240" role="img" aria-label="AI 시대 문제 해결 흐름">
+              <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M0 0l10 5-10 5z" fill="#6b6a63"/>
+                </marker>
+              </defs>
+              <rect x="30" y="56" width="170" height="100" rx="10" fill="#faeee7" stroke="#d95f2b"/>
+              <text x="115" y="96" text-anchor="middle" font-size="17" font-weight="700" fill="#1a1a18">문제 정의</text>
+              <text x="115" y="124" text-anchor="middle" font-size="13" fill="#6b6a63">사용자, 맥락, 제약</text>
+              <line x1="205" y1="106" x2="278" y2="106" stroke="#6b6a63" stroke-width="2" marker-end="url(#arrow)"/>
+              <rect x="285" y="56" width="170" height="100" rx="10" fill="#e5eef7" stroke="#2d5a8e"/>
+              <text x="370" y="96" text-anchor="middle" font-size="17" font-weight="700" fill="#1a1a18">기술 선택</text>
+              <text x="370" y="124" text-anchor="middle" font-size="13" fill="#6b6a63">도구, 구조, 절충</text>
+              <line x1="460" y1="106" x2="533" y2="106" stroke="#6b6a63" stroke-width="2" marker-end="url(#arrow)"/>
+              <rect x="540" y="56" width="170" height="100" rx="10" fill="#e6f0e9" stroke="#3a6b4a"/>
+              <text x="625" y="96" text-anchor="middle" font-size="17" font-weight="700" fill="#1a1a18">가치 설명</text>
+              <text x="625" y="124" text-anchor="middle" font-size="13" fill="#6b6a63">비즈니스와 결과</text>
+              <path d="M625 170C625 212 115 212 115 170" fill="none" stroke="#b8b5ac" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#arrow)"/>
+              <text x="370" y="226" text-anchor="middle" font-size="13" fill="#6b6a63">사용자 반응과 데이터로 다시 문제를 조정한다</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="thinking">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">Thinking Trace</div>
+            <h2>사고 과정을 드러내는 법</h2>
+          </div>
+        </div>
+
+        <div class="comparison">
+          <div class="card before">
+            <span class="badge badge-red">Before</span>
+            <h3>기술 나열</h3>
+            <ul class="decision-list">
+              <li>Redis 적용</li>
+              <li>Docker 배포</li>
+              <li>JWT 로그인 구현</li>
+            </ul>
+          </div>
+          <div class="card after">
+            <span class="badge badge-green">After</span>
+            <h3>문제 맥락과 판단</h3>
+            <ul class="decision-list">
+              <li>잦은 조회가 발생하는 인기 게시글 응답 속도 개선을 위해 Redis 캐시 적용</li>
+              <li>팀원 간 개발환경 차이를 줄이기 위해 Docker 기반 배포 구성</li>
+              <li>확장성을 고려해 JWT 기반 로그인 구조 설계</li>
+            </ul>
+          </div>
+        </div>
+        <p style="margin-top: var(--space-5);">
+          차이는 분량이 아니다. 같은 기술이라도 <strong>"왜 이 기술을 선택했는가"</strong>라는
+          맥락이 한 줄에 담기면 프로젝트는 기능 목록이 아니라 판단의 기록이 된다.
+        </p>
+      </section>
+
+      <section class="section" id="education">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">Education</div>
+            <h2>AI 시대의 교육은 무엇을 가르쳐야 하는가?</h2>
+          </div>
+        </div>
+
+        <div class="diagram-card" style="margin-bottom: var(--space-6);">
+          <svg viewBox="0 0 760 210" role="img" aria-label="교육 초점 변화">
+            <defs>
+              <marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M0 0l10 5-10 5z" fill="#6b6a63"/>
+              </marker>
+            </defs>
+            <rect x="35" y="55" width="190" height="90" rx="10" fill="#eceae4" stroke="#b8b5ac"/>
+            <text x="130" y="94" text-anchor="middle" font-size="17" font-weight="700" fill="#1a1a18">과거</text>
+            <text x="130" y="120" text-anchor="middle" font-size="14" fill="#6b6a63">문법과 구현</text>
+            <line x1="235" y1="100" x2="295" y2="100" stroke="#6b6a63" stroke-width="2" marker-end="url(#arrow2)"/>
+            <rect x="305" y="55" width="190" height="90" rx="10" fill="#e5eef7" stroke="#2d5a8e"/>
+            <text x="400" y="94" text-anchor="middle" font-size="17" font-weight="700" fill="#1a1a18">현재</text>
+            <text x="400" y="120" text-anchor="middle" font-size="14" fill="#6b6a63">도구 활용</text>
+            <line x1="505" y1="100" x2="565" y2="100" stroke="#6b6a63" stroke-width="2" marker-end="url(#arrow2)"/>
+            <rect x="575" y="55" width="150" height="90" rx="10" fill="#e6f0e9" stroke="#3a6b4a"/>
+            <text x="650" y="94" text-anchor="middle" font-size="17" font-weight="700" fill="#1a1a18">미래</text>
+            <text x="650" y="120" text-anchor="middle" font-size="14" fill="#6b6a63">문제 정의</text>
+          </svg>
+        </div>
+
+        <div class="alert alert-success">
+          <div class="alert-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+              <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="alert-title">교육의 핵심 전환</div>
+            <div class="alert-body">
+              코드를 정확히 작성하는 법에서 문제를 명확히 정의하는 법으로, 기술 스택 숙련에서
+              적절한 기술을 선택하는 판단력으로, 혼자 완성하는 능력에서 현실의 맥락을 이해하고
+              소통하는 능력으로 초점이 이동해야 한다.
+            </div>
+          </div>
+        </div>
+
+        <div class="checklist">
+          <div class="check-item">
+            <h3>질문 먼저, 구현은 나중에</h3>
+            <p>프로젝트를 시작할 때 "왜?"를 세 번 이상 묻고 사용자의 진짜 불편함을 정의한다.</p>
+          </div>
+          <div class="check-item">
+            <h3>현실 검증 습관화</h3>
+            <p>만든 것을 실제 사용자에게 보여주고, 상상한 문제와 현실의 차이를 기록한다.</p>
+          </div>
+          <div class="check-item">
+            <h3>판단을 기록하기</h3>
+            <p>기술 선택의 이유와 트레이드오프를 문서화해 프로젝트의 사고 과정을 남긴다.</p>
+          </div>
+          <div class="check-item">
+            <h3>도메인에 호기심 갖기</h3>
+            <p>서비스의 현실 운영 방식, 사용자 불편, 팀 자원, 우선순위를 함께 고려한다.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="summary">
+        <div class="summary">
+          <span class="badge badge-accent">핵심 요약</span>
+          <h2>희소해질 능력에 투자하라</h2>
+          <p>
+            AI가 코드 작성의 진입장벽을 낮춘 시대에 구현 능력은 점점 흔해지고,
+            문제 정의 능력은 점점 희소해진다. 앞으로 가치 있는 사람은 문제를 정의하고,
+            기술적으로 풀어내고, 비즈니스 관점에서 설명할 수 있는 사람이다.
+          </p>
+          <ul>
+            <li>많이 만드는 것보다 왜 만들어야 하는지 설명할 수 있어야 한다.</li>
+            <li>기술 목록보다 문제 맥락과 선택의 이유가 경쟁력이 된다.</li>
+            <li>AI를 잘 쓰는 사람은 구현을 맡기는 데서 멈추지 않고 판단을 더 선명하게 만든다.</li>
+          </ul>
+          <div class="footer-links" aria-label="관련 문서와 참고 자료">
+            <a class="link-pill" href="#">바이브 코딩 입문 커리큘럼</a>
+            <a class="link-pill" href="#">프롬프트 엔지니어링 기초</a>
+            <a class="link-pill" href="#">AI 시대의 교육 방향</a>
+            <a class="link-pill" href="https://yozm.wishket.com/magazine/detail/3694/">요즘IT 참고 자료</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Generated for HTML Library · 2026-05-19</span>
+    </footer>
+  </div>
+
+  <script>
+    function switchTab(btn, panelId) {
+      const section = btn.closest(".section");
+      section.querySelectorAll(".tab-btn").forEach((tab) => tab.classList.remove("active"));
+      section.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById(panelId).classList.add("active");
+    }
+
+    function updateProgress() {
+      const progress = document.getElementById("progress");
+      const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const percent = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+      progress.style.width = percent + "%";
+    }
+
+    document.addEventListener("scroll", updateProgress, { passive: true });
+    updateProgress();
+  </script>
+
+<!-- Back to index -->
+<a id="back-to-index" href="../index.html" aria-label="목록으로 돌아가기" title="목록으로"><svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M8.5 15L3 10l5.5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10h14" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></a>
+<style>
+#back-to-index{position:fixed;bottom:1.5rem;left:1.5rem;width:44px;height:44px;background:#6b6a63;color:#fff;border-radius:9999px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.18);transition:background .15s,transform .15s;z-index:800;}
+#back-to-index:hover{background:#d95f2b;transform:translateX(-2px);}
+@media(max-width:600px){#back-to-index{bottom:1rem;left:1rem;}}
+</style>
+</body>
+</html>

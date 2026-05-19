@@ -65,7 +65,7 @@ def collect_files():
         if folder.startswith("."):
             continue
         folders.setdefault(folder, []).append({
-            "path": str(rel),
+            "path": rel.as_posix(),
             "title": get_title(html),
             "description": get_description(html),
             "date": get_date(html),
