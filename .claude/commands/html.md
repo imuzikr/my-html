@@ -243,14 +243,16 @@ Filename format: `YYYY-MM-DD-<slug>.html`
 - Use today's date
 - Derive a short kebab-case slug from the title (e.g. `2026-05-18-oauth-pkce.html`)
 
-### 2. Ask before pushing
+### 2. Review before publishing
 
-After saving the file, **always ask the user** before committing and pushing:
+After saving the file, **do not commit or push immediately**. First give the user the generated file path and a concrete way to review it, such as a local file path, preview URL, or screenshot if available.
+
+Ask for explicit approval before committing and pushing:
 
 > 파일이 저장되었습니다: `articles/YYYY-MM-DD-slug.html`
-> main에 푸시하여 배포할까요?
+> 먼저 내용을 확인해 주세요. 확인 후 배포하려면 "푸시해 주세요", "배포해 주세요", or "승인합니다"라고 답해 주세요.
 
-Only if the user confirms, run:
+Only if the user explicitly approves publishing, run:
 
 ```bash
 git add <file-path>
@@ -258,5 +260,7 @@ git commit -m "Add article: <title>"
 git push origin HEAD:main
 ```
 
+- Do not treat "make an HTML file" as approval to publish.
+- Treat "make and deploy", "push it", "배포해 주세요", "푸시해 주세요", or "승인합니다" as publishing approval only after the generated result has been presented for review in the current turn.
 - Use `git push origin HEAD:main` so the push goes to main regardless of the current branch
 - After a successful push, GitHub Actions will automatically regenerate `index.html` and deploy to GitHub Pages
