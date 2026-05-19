@@ -225,7 +225,7 @@ The text after the sub-command is passed to Claude as the content or context to 
 
 ## After generating the file
 
-Once the HTML file has been written to disk, always run these steps automatically without asking:
+Once the HTML file has been written to disk:
 
 ### 1. Determine the save path
 
@@ -243,7 +243,14 @@ Filename format: `YYYY-MM-DD-<slug>.html`
 - Use today's date
 - Derive a short kebab-case slug from the title (e.g. `2026-05-18-oauth-pkce.html`)
 
-### 2. Commit and push to main
+### 2. Ask before pushing
+
+After saving the file, **always ask the user** before committing and pushing:
+
+> 파일이 저장되었습니다: `articles/YYYY-MM-DD-slug.html`
+> main에 푸시하여 배포할까요?
+
+Only if the user confirms, run:
 
 ```bash
 git add <file-path>
