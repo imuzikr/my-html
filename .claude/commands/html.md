@@ -15,12 +15,18 @@ Generate a polished, self-contained HTML file instead of a Markdown response. Us
 **Examples:**
 
 ```
+/html article 온톨로지란 무엇인가
 /html spec add real-time collaboration to the document editor
 /html review src/auth/session.ts
 /html report Q2 infrastructure incidents
 /html explore pagination strategies for the feed API
 /html editor write a system prompt for a customer support bot
 /html explain how our rate limiter works
+/html slide intro to distributed systems
+/html diagram microservices architecture overview
+/html plan implement OAuth 2.0 PKCE in 4 slices
+/html pr feat/realtime-comments #142
+/html prototype kanban board for task triage
 ```
 
 If no sub-command is given, choose the most appropriate one based on the content, or default to `report`.
@@ -28,6 +34,24 @@ If no sub-command is given, choose the most appropriate one based on the content
 ---
 
 ## Sub-commands
+
+### `article`
+**Write a long-form educational article**
+
+Produce a full-length HTML article on a concept, technology, or topic. Include:
+- A hero section with title, one-sentence lead, and `<meta name="description">` tag for index card previews
+- Sticky nav / progress bar that tracks scroll position
+- Numbered sections with clear headings and body text
+- SVG diagrams or illustrations for key concepts — no ASCII art
+- Annotated code examples where relevant
+- A summary or "key takeaways" section at the end
+- `<meta property="og:image">` if a visual thumbnail is appropriate
+
+Filename: `articles/YYYY-MM-DD-<slug>.html`
+
+**Example usage:** `/html article 온톨로지란 무엇인가`
+
+---
 
 ### `spec`
 **Generate a specification / plan document**
@@ -102,9 +126,16 @@ Produce a self-contained HTML interactive editor/tool. Include:
 - The main interactive area: a `<textarea>` or structured form inputs depending on the use case
 - Live preview or output panel where appropriate
 - All logic inline in `<script>` tags — no external dependencies
-- The "Copy as prompt" button should assemble a well-structured prompt from the current editor state and copy it to the clipboard, showing a brief "Copied!" confirmation
+- The "Copy as prompt" button assembles a well-structured prompt from the current editor state and copies it to the clipboard, showing a brief "Copied!" confirmation
 - A reset button
 - Mobile-friendly layout (single column on narrow screens)
+
+Advanced editor patterns (apply when relevant):
+- **Contenteditable + slot highlighting**: for prompt template editors, use a `contenteditable` div with `<span>` overlays to highlight `{{variable}}` placeholders in real time; preserve caret position across re-renders; use `TreeWalker` to extract clean text
+- **Toggle switches**: for feature-flag or settings editors, use animated CSS toggle switches (track + animated thumb) with `transition: background 140ms ease`; show dependency warnings when required flags are disabled
+- **Live diff sidebar**: when showing before/after state, render a sticky 320px sidebar with color-coded line-by-line diff (green additions, gray removals); add "Copy diff" and "Copy full JSON" buttons
+- **requestAnimationFrame debouncing**: wrap live-preview updates in `requestAnimationFrame` to prevent excessive DOM operations during rapid typing
+- **Event delegation**: attach a single `change` listener on the container and use `.matches()` to route events rather than binding per-element
 
 The output must be fully functional when opened as a standalone HTML file in any browser.
 
@@ -126,6 +157,97 @@ Produce a visual explainer document. Include:
 - "Related files / see also" footer
 
 **Example usage:** `/html explain how our distributed lock implementation works`
+
+---
+
+### `slide`
+**Generate a presentation slide deck**
+
+Produce a scroll-snapping slide deck where each slide fills the viewport. Include:
+- CSS scroll-snap (`scroll-snap-type: y mandatory` on container; `scroll-snap-align: start` on each slide)
+- Each slide is a `<section>` with `height: 100vh`; content centered with flexbox
+- Keyboard navigation: left/right arrow keys scroll to prev/next slide using `scrollIntoView({ behavior: 'smooth' })`
+- A slide counter in the corner updated via `IntersectionObserver` (threshold: 0.6) — not `scroll` events
+- A progress bar at the top that fills as slides advance
+- Slide types to mix: title slide (large serif heading + subtitle), content slide (heading + bullets), diagram slide (SVG fills most of viewport), quote slide (blockquote centered), code slide (dark background + syntax-highlighted code block)
+- Consistent color theme using CSS variables; slide backgrounds alternate between `--color-bg` and `--color-bg-alt`
+- Navigation arrows (prev/next buttons) fixed at bottom center; hide on first/last slide
+
+**Example usage:** `/html slide intro to distributed systems`
+
+---
+
+### `diagram`
+**Generate a standalone SVG architecture or flow diagram**
+
+Produce a focused document whose main content is one or more large SVG diagrams. Include:
+- A minimal header with title and optional description
+- The SVG diagram fills most of the viewport; scale it with `viewBox` and `width="100%"`
+- SVG elements to use: `<rect>` for boxes/services, `<circle>` for nodes, `<path>` or `<line>` for connections, `<marker>` for arrowheads (define in `<defs>`)
+- Color-code by layer (e.g., client = blue, API = green, DB = orange, external = gray)
+- Annotate with `<text>` labels; use `<title>` inside SVG elements for accessibility
+- Add a "Download SVG" button that triggers `URL.createObjectURL(new Blob([svgContent], {type:'image/svg+xml'}))` and an `<a download>` click
+- If multiple diagrams are needed, use tabs or a vertical layout with clear section headings
+- Dashed lines for async/optional paths; solid lines for sync/required paths
+- Arrow direction must always be clear — use `marker-end` for arrowheads
+
+**Example usage:** `/html diagram microservices architecture overview`
+
+---
+
+### `plan`
+**Generate an implementation plan with sliced delivery**
+
+Produce a phased implementation document. Include:
+- A header with title, delivery date, and status badge
+- A milestone timeline: vertical flex column, each milestone has a filled/outlined dot + connector line, label, and date; dots are filled for completed steps, outlined for pending
+- Slice / phase cards: each slice has a title, scope description, severity/effort badge, and an expandable `<details>` with technical notes
+- Code panels for key technical decisions — use two-column `<details>` for before/after comparisons with a highlighted left border on the "after" side
+- SVG data-flow diagram showing how components interact after the change
+- A "Rollout steps" section: connected horizontal timeline (first/last child get adjusted border-radius)
+- Risk / open questions table with severity badges (high = red, medium = yellow, low = green)
+
+**Example usage:** `/html plan implement OAuth 2.0 PKCE in 4 delivery slices`
+
+---
+
+### `pr`
+**Generate a PR writeup / code change document**
+
+Produce a rich pull-request description document. Include:
+- A header with PR title, branch name, author placeholder, and status badge (Open / Draft / Merged)
+- A sticky sidebar table of contents (`position: sticky; top: 32px`) listing changed files; clicking jumps to the relevant section
+- For each changed file: a `<details>` element (open by default for key files, closed for minor ones) with:
+  - File path, change type badge (`.badge.new` / `.badge.mod` / `.badge.del`)
+  - Before/after code panels side by side (CSS Grid `1fr 1fr`); "after" panel has olive/green border
+  - Highlighted added/deleted lines with subtle background overlays
+- A "Focus areas" section with numbered review guidance cards
+- A "Test plan" checklist with `.done` state (custom checkbox via `::after` pseudo-element)
+- A "Rollout" section showing deployment steps
+- Responsive: sidebar hidden on mobile (`max-width: 900px`), file grids collapse to single column
+
+**Example usage:** `/html pr feat/realtime-comments — real-time cursor & comment threads`
+
+---
+
+### `prototype`
+**Generate an interactive UI prototype**
+
+Produce a working UI mock with realistic interactions. Include:
+- HTML5 drag-and-drop for reorderable lists or Kanban columns: use `draggable="true"`, `dragstart` / `dragover` / `drop` events; add `.dragging` CSS class during drag for visual feedback
+- Realistic data: populate with believable items, not "Lorem ipsum"
+- Action buttons that modify state: add, delete, move, mark complete
+- "Export" or "Copy as markdown/JSON" button that assembles current state from the DOM and copies it to clipboard
+- Status indicators: color-coded badges, progress bars, or count chips that update reactively
+- A reset button that restores initial state
+- Animations: `transition: all 200ms ease` on cards; use `opacity` + `transform: translateY` for enter/exit effects
+
+Kanban-specific:
+- Three columns (e.g., Backlog / In Progress / Done) in a horizontal flex layout
+- Each card shows: title, priority badge, assignee initials avatar, tag chips
+- Column headers show item count; count updates as cards move
+
+**Example usage:** `/html prototype kanban board for engineering task triage`
 
 ---
 
@@ -153,13 +275,22 @@ Follow these rules for every HTML file generated, regardless of sub-command:
 - Use tabs (`.tabs` / `.tab-btn` / `.tab-panel` pattern) whenever there are 3 or more major content sections.
 - Tab switching must work with inline JavaScript (`onclick`). No dependencies.
 - Always show the first tab by default.
+- For very long documents, add a sticky sidebar TOC or a `position: sticky` section nav.
+
+### Expandable sections
+- Use native `<details>` / `<summary>` for collapsible content — no custom JS needed.
+- Style the summary chevron with CSS `transform: rotate(90deg)` when `details[open] > summary .chevron`.
+- Use `<details open>` for sections that should start expanded.
 
 ### Diagrams and charts
 - Use inline `<svg>` for all diagrams, flow charts, architecture sketches, and data visualizations.
 - Never use ASCII art for diagrams.
 - For bar charts, label each bar with its value. Include axis labels.
-- For flow diagrams, use boxes (rect), arrows (line/path with marker), and text labels.
+- For flow diagrams, use boxes (`<rect>`), arrows (`<line>` / `<path>` with `<marker>`), and text labels.
+- Define arrowheads in `<defs>` with `<marker>` elements; use `marker-end` on paths.
+- Use dashed lines (`stroke-dasharray`) for optional/async connections; solid for required/sync.
 - Charts must use the CSS color variables (pass them as `fill` or `stroke` attributes with the hex values — SVG does not inherit CSS custom properties in all contexts).
+- Add a "Download SVG" button for standalone diagram files.
 
 ### Tables
 - Use `<table>` with `<thead>` / `<tbody>` for all tabular data.
@@ -170,6 +301,13 @@ Follow these rules for every HTML file generated, regardless of sub-command:
 - Use the `.code-block` / `.code-block-header` / `<pre><code>` structure.
 - Include a language label and a "Copy" button that uses the clipboard API.
 - Apply token classes for syntax highlighting: `.tok-keyword`, `.tok-string`, `.tok-comment`, `.tok-number`, `.tok-function`, `.tok-property`, `.tok-operator`.
+- For before/after comparisons: use two code panels side by side (CSS Grid `1fr 1fr`); highlight changed lines with a subtle background overlay; give the "after" panel a green/olive left border.
+
+### Interactive controls
+- **Toggle switches**: use a `<label>` wrapping a hidden checkbox + styled track/thumb elements; animate with `transition: background 140ms ease, transform 140ms ease`.
+- **Drag-and-drop**: use `draggable="true"` + `dragstart`/`dragover`/`drop` events; add `.dragging` class for visual feedback; prevent default on `dragover` to allow drops.
+- **Clipboard**: always use `navigator.clipboard.writeText()` with a `try/catch` fallback to `document.execCommand('copy')` via a temporary `<textarea>`.
+- **Event delegation**: attach listeners to container elements and use `.closest()` or `.matches()` to route events rather than binding per-element.
 
 ### Copy as prompt button
 - Every `editor`-type file must have a "Copy as prompt" button.
@@ -192,9 +330,11 @@ Follow these rules for every HTML file generated, regardless of sub-command:
 
 ### Responsiveness
 - Use CSS Grid with `grid-template-columns: repeat(auto-fill, minmax(..., 1fr))` for card layouts.
+- For content + sidebar layouts use `grid-template-columns: 1fr 320px`; collapse to single column below 880px.
 - Add `@media (max-width: 768px)` breakpoints to collapse multi-column layouts to single column.
 - Ensure tap targets are at least 44px tall on mobile.
 - Use `overflow-x: auto` on table wrappers.
+- Hide decorative sidebars entirely on mobile (`display: none` below breakpoint).
 
 ### Typography and spacing
 - Use the `--font-sans` and `--font-mono` variables. Never specify raw font families.
@@ -202,12 +342,28 @@ Follow these rules for every HTML file generated, regardless of sub-command:
 - Use `--space-*` variables for margins, padding, and gaps. Never use magic numbers.
 - Line heights: `--leading-tight` for headings, `--leading-normal` for body text.
 
+### Animations and transitions
+- Use CSS transitions for hover states: `transition: all 180ms ease` on cards, buttons, and interactive elements.
+- Use `opacity` + `transform: translateY(-4px)` for subtle hover lift effects.
+- Slide/enter animations: `@keyframes` with `opacity 0→1` + `transform translateY(8px)→0`.
+- Never use `animation-duration` longer than 400ms for UI transitions — keep them snappy.
+- Use `transition: background 140ms ease` for color state changes (toggles, active tabs).
+
+### Semantic HTML
+- Use `<details>` / `<summary>` for collapsible content.
+- Use `<nav>` for table of contents and tab navigation.
+- Use `<article>` for self-contained content blocks.
+- Use `<aside>` for sidebars.
+- Add `aria-label` and `title` attributes on interactive SVG elements.
+- Add `loading="lazy"` on any `<img>` tags.
+
 ### Quality bar
 - The file should look genuinely polished when opened in a browser.
 - Hierarchy must be obvious at a glance: the most important information stands out.
 - If content is long, navigation or tabs must be present so the user can jump around.
 - Prefer real data (from the user's context) over placeholder text wherever possible.
 - When generating example/placeholder values, make them realistic and domain-appropriate.
+- Interactive features must actually work — test the logic mentally before writing it.
 
 ---
 
@@ -215,9 +371,9 @@ Follow these rules for every HTML file generated, regardless of sub-command:
 
 The text after the sub-command is passed to Claude as the content or context to work with.
 
-- For `spec` / `report` / `explore` / `explain`: treat it as the topic or subject matter.
-- For `review`: treat it as a file path, diff, or pasted code.
-- For `editor`: treat it as a description of the tool to build.
+- For `article` / `spec` / `report` / `explore` / `explain` / `slide` / `diagram` / `plan`: treat it as the topic or subject matter.
+- For `review` / `pr`: treat it as a file path, diff, PR number, or pasted code.
+- For `editor` / `prototype`: treat it as a description of the tool or UI to build.
 - If the argument references a file path, read the file first.
 - If the argument is empty, ask the user for the content before generating.
 
@@ -234,10 +390,11 @@ Use the folder that matches the sub-command:
 | Sub-command | Folder |
 |---|---|
 | `article` / `report` / `explain` | `articles/` |
-| `spec` | `specs/` |
-| `review` | `reviews/` |
+| `spec` / `plan` | `specs/` |
+| `review` / `pr` | `reviews/` |
 | `explore` | `explore/` |
-| `editor` / `tools` | `tools/` |
+| `editor` / `prototype` / `tools` / `slide` | `tools/` |
+| `diagram` | `articles/` |
 
 Filename format: `YYYY-MM-DD-<slug>.html`
 - Use today's date
