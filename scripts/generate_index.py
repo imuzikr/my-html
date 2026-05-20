@@ -140,25 +140,25 @@ def render_cards(folders):
             if f["og_image"]:
                 thumb = f"<div class='card-thumb'><img src='{f['og_image']}' alt='' loading='lazy'></div>"
             else:
-                safe_title = f["title"].replace("<", "&lt;").replace(">", "&gt;")
                 thumb = (
                     f"<div class='card-thumb card-thumb-grad'"
-                    f" style='background:linear-gradient(135deg,#{c1},#{c2})'>"
-                    f"<span class='card-thumb-text'>{safe_title}</span></div>"
+                    f" style='background:linear-gradient(135deg,#{c1},#{c2})'></div>"
                 )
 
             html += f"""
-    <a class="card" href="{f['path']}" data-folder="{folder}">
-      {thumb}
-      <div class="card-body">
-        <div class="card-header">
-          <span class="card-folder">{label}</span>
-          {date_str}
+    <div class="card-wrap" data-folder="{folder}">
+      <a class="card" href="{f['path']}">
+        {thumb}
+        <div class="card-body">
+          <div class="card-header">
+            <span class="card-folder">{label}</span>
+            {date_str}
+          </div>
+          <h3 class="card-title">{f['title']}</h3>
         </div>
-        <h3 class="card-title">{f['title']}</h3>
-        {desc_str}
-      </div>
-    </a>"""
+      </a>
+      {desc_str}
+    </div>"""
     return html
 
 
@@ -210,35 +210,26 @@ header .meta{{font-size:var(--text-sm);color:var(--color-text-faint);margin-left
   color:var(--color-text);outline:none;width:200px;
 }}
 .search input:focus{{border-color:var(--color-accent)}}
-.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--space-4)}}
+.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--space-6)}}
+.card-wrap{{display:flex;flex-direction:column;gap:var(--space-3);}}
 .card{{
   background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);
   text-decoration:none;color:inherit;display:flex;flex-direction:column;overflow:hidden;
   box-shadow:var(--shadow-sm);transition:all 180ms ease;
 }}
 .card:hover{{box-shadow:var(--shadow-md);border-color:var(--color-accent);transform:translateY(-2px)}}
-.card-thumb{{width:100%;height:140px;overflow:hidden;flex-shrink:0;}}
+.card-thumb{{width:100%;height:180px;overflow:hidden;flex-shrink:0;}}
 .card-thumb img{{width:100%;height:100%;object-fit:cover;display:block;}}
-.card-thumb-grad{{
-  display:flex;align-items:flex-end;padding:var(--space-4);
-  background-image:linear-gradient(to top,rgba(0,0,0,0.18) 0%,transparent 60%);
-}}
-.card-thumb-text{{
-  font-size:var(--text-sm);font-weight:var(--weight-semibold);
-  color:rgba(255,255,255,0.95);line-height:1.45;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-  text-shadow:0 1px 6px rgba(0,0,0,0.35);
-  min-height:calc(1.45em * 2);
-}}
-.card-body{{padding:var(--space-6);flex:1;display:flex;flex-direction:column;gap:var(--space-3);}}
+.card-thumb-grad{{width:100%;height:100%;}}
+.card-body{{padding:var(--space-4) var(--space-5);display:flex;flex-direction:column;gap:var(--space-2);}}
 .card-header{{display:flex;align-items:center;justify-content:space-between;}}
 .card-folder{{
   font-size:var(--text-sm);font-weight:var(--weight-medium);color:var(--color-accent);
   background:var(--color-accent-soft);padding:3px var(--space-3);border-radius:var(--radius-md);
 }}
 .card-date{{font-size:var(--text-sm);color:var(--color-text-faint)}}
-.card-title{{font-size:var(--text-lg);font-weight:var(--weight-semibold);line-height:1.5;letter-spacing:-0.01em;margin-top:var(--space-1);}}
-.card-desc{{font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.7;}}
+.card-title{{font-size:var(--text-base);font-weight:var(--weight-semibold);line-height:1.5;letter-spacing:-0.01em;}}
+.card-desc{{font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.7;padding:0 var(--space-1);}}
 .empty{{text-align:center;color:var(--color-text-faint);padding:var(--space-12);font-size:var(--text-lg)}}
 footer{{text-align:center;padding:var(--space-8);color:var(--color-text-faint);font-size:var(--text-sm);border-top:1px solid var(--color-border);margin-top:var(--space-12)}}
 @media(max-width:600px){{
@@ -268,7 +259,7 @@ footer{{text-align:center;padding:var(--space-8);color:var(--color-text-faint);f
 let currentFolder = 'all';
 let currentSearch = '';
 function update() {{
-  const cards = document.querySelectorAll('.card');
+  const cards = document.querySelectorAll('.card-wrap');
   let visible = 0;
   cards.forEach(c => {{
     const folderMatch = currentFolder === 'all' || c.dataset.folder === currentFolder;
