@@ -226,9 +226,9 @@ header .meta{{font-size:var(--text-sm);color:var(--color-text-faint);margin-left
 .card-thumb{{position:relative;width:100%;height:180px;overflow:hidden;flex-shrink:0;}}
 .card-thumb img{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}}
 .card-thumb-grad{{/* gradient set inline */}}
-.card-thumb-glass{{position:absolute;inset:0;background:rgba(5,5,10,0.54);}}
+.card-thumb-glass{{position:absolute;inset:0;background:rgba(5,5,10,0.36);}}
 .card-body{{
-  padding:var(--space-5);height:120px;overflow:hidden;
+  padding:var(--space-6);height:132px;overflow:hidden;
   display:flex;flex-direction:column;gap:var(--space-2);flex-shrink:0;
 }}
 .card-header{{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}}
