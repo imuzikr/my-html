@@ -141,17 +141,13 @@ def render_cards(folders):
                 thumb = (
                     f"<div class='card-thumb'>"
                     f"<img src='{f['og_image']}' alt='' loading='lazy'>"
-                    f"<div class='card-thumb-glass'>"
-                    f"<span class='card-thumb-text'>{f['title']}</span>"
-                    f"</div></div>"
+                    f"<div class='card-thumb-glass'></div></div>"
                 )
             else:
                 thumb = (
                     f"<div class='card-thumb card-thumb-grad'"
                     f" style='background:linear-gradient(135deg,#{c1},#{c2})'>"
-                    f"<div class='card-thumb-glass'>"
-                    f"<span class='card-thumb-text'>{f['title']}</span>"
-                    f"</div></div>"
+                    f"<div class='card-thumb-glass'></div></div>"
                 )
 
             html += f"""
@@ -163,6 +159,7 @@ def render_cards(folders):
             <span class="card-folder">{label}</span>
             {date_str}
           </div>
+          <h3 class="card-title">{f['title']}</h3>
         </div>
       </a>
       {desc_str}
@@ -229,25 +226,22 @@ header .meta{{font-size:var(--text-sm);color:var(--color-text-faint);margin-left
 .card-thumb{{position:relative;width:100%;height:180px;overflow:hidden;flex-shrink:0;}}
 .card-thumb img{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}}
 .card-thumb-grad{{/* gradient set inline */}}
-.card-thumb-glass{{
-  position:absolute;inset:0;
-  background:rgba(5,5,10,0.54);
-  display:flex;align-items:flex-end;
-  padding:var(--space-4) var(--space-5);
+.card-thumb-glass{{position:absolute;inset:0;background:rgba(5,5,10,0.54);}}
+.card-body{{
+  padding:var(--space-5);height:120px;overflow:hidden;
+  display:flex;flex-direction:column;gap:var(--space-2);flex-shrink:0;
 }}
-.card-thumb-text{{
-  font-size:var(--text-sm);font-weight:var(--weight-semibold);
-  color:rgba(255,255,255,0.93);line-height:1.5;
-  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
-  letter-spacing:-0.01em;
-}}
-.card-body{{padding:var(--space-3) var(--space-5);display:flex;flex-direction:column;}}
-.card-header{{display:flex;align-items:center;justify-content:space-between;}}
+.card-header{{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}}
 .card-folder{{
   font-size:var(--text-sm);font-weight:var(--weight-medium);color:var(--color-accent);
   background:var(--color-accent-soft);padding:3px var(--space-3);border-radius:var(--radius-md);
 }}
 .card-date{{font-size:var(--text-sm);color:var(--color-text-faint)}}
+.card-title{{
+  font-size:var(--text-base);font-weight:var(--weight-semibold);line-height:1.5;
+  letter-spacing:-0.01em;color:var(--color-text);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}}
 .card-desc{{font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.7;padding:0 var(--space-1);}}
 .empty{{text-align:center;color:var(--color-text-faint);padding:var(--space-12);font-size:var(--text-lg)}}
 footer{{text-align:center;padding:var(--space-8);color:var(--color-text-faint);font-size:var(--text-sm);border-top:1px solid var(--color-border);margin-top:var(--space-12)}}
