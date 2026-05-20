@@ -321,13 +321,14 @@
 
     /* ── PARADOX ── */
     .paradox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
-    .paradox-card { border-radius: var(--radius-lg); padding: var(--space-6); }
-    .paradox-card.good { background: var(--color-green-soft); border: 1px solid #b8d5c0; }
-    .paradox-card.bad  { background: var(--color-red-soft);   border: 1px solid #e8b8b4; }
-    .paradox-card .p-icon { font-size: 2rem; margin-bottom: var(--space-3); display: block; }
-    .paradox-card h3 { font-size: var(--text-lg); font-weight: var(--weight-semibold); margin-bottom: var(--space-2); }
-    .paradox-card.good h3 { color: var(--color-green); }
-    .paradox-card.bad  h3 { color: var(--color-red); }
+    .paradox-card {
+      background: var(--color-bg-card); border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg); padding: var(--space-6); box-shadow: var(--shadow-sm);
+    }
+    .paradox-card.good { border-left: 4px solid var(--color-green); }
+    .paradox-card.bad  { border-left: 4px solid var(--color-red); }
+    .paradox-card .p-icon { font-size: 1.5rem; margin-bottom: var(--space-3); display: block; }
+    .paradox-card h3 { font-size: var(--text-lg); font-weight: var(--weight-semibold); color: var(--color-text); margin-bottom: var(--space-2); }
     .paradox-card p { font-size: var(--text-sm); color: var(--color-text-muted); margin: 0; }
     .paradox-score { font-size: var(--text-3xl); font-weight: var(--weight-bold); line-height: 1; margin: var(--space-3) 0; }
     .paradox-card.good .paradox-score { color: var(--color-green); }
