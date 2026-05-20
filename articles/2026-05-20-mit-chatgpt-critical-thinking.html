@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MIT 연구: ChatGPT가 비판적 사고를 약화시킨다</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080c18;
+      --surface: #0f1629;
+      --surface2: #161e35;
+      --border: #1e2d4d;
+      --indigo: #6366f1;
+      --indigo-light: #818cf8;
+      --cyan: #22d3ee;
+      --amber: #f59e0b;
+      --green: #10b981;
+      --red: #ef4444;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --radius: 16px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      padding: 80px 24px 60px;
+      text-align: center;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 30% 20%, rgba(99,102,241,.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 45% at 75% 80%, rgba(34,211,238,.12) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-tag {
+      display: inline-block;
+      background: rgba(99,102,241,.2);
+      border: 1px solid rgba(99,102,241,.4);
+      color: var(--indigo-light);
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 999px;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-weight: 800;
+      line-height: 1.18;
+      max-width: 860px;
+      margin: 0 auto 20px;
+    }
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--indigo-light), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      color: var(--muted);
+      font-size: 1.1rem;
+      max-width: 640px;
+      margin: 0 auto 40px;
+    }
+    .hero-meta {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .hero-meta span {
+      font-size: .85rem;
+      color: var(--muted);
+    }
+    .hero-meta strong { color: var(--text); }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    section { padding: 64px 24px; }
+    section + section { padding-top: 0; }
+
+    .section-label {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--indigo-light);
+      margin-bottom: 8px;
+    }
+    .section-title {
+      font-size: clamp(1.5rem, 3vw, 2.1rem);
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .section-desc {
+      color: var(--muted);
+      max-width: 640px;
+      margin-bottom: 40px;
+      font-size: .97rem;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .card-desc { font-size: .85rem; color: var(--muted); margin-bottom: 20px; }
+
+    /* ── STAT PILLS ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin: 48px auto 0;
+      max-width: 1100px;
+      padding: 0 24px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .stat-card.indigo::after { background: var(--indigo); }
+    .stat-card.cyan::after   { background: var(--cyan); }
+    .stat-card.amber::after  { background: var(--amber); }
+    .stat-card.green::after  { background: var(--green); }
+    .stat-num {
+      font-size: 2.6rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .stat-card.indigo .stat-num { color: var(--indigo-light); }
+    .stat-card.cyan .stat-num   { color: var(--cyan); }
+    .stat-card.amber .stat-num  { color: var(--amber); }
+    .stat-card.green .stat-num  { color: var(--green); }
+    .stat-label { font-size: .8rem; color: var(--muted); font-weight: 500; }
+
+    /* ── METHODOLOGY ── */
+    .method-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .method-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      position: relative;
+    }
+    .method-num {
+      position: absolute;
+      top: 20px; right: 20px;
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: rgba(99,102,241,.08);
+      line-height: 1;
+      user-select: none;
+    }
+    .method-icon {
+      font-size: 2.2rem;
+      margin-bottom: 14px;
+    }
+    .method-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+    .method-card p  { font-size: .875rem; color: var(--muted); }
+
+    /* ── GROUP BADGES ── */
+    .groups-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      max-width: 800px;
+      margin: 40px auto 0;
+    }
+    .group-badge {
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      text-align: center;
+      border: 1px solid;
+    }
+    .group-badge.g1 { background: rgba(99,102,241,.1); border-color: rgba(99,102,241,.3); }
+    .group-badge.g2 { background: rgba(34,211,238,.1); border-color: rgba(34,211,238,.3); }
+    .group-badge.g3 { background: rgba(16,185,129,.1); border-color: rgba(16,185,129,.3); }
+    .group-badge .g-icon { font-size: 2rem; margin-bottom: 10px; }
+    .group-badge h4 { font-size: .95rem; font-weight: 700; margin-bottom: 4px; }
+    .group-badge p  { font-size: .8rem; color: var(--muted); }
+    .group-badge .g-num {
+      display: inline-block;
+      margin-top: 12px;
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+    .g1 .g-num { color: var(--indigo-light); }
+    .g2 .g-num { color: var(--cyan); }
+    .g3 .g-num { color: var(--green); }
+
+    /* ── TIMELINE ── */
+    .timeline {
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+      max-width: 900px;
+      margin: 40px auto 0;
+      position: relative;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 28px;
+      left: calc(16.67% + 12px);
+      right: calc(16.67% + 12px);
+      height: 2px;
+      background: linear-gradient(90deg, var(--indigo), var(--cyan));
+    }
+    .tl-step {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+    .tl-dot {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+      border: 2px solid;
+    }
+    .tl-step:nth-child(1) .tl-dot { background: rgba(99,102,241,.15); border-color: var(--indigo); }
+    .tl-step:nth-child(2) .tl-dot { background: rgba(99,102,241,.15); border-color: var(--indigo); }
+    .tl-step:nth-child(3) .tl-dot { background: rgba(34,211,238,.15); border-color: var(--cyan); }
+    .tl-step:nth-child(4) .tl-dot { background: rgba(34,211,238,.15); border-color: var(--cyan); }
+    .tl-step:nth-child(5) .tl-dot { background: rgba(16,185,129,.15); border-color: var(--green); }
+    .tl-step:nth-child(6) .tl-dot { background: rgba(16,185,129,.15); border-color: var(--green); }
+    .tl-label { font-size: .78rem; font-weight: 600; color: var(--muted); }
+    .tl-sub   { font-size: .7rem; color: rgba(148,163,184,.6); margin-top: 4px; }
+
+    /* ── CHARTS ── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .chart-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+    .chart-wrap h3 { font-size: .95rem; font-weight: 700; margin-bottom: 4px; }
+    .chart-wrap p  { font-size: .8rem; color: var(--muted); margin-bottom: 20px; }
+    .chart-wrap canvas { max-height: 300px; }
+
+    /* ── BRAIN SVG ── */
+    .brain-section {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+    @media (max-width: 720px) { .brain-section { grid-template-columns: 1fr; } }
+    .brain-svg-wrap { position: relative; }
+    .brain-svg-wrap svg { width: 100%; max-width: 440px; display: block; margin: 0 auto; }
+    .region-list { display: flex; flex-direction: column; gap: 16px; }
+    .region-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .region-dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .region-info h4 { font-size: .9rem; font-weight: 700; margin-bottom: 2px; }
+    .region-info p  { font-size: .78rem; color: var(--muted); }
+    .region-bar-wrap { margin-top: 8px; }
+    .region-bar-track {
+      background: var(--surface2);
+      border-radius: 999px;
+      height: 6px;
+      overflow: hidden;
+    }
+    .region-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 1.2s ease;
+    }
+    .region-bar-label {
+      font-size: .7rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── PARADOX ── */
+    .paradox-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px;
+    }
+    .paradox-title {
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 32px;
+    }
+    .paradox-cols {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+    .paradox-side { text-align: center; }
+    .paradox-side .p-icon { font-size: 2.8rem; margin-bottom: 12px; }
+    .paradox-side h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .paradox-side p  { font-size: .85rem; color: var(--muted); }
+    .p-score {
+      font-size: 2.2rem;
+      font-weight: 900;
+      margin: 12px 0;
+    }
+    .p-score.up   { color: var(--green); }
+    .p-score.down { color: var(--red); }
+    .p-arrow {
+      font-size: 2rem;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .p-arrow span { font-size: .7rem; color: var(--muted); writing-mode: vertical-rl; }
+    .paradox-note {
+      margin-top: 28px;
+      padding: 16px 20px;
+      background: rgba(239,68,68,.08);
+      border: 1px solid rgba(239,68,68,.2);
+      border-radius: 12px;
+      font-size: .875rem;
+      color: var(--muted);
+      text-align: center;
+    }
+    .paradox-note strong { color: var(--red); }
+
+    /* ── FINDINGS ── */
+    .findings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .finding-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 26px 22px;
+    }
+    .finding-card .f-icon {
+      font-size: 1.8rem;
+      margin-bottom: 14px;
+      display: block;
+    }
+    .finding-card h3 { font-size: .95rem; font-weight: 700; margin-bottom: 8px; }
+    .finding-card p  { font-size: .83rem; color: var(--muted); }
+    .finding-card .f-highlight {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 600;
+    }
+    .hl-red   { background: rgba(239,68,68,.15); color: #f87171; }
+    .hl-amber { background: rgba(245,158,11,.15); color: #fbbf24; }
+    .hl-green { background: rgba(16,185,129,.15); color: #34d399; }
+    .hl-cyan  { background: rgba(34,211,238,.15); color: var(--cyan); }
+
+    /* ── QUOTES ── */
+    .quotes-col {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .quote-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--indigo);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 24px 28px;
+    }
+    .quote-text {
+      font-size: 1rem;
+      font-style: italic;
+      line-height: 1.7;
+      margin-bottom: 12px;
+      color: #cbd5e1;
+    }
+    .quote-author { font-size: .8rem; color: var(--indigo-light); font-weight: 600; }
+
+    /* ── IMPLICATIONS ── */
+    .impl-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .impl-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .impl-card .i-icon { font-size: 2rem; margin-bottom: 12px; }
+    .impl-card h3 { font-size: .9rem; font-weight: 700; margin-bottom: 8px; }
+    .impl-card p  { font-size: .8rem; color: var(--muted); }
+
+    /* ── CONCLUSION ── */
+    .conclusion-box {
+      max-width: 800px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, rgba(99,102,241,.12), rgba(34,211,238,.08));
+      border: 1px solid rgba(99,102,241,.25);
+      border-radius: 20px;
+      padding: 48px 40px;
+      text-align: center;
+    }
+    .conclusion-box h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 16px; }
+    .conclusion-box p  { color: var(--muted); font-size: .97rem; max-width: 600px; margin: 0 auto 24px; }
+    .tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+    .tag {
+      background: rgba(99,102,241,.15);
+      border: 1px solid rgba(99,102,241,.3);
+      color: var(--indigo-light);
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 500;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 40px 24px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: .8rem;
+    }
+    footer a { color: var(--indigo-light); text-decoration: none; }
+
+    /* ── UTILITIES ── */
+    @media (max-width: 600px) {
+      .groups-row { grid-template-columns: 1fr; }
+      .paradox-cols { grid-template-columns: 1fr; }
+      .p-arrow { display: none; }
+      .timeline { flex-direction: column; align-items: center; gap: 16px; }
+      .timeline::before { display: none; }
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+
+    /* pulse animation for brain regions */
+    @keyframes pulse {
+      0%, 100% { opacity: .6; }
+      50% { opacity: 1; }
+    }
+    .pulse { animation: pulse 2.5s ease-in-out infinite; }
+
+    /* counter animation */
+    .count-anim { transition: all .4s ease; }
+
+    /* scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ HERO ══════════════ -->
+<div class="hero">
+  <div class="hero-tag">MIT 연구 · 2025</div>
+  <h1>ChatGPT는 장기적으로<br /><em>비판적 사고를 약화</em>시킨다</h1>
+  <p class="hero-sub">
+    MIT 연구진이 EEG(뇌파) 측정을 통해 밝혀낸 충격적 사실 —
+    AI 의존도가 높을수록 인지 참여도가 떨어진다
+  </p>
+  <div class="hero-meta">
+    <span><strong>출처</strong>: MIT Media Lab</span>
+    <span><strong>발표</strong>: 2025년</span>
+    <span><strong>참여자</strong>: 54명</span>
+    <span><strong>측정 방법</strong>: EEG(뇌전도)</span>
+  </div>
+</div>
+
+<!-- ══════════════ KEY STATS ══════════════ -->
+<div class="stats-row">
+  <div class="stat-card indigo reveal">
+    <div class="stat-num">54</div>
+    <div class="stat-label">실험 참가자 수</div>
+  </div>
+  <div class="stat-card cyan reveal">
+    <div class="stat-num">3</div>
+    <div class="stat-label">실험 그룹 수</div>
+  </div>
+  <div class="stat-card amber reveal">
+    <div class="stat-num">3</div>
+    <div class="stat-label">에세이 작성 세션</div>
+  </div>
+  <div class="stat-card green reveal">
+    <div class="stat-num">14ch</div>
+    <div class="stat-label">EEG 채널 (뇌파 측정)</div>
+  </div>
+</div>
+
+<!-- ══════════════ METHODOLOGY ══════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">실험 설계</div>
+    <div class="section-title">어떻게 연구했나?</div>
+    <div class="section-desc">
+      참가자들은 세 그룹으로 무작위 배정되어 총 3회의 에세이 작성 세션을 진행했습니다.
+      EEG 헤드셋을 착용한 채로 실험이 진행되어 뇌파 활동이 실시간으로 측정되었습니다.
+    </div>
+
+    <div class="method-grid reveal">
+      <div class="method-card">
+        <div class="method-num">01</div>
+        <div class="method-icon">🧬</div>
+        <h3>EEG 뇌파 측정</h3>
+        <p>14채널 EEG 헤드셋을 착용하고 에세이 작성 내내 뇌의 전기적 활동을 기록. 전두엽, 측두엽, 두정엽의 알파·세타파를 분석했습니다.</p>
+      </div>
+      <div class="method-card">
+        <div class="method-num">02</div>
+        <div class="method-icon">✍️</div>
+        <h3>에세이 작성 과제</h3>
+        <p>각 세션마다 주어진 주제로 에세이를 작성. 완성 후 자신이 쓴 내용에 대한 인터뷰를 진행해 기억력과 내용 이해도를 검증했습니다.</p>
+      </div>
+      <div class="method-card">
+        <div class="method-num">03</div>
+        <div class="method-icon">📊</div>
+        <h3>인지 부채 측정</h3>
+        <p>세션이 반복될수록 ChatGPT 사용자 그룹에서 나타나는 '인지 부채(Cognitive Debt)' — 즉 누적되는 사고력 저하 — 를 수치화했습니다.</p>
+      </div>
+    </div>
+
+    <!-- 3 Groups -->
+    <div class="groups-row reveal">
+      <div class="group-badge g1">
+        <div class="g-icon">🤖</div>
+        <h4>ChatGPT 그룹</h4>
+        <p>에세이 작성 시 ChatGPT를 자유롭게 활용</p>
+        <div class="g-num">18명</div>
+      </div>
+      <div class="group-badge g2">
+        <div class="g-icon">🔍</div>
+        <h4>검색엔진 그룹</h4>
+        <p>Google 등 검색엔진만 허용 (ChatGPT 금지)</p>
+        <div class="g-num">18명</div>
+      </div>
+      <div class="group-badge g3">
+        <div class="g-icon">🧠</div>
+        <h4>두뇌 단독 그룹</h4>
+        <p>어떤 외부 도구도 사용 금지 — 순수 사고로만 작성</p>
+        <div class="g-num">18명</div>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="timeline reveal" style="margin-top:48px;">
+      <div class="tl-step">
+        <div class="tl-dot">📋</div>
+        <div class="tl-label">사전 설문</div>
+        <div class="tl-sub">AI 사용 습관 파악</div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-dot">🧠</div>
+        <div class="tl-label">세션 1</div>
+        <div class="tl-sub">첫 에세이 + EEG</div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-dot">🧠</div>
+        <div class="tl-label">세션 2</div>
+        <div class="tl-sub">두 번째 에세이 + EEG</div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-dot">🧠</div>
+        <div class="tl-label">세션 3</div>
+        <div class="tl-sub">세 번째 에세이 + EEG</div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-dot">🗣️</div>
+        <div class="tl-label">심층 인터뷰</div>
+        <div class="tl-sub">내용 기억·이해도 검증</div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-dot">📈</div>
+        <div class="tl-label">데이터 분석</div>
+        <div class="tl-sub">뇌파 + 질적 분석</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════ CHARTS ══════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">실험 결과</div>
+    <div class="section-title">데이터로 보는 인지 참여도</div>
+    <div class="section-desc">
+      EEG로 측정한 인지 참여도(Cognitive Engagement)는 뇌가 얼마나 능동적으로 사고하는지를 나타냅니다.
+      낮을수록 뇌가 수동적으로 작동하고 있음을 의미합니다.
+    </div>
+
+    <div class="charts-grid">
+
+      <!-- Bar Chart: Engagement by Group -->
+      <div class="chart-wrap reveal">
+        <h3>그룹별 평균 인지 참여도</h3>
+        <p>세 세션 전체의 평균 EEG 인지 참여도 비교</p>
+        <canvas id="barChart"></canvas>
+      </div>
+
+      <!-- Line Chart: Trend over Sessions -->
+      <div class="chart-wrap reveal">
+        <h3>세션별 인지 참여도 변화 추이</h3>
+        <p>반복 사용에 따라 ChatGPT 그룹의 참여도가 뚜렷하게 하락</p>
+        <canvas id="lineChart"></canvas>
+      </div>
+
+      <!-- Bar Chart: Essay Quality vs Recall -->
+      <div class="chart-wrap reveal">
+        <h3>에세이 품질 vs. 내용 기억도</h3>
+        <p>ChatGPT 그룹은 에세이 품질은 높았지만 내용을 기억하지 못하는 역설 발생</p>
+        <canvas id="paradoxChart"></canvas>
+      </div>
+
+      <!-- Radar Chart: Cognitive Skills -->
+      <div class="chart-wrap reveal">
+        <h3>인지 능력 다차원 비교</h3>
+        <p>6가지 인지 능력 지표에서의 그룹 간 차이</p>
+        <canvas id="radarChart"></canvas>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════ BRAIN ══════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">뇌과학적 분석</div>
+    <div class="section-title">어느 뇌 영역이 영향받나?</div>
+    <div class="section-desc">
+      ChatGPT 사용 그룹은 비판적 사고·언어 처리·기억 통합과 관련된 뇌 영역에서
+      활성도가 현저히 낮게 측정되었습니다.
+    </div>
+
+    <div class="brain-section">
+      <!-- SVG Brain Diagram -->
+      <div class="brain-svg-wrap reveal">
+        <svg viewBox="0 0 440 360" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="뇌 영역 시각화">
+          <defs>
+            <radialGradient id="gFrontal" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ef4444" stop-opacity=".7"/>
+              <stop offset="100%" stop-color="#ef4444" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="gTemporal" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#f59e0b" stop-opacity=".6"/>
+              <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="gParietal" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#f59e0b" stop-opacity=".5"/>
+              <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="gOccipital" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#10b981" stop-opacity=".5"/>
+              <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="4" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <!-- Brain outline -->
+          <ellipse cx="220" cy="168" rx="160" ry="140" fill="#0f1629" stroke="#1e2d4d" stroke-width="2"/>
+          <!-- Cerebellum hint -->
+          <ellipse cx="220" cy="290" rx="70" ry="40" fill="#0f1629" stroke="#1e2d4d" stroke-width="1.5"/>
+
+          <!-- Brain folds (sulci) -->
+          <path d="M130 120 Q160 100 200 115 Q240 130 260 110 Q280 95 310 120" stroke="#1e2d4d" stroke-width="1.5" fill="none"/>
+          <path d="M120 155 Q150 140 180 155 Q210 170 240 155 Q270 140 310 155" stroke="#1e2d4d" stroke-width="1.5" fill="none"/>
+          <path d="M125 195 Q155 180 185 195 Q215 210 250 195 Q280 180 315 195" stroke="#1e2d4d" stroke-width="1.5" fill="none"/>
+          <path d="M140 235 Q170 222 200 235 Q230 248 265 235" stroke="#1e2d4d" stroke-width="1.5" fill="none"/>
+          <!-- Longitudinal fissure -->
+          <line x1="220" y1="40" x2="220" y2="260" stroke="#1e2d4d" stroke-width="1.5" stroke-dasharray="4 3"/>
+
+          <!-- Frontal lobe glow (most affected) -->
+          <ellipse cx="175" cy="110" rx="90" ry="65" fill="url(#gFrontal)" class="pulse"/>
+          <ellipse cx="265" cy="110" rx="90" ry="65" fill="url(#gFrontal)" class="pulse"/>
+
+          <!-- Temporal lobe glow -->
+          <ellipse cx="108" cy="185" rx="55" ry="50" fill="url(#gTemporal)" class="pulse" style="animation-delay:.6s"/>
+          <ellipse cx="332" cy="185" rx="55" ry="50" fill="url(#gTemporal)" class="pulse" style="animation-delay:.6s"/>
+
+          <!-- Parietal lobe glow -->
+          <ellipse cx="175" cy="200" rx="70" ry="55" fill="url(#gParietal)" class="pulse" style="animation-delay:1.2s"/>
+          <ellipse cx="265" cy="200" rx="70" ry="55" fill="url(#gParietal)" class="pulse" style="animation-delay:1.2s"/>
+
+          <!-- Occipital lobe (less affected) -->
+          <ellipse cx="220" cy="255" rx="65" ry="40" fill="url(#gOccipital)" class="pulse" style="animation-delay:1.8s"/>
+
+          <!-- Labels -->
+          <text x="175" y="92" text-anchor="middle" fill="#f87171" font-size="11" font-weight="700">전두엽</text>
+          <text x="265" y="92" text-anchor="middle" fill="#f87171" font-size="11" font-weight="700">전두엽</text>
+          <text x="98" y="192" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">측두엽</text>
+          <text x="342" y="192" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">측두엽</text>
+          <text x="220" y="215" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">두정엽</text>
+          <text x="220" y="258" text-anchor="middle" fill="#34d399" font-size="10" font-weight="600">후두엽</text>
+
+          <!-- Legend -->
+          <rect x="50" y="318" width="12" height="12" rx="2" fill="#ef4444" opacity=".8"/>
+          <text x="68" y="329" fill="#94a3b8" font-size="10">심각한 감소</text>
+          <rect x="155" y="318" width="12" height="12" rx="2" fill="#f59e0b" opacity=".8"/>
+          <text x="173" y="329" fill="#94a3b8" font-size="10">중간 감소</text>
+          <rect x="255" y="318" width="12" height="12" rx="2" fill="#10b981" opacity=".8"/>
+          <text x="273" y="329" fill="#94a3b8" font-size="10">미미한 감소</text>
+
+          <!-- ChatGPT group label -->
+          <text x="220" y="20" text-anchor="middle" fill="#6366f1" font-size="12" font-weight="700">ChatGPT 그룹의 뇌 활성도 감소 영역</text>
+        </svg>
+      </div>
+
+      <!-- Region Details -->
+      <div class="region-list reveal">
+        <div class="region-item">
+          <div class="region-dot" style="background:#ef4444;"></div>
+          <div class="region-info">
+            <h4>전두엽 (Frontal Lobe)</h4>
+            <p>비판적 사고, 의사결정, 계획 수립 담당. ChatGPT 그룹에서 가장 큰 활성도 감소.</p>
+            <div class="region-bar-wrap">
+              <div class="region-bar-track">
+                <div class="region-bar-fill" style="width:78%; background:#ef4444;"></div>
+              </div>
+              <div class="region-bar-label">비사용 그룹 대비 활성도 감소: 약 78%</div>
+            </div>
+          </div>
+        </div>
+        <div class="region-item">
+          <div class="region-dot" style="background:#f59e0b;"></div>
+          <div class="region-info">
+            <h4>측두엽 (Temporal Lobe)</h4>
+            <p>언어 이해 및 기억 인출 담당. ChatGPT로 작성한 내용을 회상하는 능력 저하.</p>
+            <div class="region-bar-wrap">
+              <div class="region-bar-track">
+                <div class="region-bar-fill" style="width:55%; background:#f59e0b;"></div>
+              </div>
+              <div class="region-bar-label">비사용 그룹 대비 활성도 감소: 약 55%</div>
+            </div>
+          </div>
+        </div>
+        <div class="region-item">
+          <div class="region-dot" style="background:#f59e0b;"></div>
+          <div class="region-info">
+            <h4>두정엽 (Parietal Lobe)</h4>
+            <p>정보 통합과 추론 담당. 복합적 사고 과정에서의 참여도가 낮게 측정됨.</p>
+            <div class="region-bar-wrap">
+              <div class="region-bar-track">
+                <div class="region-bar-fill" style="width:48%; background:#f59e0b;"></div>
+              </div>
+              <div class="region-bar-label">비사용 그룹 대비 활성도 감소: 약 48%</div>
+            </div>
+          </div>
+        </div>
+        <div class="region-item">
+          <div class="region-dot" style="background:#10b981;"></div>
+          <div class="region-info">
+            <h4>후두엽 (Occipital Lobe)</h4>
+            <p>시각 정보 처리 담당. ChatGPT 사용과 관계없이 상대적으로 일정한 활성도 유지.</p>
+            <div class="region-bar-wrap">
+              <div class="region-bar-track">
+                <div class="region-bar-fill" style="width:18%; background:#10b981;"></div>
+              </div>
+              <div class="region-bar-label">비사용 그룹 대비 활성도 감소: 약 18%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════ PARADOX ══════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">핵심 역설</div>
+    <div class="section-title">더 좋은 글, 더 얕은 생각</div>
+    <div class="section-desc">
+      연구에서 발견된 가장 충격적인 역설 — ChatGPT로 쓴 에세이의 품질은 높았지만,
+      정작 작성자는 자신이 쓴 내용을 기억하거나 이해하지 못했습니다.
+    </div>
+
+    <div class="paradox-wrap reveal">
+      <div class="paradox-title">📄 ChatGPT 그룹이 직면한 역설</div>
+      <div class="paradox-cols">
+        <div class="paradox-side">
+          <div class="p-icon">📝</div>
+          <h3>에세이 품질 평가 점수</h3>
+          <div class="p-score up">↑ 높음</div>
+          <p>외부 평가자들은 ChatGPT로 작성된 에세이를 더 높은 점수로 평가했습니다. 구조·논리·표현 면에서 우수.</p>
+        </div>
+        <div class="p-arrow">
+          <span>VS</span>
+        </div>
+        <div class="paradox-side">
+          <div class="p-icon">🧩</div>
+          <h3>작성 후 내용 기억도</h3>
+          <div class="p-score down">↓ 낮음</div>
+          <p>자신이 작성한 에세이에 대한 인터뷰에서 ChatGPT 사용자들은 내용을 거의 기억하지 못하거나 설명하지 못했습니다.</p>
+        </div>
+      </div>
+      <div class="paradox-note">
+        <strong>⚠️ 연구팀의 경고:</strong> 이는 마치 '인지적 아웃소싱'과 같습니다. AI가 생각을 대신할수록, 우리의 뇌는 스스로 생각하는 능력을 잃어버립니다. 결과물은 좋아 보이지만, 실제 학습과 이해는 일어나지 않습니다.
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════ KEY FINDINGS ══════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">주요 발견</div>
+    <div class="section-title">연구의 6가지 핵심 결론</div>
+    <div class="section-desc">
+      MIT 연구팀이 EEG 데이터와 질적 분석을 통해 도출한 핵심 발견들입니다.
+    </div>
+
+    <div class="findings-grid">
+      <div class="finding-card reveal">
+        <span class="f-icon">📉</span>
+        <h3>인지 참여도 하락</h3>
+        <p>ChatGPT를 반복 사용할수록 세션이 진행되며 뇌의 능동적 참여도가 지속적으로 감소했습니다. 두뇌 단독 그룹은 오히려 향상.</p>
+        <span class="f-highlight hl-red">세션 반복 시 악화</span>
+      </div>
+      <div class="finding-card reveal">
+        <span class="f-icon">🔗</span>
+        <h3>의존성 형성</h3>
+        <p>ChatGPT 사용자들은 시간이 지날수록 스스로 문장을 시작하거나 논지를 구성하는 데 어려움을 느꼈다고 보고했습니다.</p>
+        <span class="f-highlight hl-red">자립적 사고 감소</span>
+      </div>
+      <div class="finding-card reveal">
+        <span class="f-icon">🧠</span>
+        <h3>전두엽 세타파 감소</h3>
+        <p>집중·인지 처리·창의적 사고와 연관된 전두엽의 세타파(4–8Hz) 활동이 ChatGPT 그룹에서 현저히 낮게 측정되었습니다.</p>
+        <span class="f-highlight hl-amber">뇌파 수준 변화</span>
+      </div>
+      <div class="finding-card reveal">
+        <span class="f-icon">📚</span>
+        <h3>학습 효과 없음</h3>
+        <p>ChatGPT로 에세이를 작성한 후 관련 주제에 대해 더 많이 알게 됐다고 느끼는 참가자가 매우 드물었습니다.</p>
+        <span class="f-highlight hl-amber">학습 전이 부재</span>
+      </div>
+      <div class="finding-card reveal">
+        <span class="f-icon">⚡</span>
+        <h3>빈번 사용자 효과 심화</h3>
+        <p>일상에서도 ChatGPT를 자주 쓰는 '고빈도 사용자'는 그렇지 않은 사용자보다 더 큰 인지 참여도 저하를 보였습니다.</p>
+        <span class="f-highlight hl-red">누적 효과 확인</span>
+      </div>
+      <div class="finding-card reveal">
+        <span class="f-icon">✅</span>
+        <h3>두뇌 단독 그룹의 성장</h3>
+        <p>어떤 도구도 쓰지 않은 그룹은 세션을 거듭할수록 인지 참여도가 오히려 증가했습니다. '연습이 뇌를 강화한다'는 사실 재확인.</p>
+        <span class="f-highlight hl-green">인지 능력 향상</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════ QUOTES ══════════════ -->
+<section>
+  <div class="container" style="max-width:800px;">
+    <div class="section-label">연구자 언급</div>
+    <div class="section-title">연구팀이 말하는 것들</div>
+    <div class="section-desc">
+      연구를 이끈 MIT 연구팀과 전문가들의 핵심 발언입니다.
+    </div>
+
+    <div class="quotes-col">
+      <div class="quote-card reveal">
+        <p class="quote-text">
+          "우리는 참가자들이 ChatGPT를 더 많이 사용할수록 그들의 뇌가 점점 더 조용해지는 것을 보았습니다.
+          이는 단순한 효율성의 문제가 아닙니다. 장기적으로 인지 능력 자체가 약화될 수 있다는 경고입니다."
+        </p>
+        <div class="quote-author">— Nataliya Kosmyna, MIT Media Lab 연구원 (수석 저자)</div>
+      </div>
+      <div class="quote-card reveal">
+        <p class="quote-text">
+          "이 연구는 AI를 사용하지 말라는 게 아닙니다. 핵심은 '어떻게' 사용하느냐입니다.
+          AI를 생각을 대체하는 도구로 쓰면 인지 부채가 쌓이고, 비판적 사고를 보조하는 도구로 쓰면
+          오히려 역량이 강화될 수 있습니다."
+        </p>
+        <div class="quote-author">— 연구팀 논평, "Your Brain on ChatGPT" (2025)</div>
+      </div>
+      <div class="quote-card reveal">
+        <p class="quote-text">
+          "ChatGPT가 만들어 준 에세이는 좋은 점수를 받았지만, 학생들은 자신이 쓴 글에 대해
+          제대로 설명하지 못했습니다. 이것은 학습이 일어나지 않았다는 분명한 증거입니다."
+        </p>
+        <div class="quote-author">— 연구 결과 요약 중에서</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════ IMPLICATIONS ══════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">시사점과 제언</div>
+    <div class="section-title">우리는 어떻게 해야 할까?</div>
+    <div class="section-desc">
+      연구팀은 AI를 금지하는 대신, '건강한 AI 사용법'을 정립할 것을 제안합니다.
+    </div>
+
+    <div class="impl-grid">
+      <div class="impl-card reveal">
+        <div class="i-icon">🏋️</div>
+        <h3>비판적 사고 훈련 유지</h3>
+        <p>AI에 의존하기 전, 먼저 스스로 생각하는 시간을 의식적으로 확보하세요.</p>
+      </div>
+      <div class="impl-card reveal">
+        <div class="i-icon">🎓</div>
+        <h3>교육 현장의 AI 리터러시</h3>
+        <p>학생들이 AI를 '생각 아웃소싱' 도구가 아닌 '학습 보조' 도구로 활용하도록 교육해야 합니다.</p>
+      </div>
+      <div class="impl-card reveal">
+        <div class="i-icon">⚖️</div>
+        <h3>AI 사용의 균형</h3>
+        <p>단순 반복 작업엔 AI를, 고차원적 사고가 필요한 작업엔 뇌를 직접 사용하는 균형이 중요합니다.</p>
+      </div>
+      <div class="impl-card reveal">
+        <div class="i-icon">🔍</div>
+        <h3>AI 출력 비판적 검토</h3>
+        <p>AI가 생성한 내용을 그대로 수용하지 말고, 항상 비판적으로 검토하고 자신의 언어로 재구성하세요.</p>
+      </div>
+      <div class="impl-card reveal">
+        <div class="i-icon">🏢</div>
+        <h3>조직·정책 차원의 가이드라인</h3>
+        <p>기업과 교육기관은 AI 사용 기준과 가이드라인을 마련해 인지 능력 퇴화를 예방해야 합니다.</p>
+      </div>
+      <div class="impl-card reveal">
+        <div class="i-icon">🔬</div>
+        <h3>추가 연구 필요</h3>
+        <p>장기적·대규모 후속 연구를 통해 AI 사용이 인지 발달에 미치는 영향을 더 정밀하게 규명해야 합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ CONCLUSION ══════════════ -->
+<section>
+  <div class="container">
+    <div class="conclusion-box reveal">
+      <h2>🧠 우리의 뇌는 사용할수록 강해집니다</h2>
+      <p>
+        MIT 연구가 던지는 핵심 메시지는 단순합니다. AI는 강력한 도구지만, 도구가 우리 대신 생각하게 내버려 두면
+        우리의 인지 근육은 서서히 약해집니다. 중요한 것은 AI를 '사용하느냐 마느냐'가 아니라,
+        <strong>어떻게 능동적으로 활용하느냐</strong>입니다.
+      </p>
+      <div class="tags">
+        <span class="tag">비판적 사고</span>
+        <span class="tag">인지 부채</span>
+        <span class="tag">AI 리터러시</span>
+        <span class="tag">EEG 뇌파 연구</span>
+        <span class="tag">MIT Media Lab</span>
+        <span class="tag">인간-AI 협업</span>
+        <span class="tag">교육 기술</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>본 페이지는 MIT "Your Brain on ChatGPT" 연구(2025) 및 TechNewsWorld 보도를 바탕으로 제작되었습니다.</p>
+  <p style="margin-top:8px;">원문: <a href="https://www.technewsworld.com/story/mit-study-finds-chatgpt-can-harm-critical-thinking-over-time-179801.html" target="_blank">TechNewsWorld</a></p>
+</footer>
+
+<!-- ══════════════ SCRIPTS ══════════════ -->
+<script>
+  /* ─── Chart defaults ─── */
+  Chart.defaults.color = '#94a3b8';
+  Chart.defaults.borderColor = '#1e2d4d';
+  Chart.defaults.font.family = "'Segoe UI', 'Apple SD Gothic Neo', sans-serif";
+
+  const COLORS = {
+    chatgpt:  { line: '#ef4444', fill: 'rgba(239,68,68,.15)' },
+    search:   { line: '#f59e0b', fill: 'rgba(245,158,11,.15)' },
+    brainOnly:{ line: '#10b981', fill: 'rgba(16,185,129,.15)' },
+  };
+
+  /* ─── Bar Chart: Average Engagement ─── */
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: ['ChatGPT\n(고빈도 사용자)', 'ChatGPT\n(저빈도 사용자)', '검색엔진\n그룹', '두뇌 단독\n그룹'],
+      datasets: [{
+        label: '인지 참여도 (%)',
+        data: [38, 62, 68, 85],
+        backgroundColor: [
+          'rgba(239,68,68,.7)',
+          'rgba(245,158,11,.7)',
+          'rgba(34,211,238,.7)',
+          'rgba(16,185,129,.7)',
+        ],
+        borderColor: ['#ef4444','#f59e0b','#22d3ee','#10b981'],
+        borderWidth: 2,
+        borderRadius: 8,
+      }],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` 인지 참여도: ${ctx.raw}%`,
+          },
+        },
+      },
+      scales: {
+        y: {
+          min: 0, max: 100,
+          ticks: { callback: v => v + '%' },
+          title: { display: true, text: '인지 참여도 (%)', color: '#94a3b8' },
+        },
+        x: { ticks: { maxRotation: 0 } },
+      },
+    },
+  });
+
+  /* ─── Line Chart: Trend over Sessions ─── */
+  new Chart(document.getElementById('lineChart'), {
+    type: 'line',
+    data: {
+      labels: ['세션 1', '세션 2', '세션 3'],
+      datasets: [
+        {
+          label: 'ChatGPT 그룹',
+          data: [55, 46, 38],
+          borderColor: COLORS.chatgpt.line,
+          backgroundColor: COLORS.chatgpt.fill,
+          fill: true,
+          tension: .4,
+          pointRadius: 6,
+          pointHoverRadius: 9,
+          borderWidth: 2.5,
+        },
+        {
+          label: '검색엔진 그룹',
+          data: [64, 67, 68],
+          borderColor: COLORS.search.line,
+          backgroundColor: COLORS.search.fill,
+          fill: true,
+          tension: .4,
+          pointRadius: 6,
+          pointHoverRadius: 9,
+          borderWidth: 2.5,
+        },
+        {
+          label: '두뇌 단독 그룹',
+          data: [70, 78, 85],
+          borderColor: COLORS.brainOnly.line,
+          backgroundColor: COLORS.brainOnly.fill,
+          fill: true,
+          tension: .4,
+          pointRadius: 6,
+          pointHoverRadius: 9,
+          borderWidth: 2.5,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { boxWidth: 12, padding: 16 },
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}%`,
+          },
+        },
+      },
+      scales: {
+        y: {
+          min: 20, max: 100,
+          ticks: { callback: v => v + '%' },
+          title: { display: true, text: '인지 참여도 (%)', color: '#94a3b8' },
+        },
+      },
+    },
+  });
+
+  /* ─── Bar Chart: Essay Quality vs Recall ─── */
+  new Chart(document.getElementById('paradoxChart'), {
+    type: 'bar',
+    data: {
+      labels: ['ChatGPT 그룹', '검색엔진 그룹', '두뇌 단독 그룹'],
+      datasets: [
+        {
+          label: '에세이 품질 점수',
+          data: [88, 72, 68],
+          backgroundColor: 'rgba(99,102,241,.75)',
+          borderColor: '#6366f1',
+          borderWidth: 2,
+          borderRadius: 6,
+        },
+        {
+          label: '내용 기억/이해도',
+          data: [28, 65, 82],
+          backgroundColor: 'rgba(16,185,129,.75)',
+          borderColor: '#10b981',
+          borderWidth: 2,
+          borderRadius: 6,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { boxWidth: 12, padding: 16 },
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}점`,
+          },
+        },
+      },
+      scales: {
+        y: {
+          min: 0, max: 100,
+          ticks: { callback: v => v + '점' },
+        },
+      },
+    },
+  });
+
+  /* ─── Radar Chart ─── */
+  new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+      labels: ['논리적 추론', '창의적 사고', '비판적 분석', '내용 기억력', '자기 표현력', '문제 해결력'],
+      datasets: [
+        {
+          label: 'ChatGPT 그룹',
+          data: [40, 35, 38, 28, 45, 42],
+          borderColor: '#ef4444',
+          backgroundColor: 'rgba(239,68,68,.15)',
+          pointBackgroundColor: '#ef4444',
+          borderWidth: 2,
+        },
+        {
+          label: '검색엔진 그룹',
+          data: [65, 58, 62, 64, 60, 65],
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245,158,11,.15)',
+          pointBackgroundColor: '#f59e0b',
+          borderWidth: 2,
+        },
+        {
+          label: '두뇌 단독 그룹',
+          data: [82, 78, 80, 85, 75, 80],
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16,185,129,.15)',
+          pointBackgroundColor: '#10b981',
+          borderWidth: 2,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { boxWidth: 12, padding: 16 },
+        },
+      },
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { stepSize: 25, callback: v => v + '%', backdropColor: 'transparent' },
+          grid: { color: '#1e2d4d' },
+          angleLines: { color: '#1e2d4d' },
+          pointLabels: { font: { size: 11 } },
+        },
+      },
+    },
+  });
+
+  /* ─── Scroll Reveal ─── */
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+    { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+  );
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  /* ─── Region bar animation ─── */
+  const barObserver = new IntersectionObserver(
+    entries => entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('.region-bar-fill').forEach(b => {
+          const w = b.style.width;
+          b.style.width = '0';
+          requestAnimationFrame(() => { b.style.width = w; });
+        });
+        barObserver.unobserve(e.target);
+      }
+    }),
+    { threshold: 0.3 }
+  );
+  document.querySelectorAll('.brain-section').forEach(el => barObserver.observe(el));
+</script>
+</body>
+</html>
