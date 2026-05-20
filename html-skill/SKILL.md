@@ -43,6 +43,15 @@ Pick the best match. If none fits, default to `report`.
 
 ---
 
+## 시작 전 필수 확인
+
+구현을 시작하기 전, 반드시 아래 순서를 먼저 따른다:
+
+1. **`design-system.html`을 읽는다** — 프로젝트 루트에 해당 파일이 있으면 구현 전 반드시 읽고, 정의된 CSS 변수·컴포넌트·스타일 규칙을 우선 적용한다. 아래 Design system 블록은 해당 파일이 없을 때의 기본값이다.
+2. **기존 아티클 파일을 하나 읽는다** — `articles/` 디렉터리에 파일이 있으면 하나를 골라 읽고, 실제 적용 패턴을 파악한 뒤 일관성을 유지한다.
+
+---
+
 ## Design system
 
 Every file must open with this exact `:root` block — no exceptions:
