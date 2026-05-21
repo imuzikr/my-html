@@ -189,6 +189,7 @@ footer{background:var(--color-bg-alt);border-top:1px solid var(--color-border);
     </a>
     <a class="nav-link" href="#background">배경</a>
     <a class="nav-link" href="#concept">개념</a>
+    <a class="nav-link" href="#handshake">핸드셰이크</a>
     <a class="nav-link" href="#when">발생 조건</a>
     <a class="nav-link" href="#how">동작 원리</a>
     <a class="nav-link" href="#server">서버 환경</a>
@@ -389,9 +390,180 @@ pass access control check.</span></code></pre>
     <p>서버라는 건물에 들어가려면 먼저 입구의 문지기(서버)에게 "나 들어가도 되나요?"를 물어봐야 합니다. 문지기가 OK하면 그때 실제로 안으로 들어갑니다.</p>
   </section>
 
-  <!-- Section 3: 발생 조건 -->
+  <!-- Section 3: 핸드셰이크 vs Preflight -->
+  <section id="handshake">
+    <h2><span class="section-num">3</span>핸드셰이크와 Preflight — 어떻게 다른가요?</h2>
+
+    <p>Preflight를 이해하다 보면 <strong>핸드셰이크(Handshake)</strong>라는 단어도 마주칩니다. 둘 다 실제 요청 전에 뭔가를 확인하는 것처럼 보이지만, 목적이 완전히 다릅니다.</p>
+
+    <div class="callout callout-blue">
+      <div class="callout-title">한 줄 정리</div>
+      <p style="margin:0">
+        <strong>핸드셰이크</strong> = "연결 가능?" — 거의 항상 발생 &nbsp;·&nbsp;
+        <strong>Preflight</strong> = "요청 허용?" — 필요할 때만 발생
+      </p>
+    </div>
+
+    <!-- 비유 SVG -->
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 680 160" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="핸드셰이크와 Preflight 비유">
+        <rect x="0" y="0" width="680" height="160" rx="12" fill="#eceae4"/>
+        <!-- Left: Handshake -->
+        <rect x="16" y="16" width="308" height="128" rx="10" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.5"/>
+        <circle cx="80" cy="62" r="28" fill="#2d5a8e" opacity="0.12"/>
+        <text x="80" y="70" text-anchor="middle" font-size="22">📞</text>
+        <text x="192" y="44" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#2d5a8e">핸드셰이크 (Handshake)</text>
+        <text x="192" y="64" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#4a7ab0">"여보세요? 들리세요?"</text>
+        <text x="192" y="82" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#2d5a8e">TCP/TLS 연결 수립 · 암호화 협상</text>
+        <rect x="116" y="96" width="76" height="20" rx="10" fill="#2d5a8e" opacity="0.15"/>
+        <text x="154" y="111" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#2d5a8e" font-weight="600">거의 항상 발생</text>
+        <rect x="200" y="96" width="108" height="20" rx="10" fill="#2d5a8e" opacity="0.15"/>
+        <text x="254" y="111" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#2d5a8e" font-weight="600">브라우저 + 서버 모두</text>
+        <text x="192" y="136" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#6b6a63">인터넷 통신 자체의 기본 연결 과정</text>
+
+        <!-- Right: Preflight -->
+        <rect x="356" y="16" width="308" height="128" rx="10" fill="#faeee7" stroke="#d95f2b" stroke-width="1.5"/>
+        <circle cx="420" cy="62" r="28" fill="#d95f2b" opacity="0.12"/>
+        <text x="420" y="70" text-anchor="middle" font-size="22">✋</text>
+        <text x="532" y="44" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#d95f2b">Preflight</text>
+        <text x="532" y="64" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#b86030">"이 요청 보내도 되나요?"</text>
+        <text x="532" y="82" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#d95f2b">CORS 허가 확인 (OPTIONS)</text>
+        <rect x="460" y="96" width="76" height="20" rx="10" fill="#d95f2b" opacity="0.15"/>
+        <text x="498" y="111" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#d95f2b" font-weight="600">필요할 때만</text>
+        <rect x="544" y="96" width="104" height="20" rx="10" fill="#d95f2b" opacity="0.15"/>
+        <text x="596" y="111" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#d95f2b" font-weight="600">브라우저 환경만</text>
+        <text x="532" y="136" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#6b6a63">브라우저 CORS 보안 정책</text>
+      </svg>
+    </div>
+
+    <p>핸드셰이크는 전화를 걸 때 "여보세요?"와 같습니다. 통신 자체를 시작하기 위한 연결 수립 과정으로, HTTPS라면 여기서 암호화 방식도 맞춥니다. <strong>브라우저뿐 아니라 서버끼리 통신할 때도 항상 일어납니다.</strong></p>
+
+    <p>Preflight는 이미 연결된 상태에서 "이런 요청을 보내도 됩니까?"를 묻는 것입니다. <strong>브라우저가 CORS 보안 정책에 따라 특정 요청 앞에서만 자동으로 수행</strong>합니다. 서버-서버 통신에서는 발생하지 않습니다.</p>
+
+    <h3>전체 흐름 비교</h3>
+
+    <!-- 흐름 비교 SVG: 단순 vs 복잡 -->
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 680 340" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="단순 요청과 복잡한 요청의 전체 통신 흐름 비교">
+        <defs>
+          <marker id="h-b" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#2d5a8e"/></marker>
+          <marker id="h-g" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3a6b4a"/></marker>
+          <marker id="h-o" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#d95f2b"/></marker>
+          <marker id="h-gr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#6b6a63"/></marker>
+        </defs>
+        <rect x="0" y="0" width="680" height="340" rx="14" fill="#eceae4"/>
+
+        <!-- ── TOP: 단순 요청 ── -->
+        <rect x="10" y="8" width="660" height="148" rx="8" fill="#edf6f0" stroke="#b0cdb9" stroke-width="1"/>
+        <text x="340" y="28" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="700" fill="#3a6b4a">단순 요청 (예: GET, 특별한 헤더 없음)</text>
+        <rect x="20" y="36" width="90" height="28" rx="6" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.5"/>
+        <text x="65" y="55" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#2d5a8e">브라우저</text>
+        <rect x="570" y="36" width="90" height="28" rx="6" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="1.5"/>
+        <text x="615" y="55" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#3a6b4a">서버</text>
+        <line x1="65" y1="64" x2="65" y2="150" stroke="#2d5a8e" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="615" y1="64" x2="615" y2="150" stroke="#3a6b4a" stroke-width="1" stroke-dasharray="3,3"/>
+
+        <!-- Handshake -->
+        <line x1="65" y1="82" x2="612" y2="82" stroke="#2d5a8e" stroke-width="1.5" marker-end="url(#h-b)"/>
+        <line x1="615" y1="94" x2="68" y2="94" stroke="#2d5a8e" stroke-width="1.5" marker-end="url(#h-b)"/>
+        <rect x="180" y="70" width="320" height="32" rx="6" fill="#e5eef7" stroke="#b5ccdf" stroke-width="1"/>
+        <text x="340" y="83" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#2d5a8e">🤝 핸드셰이크 (TCP/TLS 연결 수립)</text>
+        <text x="340" y="96" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#4a7ab0">암호화 협상 완료</text>
+
+        <!-- 실제 요청 -->
+        <line x1="65" y1="118" x2="612" y2="118" stroke="#3a6b4a" stroke-width="1.5" marker-end="url(#h-g)"/>
+        <line x1="615" y1="130" x2="68" y2="130" stroke="#6b6a63" stroke-width="1.5" marker-end="url(#h-gr)"/>
+        <rect x="180" y="108" width="320" height="30" rx="6" fill="#e6f0e9" stroke="#b0cdb9" stroke-width="1"/>
+        <text x="340" y="121" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#3a6b4a">📨 실제 요청 (GET /api/data)</text>
+        <text x="340" y="134" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#6b6a63">← 응답</text>
+
+        <!-- ── BOTTOM: 복잡한 요청 ── -->
+        <rect x="10" y="170" width="660" height="160" rx="8" fill="#fff3ed" stroke="#e8b89a" stroke-width="1"/>
+        <text x="340" y="190" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="700" fill="#d95f2b">복잡한 요청 (예: POST + application/json + Authorization)</text>
+        <rect x="20" y="198" width="90" height="28" rx="6" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.5"/>
+        <text x="65" y="217" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#2d5a8e">브라우저</text>
+        <rect x="570" y="198" width="90" height="28" rx="6" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="1.5"/>
+        <text x="615" y="217" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#3a6b4a">서버</text>
+        <line x1="65" y1="226" x2="65" y2="324" stroke="#2d5a8e" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="615" y1="226" x2="615" y2="324" stroke="#3a6b4a" stroke-width="1" stroke-dasharray="3,3"/>
+
+        <!-- Handshake -->
+        <line x1="65" y1="242" x2="612" y2="242" stroke="#2d5a8e" stroke-width="1.5" marker-end="url(#h-b)"/>
+        <line x1="615" y1="254" x2="68" y2="254" stroke="#2d5a8e" stroke-width="1.5" marker-end="url(#h-b)"/>
+        <rect x="180" y="230" width="320" height="32" rx="6" fill="#e5eef7" stroke="#b5ccdf" stroke-width="1"/>
+        <text x="340" y="243" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#2d5a8e">🤝 핸드셰이크 (TCP/TLS 연결 수립)</text>
+        <text x="340" y="256" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#4a7ab0">암호화 협상 완료</text>
+
+        <!-- Preflight (dashed = conditional) -->
+        <line x1="65" y1="274" x2="612" y2="274" stroke="#d95f2b" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#h-o)"/>
+        <line x1="615" y1="286" x2="68" y2="286" stroke="#d95f2b" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#h-o)"/>
+        <rect x="180" y="262" width="320" height="32" rx="6" fill="#faeee7" stroke="#e8b89a" stroke-width="1"/>
+        <text x="340" y="275" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#d95f2b">✋ Preflight (OPTIONS — 허가 확인)</text>
+        <text x="340" y="288" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#b86030">← Access-Control-Allow-* 응답</text>
+
+        <!-- 실제 요청 -->
+        <line x1="65" y1="306" x2="612" y2="306" stroke="#3a6b4a" stroke-width="1.5" marker-end="url(#h-g)"/>
+        <line x1="615" y1="318" x2="68" y2="318" stroke="#6b6a63" stroke-width="1.5" marker-end="url(#h-gr)"/>
+        <rect x="180" y="296" width="320" height="30" rx="6" fill="#e6f0e9" stroke="#b0cdb9" stroke-width="1"/>
+        <text x="340" y="309" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#3a6b4a">📨 실제 요청 (POST /api/data)</text>
+        <text x="340" y="322" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#6b6a63">← 응답</text>
+      </svg>
+    </div>
+
+    <!-- 비교 표 -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>구분</th>
+            <th>핸드셰이크 (Handshake)</th>
+            <th>Preflight</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>목적</strong></td>
+            <td>연결 수립 · 암호화 협상</td>
+            <td>CORS 요청 허가 확인</td>
+          </tr>
+          <tr>
+            <td><strong>발생 빈도</strong></td>
+            <td class="cell-green">거의 항상 (HTTPS면 필수)</td>
+            <td class="cell-yellow">필요할 때만</td>
+          </tr>
+          <tr>
+            <td><strong>발생 환경</strong></td>
+            <td>브라우저 · 서버 모두</td>
+            <td class="cell-red">브라우저 전용</td>
+          </tr>
+          <tr>
+            <td><strong>프로토콜 계층</strong></td>
+            <td>TCP / TLS (연결 계층)</td>
+            <td>HTTP (애플리케이션 계층)</td>
+          </tr>
+          <tr>
+            <td><strong>HTTP 메서드</strong></td>
+            <td>해당 없음</td>
+            <td class="cell-red">OPTIONS</td>
+          </tr>
+          <tr>
+            <td><strong>서버 설정</strong></td>
+            <td class="cell-green">TLS 인증서만</td>
+            <td class="cell-red">CORS 헤더 필수</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-accent">
+      <div class="callout-title">핵심 포인트</div>
+      <p style="margin:0">Preflight는 핸드셰이크보다 상위 개념입니다. 핸드셰이크로 연결을 맺은 <em>후</em>, 브라우저가 "이 요청이 CORS 규칙상 허용되는지" 추가로 확인하는 단계입니다. 핸드셰이크는 생략할 수 없지만, Preflight는 단순 요청이면 건너뜁니다.</p>
+    </div>
+  </section>
+
+  <!-- Section 4: 발생 조건 -->
   <section id="when">
-    <h2><span class="section-num">3</span>언제 발생하나요?</h2>
+    <h2><span class="section-num">4</span>언제 발생하나요?</h2>
 
     <p>모든 요청에 Preflight가 발생하지는 않습니다. 브라우저는 "단순하고 안전하다"고 판단되는 요청은 바로 보냅니다. 복잡하거나 위험할 수 있는 요청 앞에서만 Preflight를 먼저 보냅니다.</p>
 
@@ -451,9 +623,9 @@ pass access control check.</span></code></pre>
     </div>
   </section>
 
-  <!-- Section 4: 동작 원리 -->
+  <!-- Section 5: 동작 원리 -->
   <section id="how">
-    <h2><span class="section-num">4</span>어떻게 동작하나요?</h2>
+    <h2><span class="section-num">5</span>어떻게 동작하나요?</h2>
 
     <p>Preflight는 총 3단계로 동작합니다. 브라우저와 서버 사이의 "대화"입니다.</p>
 
@@ -548,9 +720,9 @@ pass access control check.</span></code></pre>
     </div>
   </section>
 
-  <!-- Section 5: 서버-서버 환경 -->
+  <!-- Section 6: 서버-서버 환경 -->
   <section id="server">
-    <h2><span class="section-num">5</span>서버-서버 통신에서는 Preflight가 없다</h2>
+    <h2><span class="section-num">6</span>서버-서버 통신에서는 Preflight가 없다</h2>
 
     <p>중요한 포인트입니다. Preflight와 CORS는 <strong>브라우저 환경에서만</strong> 발생합니다. 서버에서 서버로 직접 HTTP 요청을 보내는 경우에는 해당 없습니다.</p>
 
@@ -583,9 +755,9 @@ pass access control check.</span></code></pre>
     </div>
   </section>
 
-  <!-- Section 6: 함정 -->
+  <!-- Section 7: 함정 -->
   <section id="gotchas">
-    <h2><span class="section-num">6</span>자주 빠지는 함정 4가지</h2>
+    <h2><span class="section-num">7</span>자주 빠지는 함정 4가지</h2>
 
     <div class="step-flow">
       <div class="step-item">
@@ -619,9 +791,9 @@ pass access control check.</span></code></pre>
     </div>
   </section>
 
-  <!-- Section 7: 해결하기 -->
+  <!-- Section 8: 해결하기 -->
   <section id="fix">
-    <h2><span class="section-num">7</span>해결하기</h2>
+    <h2><span class="section-num">8</span>해결하기</h2>
 
     <h3>서버 CORS 설정 — Express.js (Node.js)</h3>
     <p>가장 간단한 방법은 <code style="font-family:var(--font-mono);">cors</code> 패키지를 사용하는 것입니다.</p>
