@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preflight — 브라우저가 먼저 허락을 구하는 이유</title>
+<meta name="description" content="fetch()를 날렸는데 OPTIONS 요청이 먼저 나간다? CORS Preflight가 무엇이고 왜 발생하는지, 바이브 코더를 위해 쉽게 설명합니다.">
+<style>
+:root {
+  --color-bg:#f5f2ed; --color-bg-alt:#eceae4; --color-bg-card:#ffffff;
+  --color-bg-code:#1e1e1e;
+  --color-text:#1a1a18; --color-text-muted:#6b6a63; --color-text-faint:#a09f97;
+  --color-border:#dedad2; --color-border-strong:#b8b5ac;
+  --color-accent:#d95f2b; --color-accent-hover:#c2521f; --color-accent-soft:#faeee7;
+  --color-green:#3a6b4a; --color-green-soft:#e6f0e9;
+  --color-blue:#2d5a8e; --color-blue-soft:#e5eef7;
+  --color-yellow:#8a6a00; --color-yellow-soft:#fdf5d9;
+  --color-red:#b03a2e; --color-red-soft:#fdecea;
+  --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --font-mono:"SF Mono","Fira Code",Consolas,"Liberation Mono",monospace;
+  --text-xs:0.75rem; --text-sm:0.875rem; --text-base:1rem; --text-lg:1.125rem;
+  --text-xl:1.25rem; --text-2xl:1.5rem; --text-3xl:1.875rem; --text-4xl:2.25rem;
+  --weight-medium:500; --weight-semibold:600; --weight-bold:700;
+  --leading-tight:1.25; --leading-snug:1.4; --leading-normal:1.6; --leading-loose:1.8;
+  --space-1:0.25rem; --space-2:0.5rem; --space-3:0.75rem; --space-4:1rem;
+  --space-5:1.25rem; --space-6:1.5rem; --space-8:2rem; --space-10:2.5rem;
+  --space-12:3rem; --space-16:4rem;
+  --radius-sm:4px; --radius-md:8px; --radius-lg:12px; --radius-full:9999px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.07); --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--color-bg);color:var(--color-text);line-height:var(--leading-normal);}
+
+#progress-bar{position:fixed;top:0;left:0;height:3px;background:var(--color-accent);width:0%;transition:width 80ms linear;z-index:200;}
+
+nav{position:sticky;top:0;background:rgba(245,242,237,0.92);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--color-border);z-index:100;padding:0 var(--space-8);}
+.nav-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:var(--space-6);height:52px;overflow-x:auto;scrollbar-width:none;}
+.nav-inner::-webkit-scrollbar{display:none;}
+.nav-link{font-size:var(--text-sm);color:var(--color-text-muted);text-decoration:none;white-space:nowrap;padding:var(--space-1) 0;border-bottom:2px solid transparent;transition:all 150ms ease;}
+.nav-link:hover,.nav-link.active{color:var(--color-accent);border-bottom-color:var(--color-accent);}
+.nav-back{margin-right:auto;display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);color:var(--color-text-muted);text-decoration:none;transition:color 150ms ease;flex-shrink:0;}
+.nav-back:hover{color:var(--color-accent);}
+
+.hero{background:linear-gradient(135deg,#1a2236 0%,#0f1520 60%,#1a1a18 100%);color:#fff;padding:var(--space-16) var(--space-8) var(--space-12);}
+.hero-inner{max-width:900px;margin:0 auto;display:grid;grid-template-columns:1fr 300px;gap:var(--space-10);align-items:start;}
+.hero-badge{display:inline-flex;align-items:center;gap:var(--space-2);background:rgba(217,95,43,0.25);color:#f4a87a;
+  font-size:var(--text-xs);font-weight:var(--weight-semibold);padding:var(--space-1) var(--space-3);
+  border-radius:var(--radius-full);border:1px solid rgba(217,95,43,0.4);margin-bottom:var(--space-6);letter-spacing:0.05em;text-transform:uppercase;}
+.hero-left h1{font-size:clamp(1.75rem,4vw,2.6rem);font-weight:var(--weight-bold);line-height:var(--leading-tight);margin-bottom:var(--space-4);letter-spacing:-0.02em;}
+.hero-lead{font-size:var(--text-lg);color:rgba(255,255,255,0.7);line-height:var(--leading-loose);margin-bottom:var(--space-6);}
+.hero-tags{display:flex;flex-wrap:wrap;gap:var(--space-2);}
+.hero-tag{font-size:var(--text-xs);background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius-full);padding:3px var(--space-3);color:rgba(255,255,255,0.6);}
+.hero-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius-lg);padding:var(--space-5);}
+.hero-card-title{font-size:var(--text-xs);font-weight:var(--weight-semibold);letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:var(--space-4);}
+.hero-scenario{display:flex;flex-direction:column;gap:var(--space-2);}
+.hero-scenario-row{display:flex;align-items:center;gap:var(--space-3);font-size:var(--text-sm);}
+.hs-num{width:22px;height:22px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;font-size:var(--text-xs);font-weight:var(--weight-bold);flex-shrink:0;}
+.hs-num.warn{background:rgba(176,58,46,0.3);color:#f5a09a;}
+.hs-num.ok{background:rgba(58,107,74,0.3);color:#9fd4b0;}
+.hs-text{color:rgba(255,255,255,0.75);line-height:var(--leading-snug);}
+
+main{max-width:900px;margin:0 auto;padding:var(--space-12) var(--space-8);}
+section{margin-bottom:var(--space-12);}
+h2{font-size:var(--text-2xl);font-weight:var(--weight-bold);line-height:var(--leading-tight);
+  margin-bottom:var(--space-6);padding-bottom:var(--space-3);border-bottom:2px solid var(--color-border);
+  display:flex;align-items:center;gap:var(--space-3);}
+.section-num{display:inline-flex;align-items:center;justify-content:center;
+  width:32px;height:32px;background:var(--color-accent);color:#fff;
+  border-radius:var(--radius-full);font-size:var(--text-sm);font-weight:var(--weight-bold);flex-shrink:0;}
+h3{font-size:var(--text-xl);font-weight:var(--weight-semibold);margin-bottom:var(--space-4);color:var(--color-text);}
+p{margin-bottom:var(--space-4);line-height:var(--leading-loose);}
+
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4);margin-bottom:var(--space-10);}
+.stat-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);text-align:center;box-shadow:var(--shadow-sm);}
+.stat-value{font-size:var(--text-3xl);font-weight:var(--weight-bold);color:var(--color-accent);line-height:1;margin-bottom:var(--space-2);}
+.stat-label{font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-snug);}
+
+.callout{padding:var(--space-5) var(--space-6);border-radius:var(--radius-lg);margin-bottom:var(--space-6);border-left:4px solid;}
+.callout-blue{background:var(--color-blue-soft);border-color:var(--color-blue);}
+.callout-green{background:var(--color-green-soft);border-color:var(--color-green);}
+.callout-yellow{background:var(--color-yellow-soft);border-color:var(--color-yellow);}
+.callout-red{background:var(--color-red-soft);border-color:var(--color-red);}
+.callout-accent{background:var(--color-accent-soft);border-color:var(--color-accent);}
+.callout-title{font-weight:var(--weight-semibold);margin-bottom:var(--space-2);font-size:var(--text-sm);text-transform:uppercase;letter-spacing:0.05em;}
+.callout-blue .callout-title{color:var(--color-blue);}
+.callout-green .callout-title{color:var(--color-green);}
+.callout-yellow .callout-title{color:var(--color-yellow);}
+.callout-red .callout-title{color:var(--color-red);}
+.callout-accent .callout-title{color:var(--color-accent);}
+
+.diagram-wrap{margin:var(--space-6) 0;overflow-x:auto;}
+
+.table-wrap{overflow-x:auto;margin:var(--space-6) 0;}
+table{width:100%;border-collapse:collapse;font-size:var(--text-sm);}
+thead th{background:var(--color-bg-alt);padding:var(--space-3) var(--space-4);text-align:left;
+  font-weight:var(--weight-semibold);font-size:var(--text-xs);text-transform:uppercase;
+  letter-spacing:0.05em;color:var(--color-text-muted);border-bottom:2px solid var(--color-border);}
+tbody td{padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--color-border);line-height:var(--leading-snug);}
+tbody tr:hover td{background:var(--color-bg-alt);}
+td.cell-green{color:var(--color-green);font-weight:var(--weight-semibold);}
+td.cell-red{color:var(--color-red);font-weight:var(--weight-semibold);}
+td.cell-yellow{color:var(--color-yellow);font-weight:var(--weight-semibold);}
+
+.code-block{margin:var(--space-4) 0;border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm);}
+.code-block-header{background:#2d2d2d;padding:var(--space-3) var(--space-4);display:flex;align-items:center;justify-content:space-between;}
+.code-lang{font-size:var(--text-xs);color:#a09f97;font-family:var(--font-mono);font-weight:var(--weight-semibold);letter-spacing:0.05em;text-transform:uppercase;}
+.copy-btn{font-size:var(--text-xs);color:#a09f97;background:transparent;border:1px solid #444;border-radius:var(--radius-sm);padding:2px var(--space-3);cursor:pointer;transition:all 120ms ease;font-family:var(--font-sans);}
+.copy-btn:hover{color:#fff;border-color:#666;}
+.code-block pre{background:var(--color-bg-code);padding:var(--space-5) var(--space-6);overflow-x:auto;margin:0;}
+.code-block code{font-family:var(--font-mono);font-size:var(--text-sm);line-height:1.7;color:#d4d4d4;}
+.tok-keyword{color:#569cd6;}
+.tok-string{color:#ce9178;}
+.tok-comment{color:#6a9955;font-style:italic;}
+.tok-number{color:#b5cea8;}
+.tok-function{color:#dcdcaa;}
+.tok-property{color:#9cdcfe;}
+.tok-operator{color:#d4d4d4;}
+.tok-type{color:#4ec9b0;}
+.tok-http-method{color:#569cd6;font-weight:700;}
+.tok-http-header{color:#9cdcfe;}
+.tok-http-value{color:#ce9178;}
+.tok-http-status{color:#4ec9b0;font-weight:700;}
+
+.step-flow{display:flex;flex-direction:column;gap:var(--space-3);margin:var(--space-6) 0;}
+.step-item{display:flex;gap:var(--space-4);align-items:flex-start;background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);}
+.step-badge{flex-shrink:0;width:32px;height:32px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;font-size:var(--text-sm);font-weight:var(--weight-bold);}
+.step-badge.blue{background:var(--color-blue-soft);color:var(--color-blue);}
+.step-badge.accent{background:var(--color-accent-soft);color:var(--color-accent);}
+.step-badge.green{background:var(--color-green-soft);color:var(--color-green);}
+.step-badge.red{background:var(--color-red-soft);color:var(--color-red);}
+.step-body{flex:1;}
+.step-title{font-weight:var(--weight-semibold);margin-bottom:var(--space-1);}
+.step-desc{font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-snug);}
+
+.checklist{list-style:none;display:flex;flex-direction:column;gap:var(--space-3);}
+.checklist li{display:flex;align-items:flex-start;gap:var(--space-3);background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);cursor:pointer;transition:all 140ms ease;}
+.checklist li:hover{border-color:var(--color-accent-hover);}
+.checklist li.checked{background:var(--color-green-soft);border-color:var(--color-green);}
+.check-box{flex-shrink:0;width:22px;height:22px;border:2px solid var(--color-border);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;transition:all 140ms ease;margin-top:1px;}
+.checklist li.checked .check-box{background:var(--color-green);border-color:var(--color-green);}
+.check-mark{display:none;color:#fff;}
+.checklist li.checked .check-mark{display:block;}
+.check-text{font-size:var(--text-sm);line-height:var(--leading-snug);flex:1;}
+.checklist li.checked .check-text{color:var(--color-green);text-decoration:line-through;text-decoration-color:rgba(58,107,74,0.4);}
+
+.env-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-5);margin:var(--space-6) 0;}
+.env-card{border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);background:var(--color-bg-card);}
+.env-card.browser{border-top:3px solid var(--color-blue);}
+.env-card.server{border-top:3px solid var(--color-green);}
+.env-label{font-size:var(--text-xs);font-weight:var(--weight-semibold);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:var(--space-3);}
+.env-card.browser .env-label{color:var(--color-blue);}
+.env-card.server .env-label{color:var(--color-green);}
+.env-examples{list-style:none;display:flex;flex-direction:column;gap:var(--space-2);}
+.env-examples li{font-size:var(--text-sm);color:var(--color-text-muted);padding-left:var(--space-4);position:relative;}
+.env-examples li::before{content:"·";position:absolute;left:0;color:var(--color-text-faint);}
+
+.takeaway-list{list-style:none;display:flex;flex-direction:column;gap:var(--space-4);}
+.takeaway-list li{display:flex;gap:var(--space-4);align-items:flex-start;background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);}
+.takeaway-icon{flex-shrink:0;width:36px;height:36px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;font-size:var(--text-base);}
+.takeaway-body{flex:1;}
+.takeaway-title{font-weight:var(--weight-semibold);margin-bottom:var(--space-1);}
+.takeaway-desc{font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-snug);}
+
+footer{background:var(--color-bg-alt);border-top:1px solid var(--color-border);
+  padding:var(--space-8);text-align:center;font-size:var(--text-sm);color:var(--color-text-faint);}
+
+@media(max-width:700px){
+  .hero-inner{grid-template-columns:1fr;}
+  .hero-card{display:none;}
+  .hero{padding:var(--space-10) var(--space-4) var(--space-8);}
+  main{padding:var(--space-8) var(--space-4);}
+  nav{padding:0 var(--space-4);}
+  .stat-row{grid-template-columns:1fr;}
+  .env-grid{grid-template-columns:1fr;}
+  h2{font-size:var(--text-xl);}
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-back" href="../index.html">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 11L5 7l4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      목록
+    </a>
+    <a class="nav-link" href="#background">배경</a>
+    <a class="nav-link" href="#concept">개념</a>
+    <a class="nav-link" href="#when">발생 조건</a>
+    <a class="nav-link" href="#how">동작 원리</a>
+    <a class="nav-link" href="#server">서버 환경</a>
+    <a class="nav-link" href="#gotchas">함정</a>
+    <a class="nav-link" href="#fix">해결하기</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-badge">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.5 3 3.3.5-2.4 2.3.6 3.2L6 8.5 3 10l.6-3.2L1.2 4.5 4.5 4 6 1z" stroke="#f4a87a" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        CORS · Preflight · 웹 보안
+      </div>
+      <h1>Preflight<br>브라우저가 먼저 허락을 구하는 이유</h1>
+      <p class="hero-lead">fetch() 한 번 날렸는데 네트워크 탭에 요청이 두 개? 내가 보낸 적 없는 OPTIONS가 먼저 나간다? 당신 잘못이 아닙니다. 브라우저가 자동으로 하는 보안 절차입니다.</p>
+      <div class="hero-tags">
+        <span class="hero-tag">바이브 코딩</span>
+        <span class="hero-tag">초보 개발자</span>
+        <span class="hero-tag">프론트엔드</span>
+        <span class="hero-tag">CORS</span>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-card-title">자주 겪는 상황</div>
+      <div class="hero-scenario">
+        <div class="hero-scenario-row">
+          <span class="hs-num warn">1</span>
+          <span class="hs-text">콘솔에 빨간 CORS 에러 등장</span>
+        </div>
+        <div class="hero-scenario-row">
+          <span class="hs-num warn">2</span>
+          <span class="hs-text">네트워크 탭에 OPTIONS 요청 — 내가 보낸 적 없는데?</span>
+        </div>
+        <div class="hero-scenario-row">
+          <span class="hs-num warn">3</span>
+          <span class="hs-text">AI에게 물어보니 "서버에 CORS 설정하세요"</span>
+        </div>
+        <div class="hero-scenario-row">
+          <span class="hs-num ok">4</span>
+          <span class="hs-text">이 글을 읽고 원리를 이해해서 직접 해결</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="stat-value">OPTIONS</div>
+      <div class="stat-label">브라우저가 자동으로 보내는<br>Preflight 요청 메서드</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">2번</div>
+      <div class="stat-label">Preflight 발생 시<br>실제로 나가는 요청 횟수</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">브라우저만</div>
+      <div class="stat-label">Preflight가 발생하는 환경<br>(서버-서버 통신은 해당 없음)</div>
+    </div>
+  </div>
+
+  <!-- Section 1: 배경 -->
+  <section id="background">
+    <h2><span class="section-num">1</span>이런 경험, 있으신가요?</h2>
+
+    <p>React나 Next.js로 프론트엔드를 만들고, 백엔드 API에 <code style="font-family:var(--font-mono);background:var(--color-bg-alt);padding:1px 6px;border-radius:4px;">fetch()</code>로 데이터를 요청했더니 콘솔에 이런 에러가 뜹니다.</p>
+
+    <div class="code-block">
+      <div class="code-block-header">
+        <span class="code-lang">Browser Console</span>
+      </div>
+      <pre><code><span style="color:#f48771;">Access to fetch at 'https://api.myserver.com/data'
+from origin 'http://localhost:3000' has been blocked
+by CORS policy: Response to preflight request doesn't
+pass access control check.</span></code></pre>
+    </div>
+
+    <p>그리고 네트워크 탭을 열어보면 이상한 일이 벌어져 있습니다.</p>
+
+    <!-- SVG: 네트워크 탭 시각화 -->
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 680 140" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="네트워크 탭에 OPTIONS와 POST 두 요청이 보이는 모습">
+        <defs>
+          <filter id="sf1" x="-5%" y="-20%" width="110%" height="150%">
+            <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#1a1a18" flood-opacity="0.07"/>
+          </filter>
+        </defs>
+        <!-- Panel -->
+        <rect x="0" y="0" width="680" height="140" rx="12" fill="#1e1e1e"/>
+        <!-- Header row -->
+        <rect x="0" y="0" width="680" height="30" rx="12" fill="#2d2d2d"/>
+        <rect x="0" y="18" width="680" height="12" fill="#2d2d2d"/>
+        <text x="20" y="20" font-family="-apple-system,sans-serif" font-size="10" fill="#6a9955" font-weight="600">Network</text>
+        <text x="100" y="20" font-family="-apple-system,sans-serif" font-size="10" fill="#808080">Method</text>
+        <text x="200" y="20" font-family="-apple-system,sans-serif" font-size="10" fill="#808080">Status</text>
+        <text x="280" y="20" font-family="-apple-system,sans-serif" font-size="10" fill="#808080">Name</text>
+        <text x="460" y="20" font-family="-apple-system,sans-serif" font-size="10" fill="#808080">Type</text>
+
+        <!-- Row 1: OPTIONS (preflight) - highlighted -->
+        <rect x="8" y="36" width="664" height="38" rx="4" fill="#2d3a2d" stroke="#3a6b4a" stroke-width="1"/>
+        <text x="100" y="60" font-family="SF Mono,Fira Code,monospace" font-size="12" fill="#569cd6" font-weight="700">OPTIONS</text>
+        <text x="200" y="60" font-family="SF Mono,Fira Code,monospace" font-size="12" fill="#4ec9b0" font-weight="600">200</text>
+        <text x="280" y="60" font-family="SF Mono,Fira Code,monospace" font-size="12" fill="#9cdcfe">/api/data</text>
+        <text x="460" y="60" font-family="-apple-system,sans-serif" font-size="11" fill="#ce9178">preflight</text>
+        <!-- Badge -->
+        <rect x="567" y="46" width="108" height="18" rx="9" fill="rgba(58,107,74,0.3)"/>
+        <text x="621" y="59" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#9fd4b0" font-weight="600">브라우저 자동 전송</text>
+
+        <!-- Row 2: POST (actual) -->
+        <rect x="8" y="82" width="664" height="38" rx="4" fill="#252525"/>
+        <text x="100" y="106" font-family="SF Mono,Fira Code,monospace" font-size="12" fill="#569cd6" font-weight="700">POST</text>
+        <text x="200" y="106" font-family="SF Mono,Fira Code,monospace" font-size="12" fill="#4ec9b0" font-weight="600">200</text>
+        <text x="280" y="106" font-family="SF Mono,Fira Code,monospace" font-size="12" fill="#9cdcfe">/api/data</text>
+        <text x="460" y="106" font-family="-apple-system,sans-serif" font-size="11" fill="#ce9178">fetch</text>
+        <!-- Badge -->
+        <rect x="567" y="92" width="108" height="18" rx="9" fill="rgba(45,90,142,0.3)"/>
+        <text x="621" y="105" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#8ab4d4" font-weight="600">내가 보낸 요청</text>
+      </svg>
+    </div>
+
+    <p>요청이 두 개입니다. 내가 <code style="font-family:var(--font-mono);background:var(--color-bg-alt);padding:1px 6px;border-radius:4px;">POST</code>를 한 번 보냈는데, <code style="font-family:var(--font-mono);background:var(--color-bg-alt);padding:1px 6px;border-radius:4px;">OPTIONS</code>가 먼저 나갔습니다. 이 <code style="font-family:var(--font-mono);background:var(--color-bg-alt);padding:1px 6px;border-radius:4px;">OPTIONS</code>가 바로 <strong>Preflight 요청</strong>입니다.</p>
+
+    <div class="callout callout-yellow">
+      <div class="callout-title">핵심</div>
+      <p style="margin:0"><strong>Preflight는 내가 만든 코드가 아닙니다.</strong> 브라우저가 보안상 필요하다고 판단할 때 자동으로 보내는 사전 확인 요청입니다. JavaScript 코드에서 <code style="font-family:var(--font-mono);">OPTIONS</code>를 직접 작성하지 않아도 됩니다.</p>
+    </div>
+  </section>
+
+  <!-- Section 2: 개념 -->
+  <section id="concept">
+    <h2><span class="section-num">2</span>Preflight란 무엇인가</h2>
+
+    <p>브라우저는 <strong>출처(Origin)가 다른 서버</strong>에 "위험할 수 있는 요청"을 보내기 전에, 먼저 그 서버에게 허락을 구합니다. 이 허락 요청이 <strong>Preflight(사전 비행)</strong>입니다.</p>
+
+    <div class="callout callout-blue">
+      <div class="callout-title">출처(Origin)가 다르다는 것은?</div>
+      <p style="margin:0">
+        <strong>프론트엔드:</strong> <code style="font-family:var(--font-mono);">http://localhost:3000</code><br>
+        <strong>백엔드 API:</strong> <code style="font-family:var(--font-mono);">https://api.myserver.com</code><br><br>
+        도메인, 프로토콜, 포트 중 하나라도 다르면 "다른 출처(Cross-Origin)"입니다. 로컬 개발 중에도 포트 번호가 달라지면 다른 출처로 간주합니다. (<code style="font-family:var(--font-mono);">:3000</code> vs <code style="font-family:var(--font-mono);">:8000</code>)
+      </p>
+    </div>
+
+    <p>브라우저가 이렇게 동작하는 이유는 <strong>보안</strong> 때문입니다. 만약 어떤 악성 사이트가 사용자의 브라우저를 통해 은행 API에 마음대로 요청을 보낼 수 있다면? Preflight는 서버가 "허용된 출처"를 명확히 선언하도록 강제해서 이를 방지합니다.</p>
+
+    <p>쉽게 비유하면 이렇습니다:</p>
+
+    <!-- SVG: 비유 다이어그램 -->
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 680 120" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Preflight 비유: 문지기에게 먼저 허락을 받고 들어가는 구조">
+        <defs>
+          <marker id="arr-a" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+            <polygon points="0 0,9 3.5,0 7" fill="#b8b5ac"/>
+          </marker>
+          <marker id="arr-b" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+            <polygon points="0 0,9 3.5,0 7" fill="#3a6b4a"/>
+          </marker>
+          <marker id="arr-q" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+            <polygon points="0 0,9 3.5,0 7" fill="#2d5a8e"/>
+          </marker>
+        </defs>
+        <rect x="0" y="0" width="680" height="120" rx="12" fill="#eceae4"/>
+
+        <!-- Browser -->
+        <rect x="20" y="30" width="110" height="60" rx="8" fill="#fff" stroke="#dedad2" stroke-width="1.5"/>
+        <text x="75" y="55" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#1a1a18">브라우저</text>
+        <text x="75" y="73" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#6b6a63">(React / Next.js)</text>
+
+        <!-- Arrow 1: 먼저 물어봄 -->
+        <line x1="132" y1="52" x2="248" y2="52" stroke="#2d5a8e" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-q)"/>
+        <text x="190" y="44" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#2d5a8e" font-weight="600">① OPTIONS (먼저 물어봄)</text>
+
+        <!-- Arrow 2: 허용 응답 -->
+        <line x1="248" y1="70" x2="132" y2="70" stroke="#3a6b4a" stroke-width="1.5" marker-end="url(#arr-b)"/>
+        <text x="190" y="88" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#3a6b4a" font-weight="600">② 허용 응답</text>
+
+        <!-- Gatekeeper / Server -->
+        <rect x="250" y="20" width="120" height="80" rx="8" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.5"/>
+        <text x="310" y="52" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="700" fill="#2d5a8e">서버</text>
+        <text x="310" y="68" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#2d5a8e">(문지기)</text>
+        <text x="310" y="86" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#2d5a8e">허용 목록 확인</text>
+
+        <!-- Arrow 3: 실제 요청 -->
+        <line x1="372" y1="60" x2="466" y2="60" stroke="#b8b5ac" stroke-width="1.5" marker-end="url(#arr-a)"/>
+        <text x="419" y="50" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#6b6a63" font-weight="600">③ 실제 POST 요청</text>
+
+        <!-- API Resource -->
+        <rect x="468" y="30" width="110" height="60" rx="8" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="1.5"/>
+        <text x="523" y="55" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#3a6b4a">API 리소스</text>
+        <text x="523" y="73" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#3a6b4a">/api/data</text>
+      </svg>
+    </div>
+
+    <p>서버라는 건물에 들어가려면 먼저 입구의 문지기(서버)에게 "나 들어가도 되나요?"를 물어봐야 합니다. 문지기가 OK하면 그때 실제로 안으로 들어갑니다.</p>
+  </section>
+
+  <!-- Section 3: 발생 조건 -->
+  <section id="when">
+    <h2><span class="section-num">3</span>언제 발생하나요?</h2>
+
+    <p>모든 요청에 Preflight가 발생하지는 않습니다. 브라우저는 "단순하고 안전하다"고 판단되는 요청은 바로 보냅니다. 복잡하거나 위험할 수 있는 요청 앞에서만 Preflight를 먼저 보냅니다.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>구분</th>
+            <th>단순 요청 — Preflight 없음</th>
+            <th>비단순 요청 — Preflight 발생</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>HTTP 메서드</strong></td>
+            <td class="cell-green">GET, POST, HEAD</td>
+            <td class="cell-red">PUT, DELETE, PATCH</td>
+          </tr>
+          <tr>
+            <td><strong>Content-Type</strong></td>
+            <td class="cell-green">text/plain<br>application/x-www-form-urlencoded<br>multipart/form-data</td>
+            <td class="cell-red">application/json ← 바이브 코더 99%</td>
+          </tr>
+          <tr>
+            <td><strong>커스텀 헤더</strong></td>
+            <td class="cell-green">없음</td>
+            <td class="cell-red">Authorization, X-Custom-Header 등</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-accent">
+      <div class="callout-title">바이브 코더가 가장 자주 마주치는 조합</div>
+      <p style="margin:0">아래 코드 한 줄이 Preflight를 발생시키는 가장 흔한 패턴입니다. <code style="font-family:var(--font-mono);">Content-Type: application/json</code>이 "단순하지 않은" 요청으로 분류되기 때문입니다.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block-header">
+        <span class="code-lang">JavaScript</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code><span class="tok-comment">// 이 코드는 Preflight를 발생시킵니다</span>
+<span class="tok-keyword">await</span> <span class="tok-function">fetch</span>(<span class="tok-string">'https://api.myserver.com/data'</span>, {
+  <span class="tok-property">method</span>: <span class="tok-string">'POST'</span>,
+  <span class="tok-property">headers</span>: {
+    <span class="tok-string">'Content-Type'</span>: <span class="tok-string">'application/json'</span>,  <span class="tok-comment">// ← 이것 때문에!</span>
+    <span class="tok-string">'Authorization'</span>: <span class="tok-string">`Bearer ${token}`</span>         <span class="tok-comment">// ← 이것도!</span>
+  },
+  <span class="tok-property">body</span>: <span class="tok-type">JSON</span>.<span class="tok-function">stringify</span>({ name: <span class="tok-string">'홍길동'</span> })
+});</code></pre>
+    </div>
+
+    <div class="callout callout-blue">
+      <div class="callout-title">POST인데 왜 Preflight가?</div>
+      <p style="margin:0">GET이나 POST라도 <code style="font-family:var(--font-mono);">Content-Type: application/json</code>이나 <code style="font-family:var(--font-mono);">Authorization</code> 헤더가 있으면 "비단순 요청"으로 분류됩니다. 메서드만 보는 게 아닙니다.</p>
+    </div>
+  </section>
+
+  <!-- Section 4: 동작 원리 -->
+  <section id="how">
+    <h2><span class="section-num">4</span>어떻게 동작하나요?</h2>
+
+    <p>Preflight는 총 3단계로 동작합니다. 브라우저와 서버 사이의 "대화"입니다.</p>
+
+    <!-- SVG: 3단계 흐름 -->
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 680 300" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Preflight 3단계 동작 흐름">
+        <defs>
+          <filter id="sf2" x="-5%" y="-30%" width="110%" height="160%">
+            <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#1a1a18" flood-opacity="0.07"/>
+          </filter>
+          <marker id="mb" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0,8 3,0 6" fill="#2d5a8e"/>
+          </marker>
+          <marker id="mg2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0,8 3,0 6" fill="#3a6b4a"/>
+          </marker>
+          <marker id="mg3" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0,8 3,0 6" fill="#6b6a63"/>
+          </marker>
+        </defs>
+        <rect x="0" y="0" width="680" height="300" rx="14" fill="#eceae4"/>
+
+        <!-- Actors -->
+        <rect x="20" y="14" width="120" height="36" rx="8" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.5"/>
+        <text x="80" y="37" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#2d5a8e">브라우저</text>
+
+        <rect x="540" y="14" width="120" height="36" rx="8" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="1.5"/>
+        <text x="600" y="37" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#3a6b4a">서버</text>
+
+        <!-- Vertical lifelines -->
+        <line x1="80" y1="50" x2="80" y2="285" stroke="#2d5a8e" stroke-width="1" stroke-dasharray="4,3"/>
+        <line x1="600" y1="50" x2="600" y2="285" stroke="#3a6b4a" stroke-width="1" stroke-dasharray="4,3"/>
+
+        <!-- STEP 1: OPTIONS -->
+        <rect x="10" y="60" width="22" height="22" rx="11" fill="#2d5a8e"/>
+        <text x="21" y="76" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#fff">1</text>
+        <line x1="80" y1="71" x2="597" y2="71" stroke="#2d5a8e" stroke-width="1.8" marker-end="url(#mb)"/>
+        <rect x="150" y="56" width="370" height="36" rx="6" fill="#e5eef7" filter="url(#sf2)"/>
+        <text x="200" y="69" font-family="SF Mono,Fira Code,monospace" font-size="11" fill="#1a1a18" font-weight="600">OPTIONS /api/data</text>
+        <text x="200" y="84" font-family="SF Mono,Fira Code,monospace" font-size="10" fill="#2d5a8e">Access-Control-Request-Method: POST</text>
+
+        <!-- request headers detail -->
+        <rect x="160" y="100" width="340" height="54" rx="6" fill="#f0f4fa" stroke="#b5ccdf" stroke-width="1"/>
+        <text x="180" y="116" font-family="SF Mono,Fira Code,monospace" font-size="10" fill="#6b6a63">Access-Control-Request-Method: POST</text>
+        <text x="180" y="130" font-family="SF Mono,Fira Code,monospace" font-size="10" fill="#6b6a63">Access-Control-Request-Headers: authorization, content-type</text>
+        <text x="180" y="144" font-family="SF Mono,Fira Code,monospace" font-size="10" fill="#6b6a63">Origin: https://myapp.com</text>
+
+        <!-- STEP 2: 200 OK -->
+        <rect x="10" y="166" width="22" height="22" rx="11" fill="#3a6b4a"/>
+        <text x="21" y="182" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#fff">2</text>
+        <line x1="600" y1="177" x2="83" y2="177" stroke="#3a6b4a" stroke-width="1.8" marker-end="url(#mg2)"/>
+        <rect x="150" y="162" width="370" height="36" rx="6" fill="#e6f0e9" filter="url(#sf2)"/>
+        <text x="200" y="175" font-family="SF Mono,Fira Code,monospace" font-size="11" fill="#1a1a18" font-weight="600">HTTP/1.1 200 OK</text>
+        <text x="200" y="190" font-family="SF Mono,Fira Code,monospace" font-size="10" fill="#3a6b4a">Access-Control-Allow-Origin: https://myapp.com</text>
+
+        <!-- response headers detail -->
+        <rect x="160" y="204" width="340" height="40" rx="6" fill="#edf6f0" stroke="#b0cdb9" stroke-width="1"/>
+        <text x="180" y="220" font-family="SF Mono,Fira Code,monospace" font-size="10" fill="#6b6a63">Access-Control-Allow-Methods: POST</text>
+        <text x="180" y="234" font-family="SF Mono,Fira Code,monospace" font-size="10" fill="#6b6a63">Access-Control-Allow-Headers: authorization, content-type</text>
+
+        <!-- STEP 3: 실제 요청 -->
+        <rect x="10" y="256" width="22" height="22" rx="11" fill="#6b6a63"/>
+        <text x="21" y="272" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#fff">3</text>
+        <line x1="80" y1="267" x2="597" y2="267" stroke="#6b6a63" stroke-width="1.8" marker-end="url(#mg3)"/>
+        <rect x="150" y="253" width="370" height="26" rx="6" fill="#fff" stroke="#dedad2" stroke-width="1" filter="url(#sf2)"/>
+        <text x="200" y="271" font-family="SF Mono,Fira Code,monospace" font-size="11" fill="#1a1a18" font-weight="600">POST /api/data  (실제 요청 전송)</text>
+      </svg>
+    </div>
+
+    <div class="step-flow">
+      <div class="step-item">
+        <div class="step-badge blue">1</div>
+        <div class="step-body">
+          <div class="step-title">브라우저 → 서버: "이런 요청 보내도 되나요?"</div>
+          <div class="step-desc">브라우저가 자동으로 <code style="font-family:var(--font-mono);">OPTIONS</code> 메서드로 Preflight를 보냅니다. "이 출처(Origin)에서 POST 메서드를 쓰고, Authorization · Content-Type 헤더를 사용할 건데 허용하나요?"라고 묻는 것입니다.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-badge green">2</div>
+        <div class="step-body">
+          <div class="step-title">서버 → 브라우저: "허용합니다" (또는 거부)</div>
+          <div class="step-desc">서버가 <code style="font-family:var(--font-mono);">Access-Control-Allow-*</code> 헤더들로 응답합니다. 허용된 출처, 메서드, 헤더를 명시합니다. 이 응답이 없거나 허용 목록에 없으면 CORS 에러가 발생합니다.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-badge accent">3</div>
+        <div class="step-body">
+          <div class="step-title">브라우저 → 서버: 이제 실제 요청 전송</div>
+          <div class="step-desc">Preflight가 성공해야만 내가 만든 실제 요청이 전송됩니다. Preflight가 실패하면 브라우저는 실제 요청을 차단하고 콘솔에 CORS 에러를 표시합니다.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 5: 서버-서버 환경 -->
+  <section id="server">
+    <h2><span class="section-num">5</span>서버-서버 통신에서는 Preflight가 없다</h2>
+
+    <p>중요한 포인트입니다. Preflight와 CORS는 <strong>브라우저 환경에서만</strong> 발생합니다. 서버에서 서버로 직접 HTTP 요청을 보내는 경우에는 해당 없습니다.</p>
+
+    <div class="env-grid">
+      <div class="env-card browser">
+        <div class="env-label">브라우저 환경 — Preflight 발생</div>
+        <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-3);line-height:var(--leading-snug);">브라우저 보안 정책(CORS)의 영향을 받습니다.</p>
+        <ul class="env-examples">
+          <li>React 앱 → 백엔드 API</li>
+          <li>Next.js 클라이언트 → 외부 API</li>
+          <li>Vue.js 앱 → REST API</li>
+          <li>브라우저에서 직접 fetch()</li>
+        </ul>
+      </div>
+      <div class="env-card server">
+        <div class="env-label">서버 환경 — Preflight 없음</div>
+        <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-3);line-height:var(--leading-snug);">브라우저가 없으므로 CORS 정책이 적용되지 않습니다.</p>
+        <ul class="env-examples">
+          <li>Next.js 서버 → 외부 API</li>
+          <li>Express 서버 → OpenAI API</li>
+          <li>Python 백엔드 → Firebase</li>
+          <li>GitHub Actions → 외부 서비스</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout callout-green">
+      <div class="callout-title">실전 팁</div>
+      <p style="margin:0">프론트엔드에서 직접 외부 API를 호출할 때 CORS 에러가 난다면, 해당 호출을 <strong>Next.js API Routes</strong>나 백엔드 서버로 옮기는 것만으로 해결됩니다. 서버-서버 통신은 Preflight가 없으니까요.</p>
+    </div>
+  </section>
+
+  <!-- Section 6: 함정 -->
+  <section id="gotchas">
+    <h2><span class="section-num">6</span>자주 빠지는 함정 4가지</h2>
+
+    <div class="step-flow">
+      <div class="step-item">
+        <div class="step-badge red">①</div>
+        <div class="step-body">
+          <div class="step-title">서버가 OPTIONS 메서드를 모른다</div>
+          <div class="step-desc">Express.js에서 <code style="font-family:var(--font-mono);">app.get()</code>, <code style="font-family:var(--font-mono);">app.post()</code>만 만들고 <code style="font-family:var(--font-mono);">OPTIONS</code>를 처리하지 않으면 Preflight가 404나 405로 응답합니다. 에러 메시지는 CORS 에러로 표시되지만 진짜 원인은 OPTIONS 라우트 미등록입니다.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-badge red">②</div>
+        <div class="step-body">
+          <div class="step-title">허용 헤더 목록에 실제 헤더가 빠져있다</div>
+          <div class="step-desc"><code style="font-family:var(--font-mono);">Access-Control-Allow-Headers</code>에 <code style="font-family:var(--font-mono);">authorization</code>을 빠뜨리면, Authorization 헤더를 쓰는 요청은 Preflight를 통과하지 못합니다. 실제로 보내는 헤더와 허용 목록이 정확히 일치해야 합니다.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-badge red">③</div>
+        <div class="step-body">
+          <div class="step-title">Nginx나 API Gateway가 OPTIONS를 가로챈다</div>
+          <div class="step-desc">서버 코드는 올바른데 앞단의 Nginx, AWS API Gateway, Cloudflare가 OPTIONS 요청을 백엔드로 전달하지 않고 막아버리는 경우입니다. 서버 코드 외에 인프라 설정도 확인해야 합니다.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-badge red">④</div>
+        <div class="step-body">
+          <div class="step-title">매 요청마다 Preflight가 나가서 느리다</div>
+          <div class="step-desc"><code style="font-family:var(--font-mono);">Access-Control-Max-Age</code> 헤더를 설정하지 않으면 브라우저는 Preflight 결과를 캐싱하지 않습니다. 모든 요청 전마다 OPTIONS를 보내게 됩니다. <code style="font-family:var(--font-mono);">Access-Control-Max-Age: 86400</code>을 추가하면 24시간 동안 캐싱됩니다.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 7: 해결하기 -->
+  <section id="fix">
+    <h2><span class="section-num">7</span>해결하기</h2>
+
+    <h3>서버 CORS 설정 — Express.js (Node.js)</h3>
+    <p>가장 간단한 방법은 <code style="font-family:var(--font-mono);">cors</code> 패키지를 사용하는 것입니다.</p>
+
+    <div class="code-block">
+      <div class="code-block-header">
+        <span class="code-lang">JavaScript — Express.js</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code><span class="tok-keyword">const</span> cors = <span class="tok-function">require</span>(<span class="tok-string">'cors'</span>);
+
+app.<span class="tok-function">use</span>(<span class="tok-function">cors</span>({
+  <span class="tok-property">origin</span>: [<span class="tok-string">'http://localhost:3000'</span>, <span class="tok-string">'https://myapp.com'</span>],
+  <span class="tok-property">methods</span>: [<span class="tok-string">'GET'</span>, <span class="tok-string">'POST'</span>, <span class="tok-string">'PUT'</span>, <span class="tok-string">'DELETE'</span>, <span class="tok-string">'PATCH'</span>, <span class="tok-string">'OPTIONS'</span>],
+  <span class="tok-property">allowedHeaders</span>: [<span class="tok-string">'Content-Type'</span>, <span class="tok-string">'Authorization'</span>],
+  <span class="tok-property">maxAge</span>: <span class="tok-number">86400</span>  <span class="tok-comment">// Preflight 결과 24시간 캐싱</span>
+}));</code></pre>
+    </div>
+
+    <h3>서버 CORS 설정 — Python FastAPI</h3>
+
+    <div class="code-block">
+      <div class="code-block-header">
+        <span class="code-lang">Python — FastAPI</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code><span class="tok-keyword">from</span> fastapi <span class="tok-keyword">import</span> FastAPI
+<span class="tok-keyword">from</span> fastapi.middleware.cors <span class="tok-keyword">import</span> CORSMiddleware
+
+app = <span class="tok-function">FastAPI</span>()
+
+app.<span class="tok-function">add_middleware</span>(
+    CORSMiddleware,
+    <span class="tok-property">allow_origins</span>=[<span class="tok-string">"http://localhost:3000"</span>, <span class="tok-string">"https://myapp.com"</span>],
+    <span class="tok-property">allow_methods</span>=[<span class="tok-string">"*"</span>],
+    <span class="tok-property">allow_headers</span>=[<span class="tok-string">"*"</span>],
+    <span class="tok-property">max_age</span>=<span class="tok-number">86400</span>,
+)</code></pre>
+    </div>
+
+    <h3>점검 체크리스트</h3>
+    <p>CORS 에러가 났을 때 순서대로 확인하세요. 클릭하면 체크됩니다.</p>
+
+    <ul class="checklist" id="checklist">
+      <li onclick="toggleCheck(this)">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div class="check-text"><strong>서버에서 OPTIONS 메서드를 처리하고 있나요?</strong><br>cors 미들웨어를 추가했거나, OPTIONS 라우트가 등록되어 있어야 합니다.</div>
+      </li>
+      <li onclick="toggleCheck(this)">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div class="check-text"><strong>Access-Control-Allow-Origin에 요청 출처가 포함되나요?</strong><br>localhost:3000에서 요청한다면 허용 목록에 http://localhost:3000이 있어야 합니다.</div>
+      </li>
+      <li onclick="toggleCheck(this)">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div class="check-text"><strong>Access-Control-Allow-Headers에 실제로 보내는 헤더가 모두 있나요?</strong><br>Authorization, Content-Type 등 fetch()에서 사용하는 헤더를 빠짐없이 포함해야 합니다.</div>
+      </li>
+      <li onclick="toggleCheck(this)">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div class="check-text"><strong>Access-Control-Allow-Methods에 실제 HTTP 메서드가 있나요?</strong><br>PUT, DELETE, PATCH를 사용한다면 허용 목록에 포함해야 합니다.</div>
+      </li>
+      <li onclick="toggleCheck(this)">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div class="check-text"><strong>Nginx/API Gateway 같은 앞단 서버도 OPTIONS를 통과시키나요?</strong><br>서버 코드가 맞아도 인프라 레이어에서 막힐 수 있습니다.</div>
+      </li>
+      <li onclick="toggleCheck(this)">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div class="check-text"><strong>(선택) Access-Control-Max-Age로 캐싱을 설정했나요?</strong><br>86400 (24시간) 정도면 충분합니다. 매 요청마다 OPTIONS가 나가는 것을 방지합니다.</div>
+      </li>
+    </ul>
+
+    <div class="callout callout-blue" style="margin-top:var(--space-6);">
+      <div class="callout-title">AI에게 물어볼 때 이렇게 말하세요</div>
+      <p style="margin:0;font-family:var(--font-mono);font-size:var(--text-sm);line-height:var(--leading-loose);">"Express.js 서버에서 CORS 설정을 추가해줘. 허용 출처는 http://localhost:3000이고, POST/PUT/DELETE 메서드와 Authorization, Content-Type 헤더를 허용해야 해. Preflight 캐싱도 24시간으로 설정해줘."</p>
+    </div>
+  </section>
+
+  <!-- 핵심 요약 -->
+  <section>
+    <h2><span class="section-num">✓</span>핵심 요약</h2>
+    <ul class="takeaway-list">
+      <li>
+        <div class="takeaway-icon" style="background:var(--color-blue-soft);">🌐</div>
+        <div class="takeaway-body">
+          <div class="takeaway-title">Preflight = 브라우저가 먼저 보내는 허락 요청</div>
+          <div class="takeaway-desc">내 코드가 보내는 게 아닙니다. 브라우저가 CORS 보안 정책에 따라 자동으로 OPTIONS 요청을 먼저 보내서 서버의 허용 여부를 확인합니다.</div>
+        </div>
+      </li>
+      <li>
+        <div class="takeaway-icon" style="background:var(--color-accent-soft);">⚡</div>
+        <div class="takeaway-body">
+          <div class="takeaway-title">application/json + Authorization = Preflight 발생</div>
+          <div class="takeaway-desc">바이브 코더가 가장 자주 쓰는 조합입니다. Content-Type: application/json이나 Authorization 헤더가 있으면 반드시 Preflight가 발생합니다.</div>
+        </div>
+      </li>
+      <li>
+        <div class="takeaway-icon" style="background:var(--color-green-soft);">🖥️</div>
+        <div class="takeaway-body">
+          <div class="takeaway-title">서버-서버 통신에는 Preflight 없음</div>
+          <div class="takeaway-desc">CORS는 브라우저 보안 정책입니다. Next.js API Routes나 백엔드 서버에서 외부 API를 호출하면 Preflight 없이 자유롭게 통신합니다.</div>
+        </div>
+      </li>
+      <li>
+        <div class="takeaway-icon" style="background:var(--color-yellow-soft);">🔧</div>
+        <div class="takeaway-body">
+          <div class="takeaway-title">해결은 항상 서버 쪽에서</div>
+          <div class="takeaway-desc">CORS 에러는 프론트엔드 코드를 수정해서 고칠 수 없습니다. 서버에서 Access-Control-Allow-* 헤더를 올바르게 설정하거나, cors 미들웨어를 추가해야 합니다.</div>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>
+  Preflight · CORS 개념 정리 · 바이브 코더를 위한 웹 보안 기초
+</footer>
+
+<script>
+const bar = document.getElementById('progress-bar');
+function updateProgress() {
+  const h = document.documentElement;
+  const pct = h.scrollHeight === h.clientHeight ? 100 : (window.scrollY / (h.scrollHeight - h.clientHeight)) * 100;
+  bar.style.width = pct + '%';
+}
+window.addEventListener('scroll', updateProgress, { passive: true });
+updateProgress();
+
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-link');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const link = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -60% 0px' });
+sections.forEach(s => observer.observe(s));
+
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+}
+
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.innerText || pre.textContent;
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => flash(btn));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;opacity:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); flash(btn); } catch(e) {}
+    document.body.removeChild(ta);
+  }
+}
+function flash(btn) {
+  const orig = btn.textContent;
+  btn.textContent = 'Copied ✓';
+  btn.disabled = true;
+  setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 1500);
+}
+</script>
+
+<!-- Back to index -->
+<a id="back-to-index" href="../index.html" aria-label="목록으로 돌아가기" title="목록으로"><svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M8.5 15L3 10l5.5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10h14" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></a>
+<style>
+#back-to-index{position:fixed;bottom:1.5rem;left:1.5rem;width:44px;height:44px;background:#6b6a63;color:#fff;border-radius:9999px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.18);transition:background .15s,transform .15s;z-index:800;}
+#back-to-index:hover{background:#d95f2b;transform:translateX(-2px);}
+@media(max-width:600px){#back-to-index{bottom:1rem;left:1rem;}}
+</style>
+</body>
+</html>
