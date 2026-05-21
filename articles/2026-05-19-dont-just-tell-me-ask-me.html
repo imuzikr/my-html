@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>말하지 말고 물어보라 — AI가 설명 대신 질문을 던질 때 인간의 논리적 판단력이 향상된다</title>
 <meta name="description" content="CHI 2023 논문 요약: AI가 설명을 진술이 아닌 질문으로 제시할 때 인간의 비판적 사고와 논리적 변별 정확도가 유의미하게 향상됨을 204명 실험으로 입증한 MIT 미디어랩 연구.">
+<meta property="og:type"        content="article">
+<meta property="og:title"       content="말하지 말고 물어보라 — AI가 설명 대신 질문을 던질 때 인간의 논리적 판단력이 향상된다">
+<meta property="og:description" content="AI가 판단 근거를 진술이 아닌 질문으로 제시할 때 논리적 변별 정확도가 유의미하게 향상됨을 204명 실험으로 입증한 CHI 2023 연구.">
+<meta property="og:image"       content="https://imuzikr.github.io/my-html/assets/images/8-Figure4-1.png">
+<meta name="twitter:card"       content="summary_large_image">
+<meta name="twitter:image"      content="https://imuzikr.github.io/my-html/assets/images/8-Figure4-1.png">
 <style>
 :root {
   --color-bg:#f5f2ed; --color-bg-alt:#eceae4; --color-bg-card:#ffffff;
@@ -380,6 +386,22 @@ footer{background:var(--color-bg-alt);border-top:1px solid var(--color-border);
         <div class="cond-desc">AI가 동일한 정보를 질문 형태로 제시. 이 연구의 핵심 개입.</div>
       </div>
     </div>
+
+    <figure style="margin:var(--space-6) 0 var(--space-8);">
+      <div style="border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm);">
+        <img src="../assets/images/8-Figure4-1.png"
+             alt="세 실험 조건의 인터페이스 — Control(좌), Causal AI-explanations(중), AI-framed Questioning(우)"
+             loading="lazy"
+             style="width:100%;height:auto;display:block;" />
+        <div style="padding:var(--space-4) var(--space-5);border-top:1px solid var(--color-border);background:var(--color-bg-card);">
+          <p style="margin:0;font-size:var(--text-sm);font-weight:var(--weight-semibold);color:var(--color-text);">Figure 4. 세 조건의 실험 인터페이스</p>
+        </div>
+      </div>
+      <figcaption style="margin-top:var(--space-3);font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-normal);">
+        좌: AI 피드백 없는 통제 조건 / 중: 인과 진술로 피드백을 제공하는 Causal AI-explanations 조건 / 우: 동일한 정보를 질문 형태로 제시하는 AI-framed Questioning 조건.
+        <span style="color:var(--color-text-faint);font-size:var(--text-xs);display:block;margin-top:var(--space-2);">출처: Danry et al., CHI 2023, Figure 4</span>
+      </figcaption>
+    </figure>
 
     <div class="callout callout-blue">
       <div class="callout-title">AI 정확도 통제</div>
