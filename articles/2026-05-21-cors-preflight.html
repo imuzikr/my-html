@@ -301,46 +301,43 @@ footer{background:var(--color-bg-alt);border-top:1px solid var(--color-border);
 
 /* ── Sequence Diagram ─────────────────────────────── */
 .seqdiag-wrap{margin:var(--space-6) 0;display:flex;flex-direction:column;gap:var(--space-5);}
-.seqdiag{border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;background:var(--color-bg-card);}
-.seqdiag.sd-simple{border-top:3px solid #3a7d44;}
-.seqdiag.sd-complex{border-top:3px solid var(--color-accent);}
-.seqdiag-header{padding:var(--space-4) var(--space-5);border-bottom:1px solid var(--color-border);background:var(--color-bg-alt);}
-.sd-title{font-size:var(--text-base);font-weight:var(--weight-bold);color:var(--color-text);margin-bottom:2px;}
+.seqdiag{border:1px solid #dedad2;border-radius:var(--radius-lg);overflow:hidden;background:#fff;}
+.seqdiag.sd-simple{border-top:2px solid #7aab8a;}
+.seqdiag.sd-complex{border-top:2px solid #c5614a;}
+.seqdiag-header{padding:var(--space-4) var(--space-6);border-bottom:1px solid #eeebe4;}
+.sd-title{font-size:var(--text-lg);font-weight:var(--weight-bold);color:var(--color-text);margin-bottom:2px;}
 .sd-subtitle{font-size:var(--text-sm);color:var(--color-text-muted);}
-.seqdiag-body{padding:var(--space-5);}
-/* Actors */
-.sd-actors{display:grid;grid-template-columns:150px 1fr 150px;margin-bottom:var(--space-4);}
-.sd-actor{display:flex;flex-direction:column;align-items:center;gap:var(--space-1);padding:var(--space-3) var(--space-2);border-radius:var(--radius-lg);border:1px solid var(--color-border);}
-.sd-actor-client{background:#e8f0fb;border-color:rgba(45,90,142,0.25);}
-.sd-actor-server{background:#e8f5e9;border-color:rgba(46,125,50,0.25);}
-.sd-actor-icon{font-size:1.4rem;}
-.sd-actor-name{font-size:var(--text-sm);font-weight:var(--weight-semibold);color:var(--color-text);text-align:center;line-height:1.3;}
+.seqdiag-body{padding:var(--space-6);}
+/* Actors — illustration card style */
+.sd-actors{display:grid;grid-template-columns:160px 1fr 160px;margin-bottom:var(--space-6);}
+.sd-actor{display:flex;flex-direction:column;align-items:center;gap:var(--space-2);padding:var(--space-4) var(--space-3);border-radius:var(--radius-lg);border:1px solid #dedad2;background:#fff;}
+.sd-actor-client{background:#f0f5fb;border-color:#c8d8ee;}
+.sd-actor-server{background:#f0f6f1;border-color:#bdd4c2;}
+.sd-actor-name{font-size:var(--text-sm);font-weight:var(--weight-semibold);color:#1a1a18;text-align:center;line-height:1.4;margin-top:2px;}
 /* Message rows */
 .sd-msgs{display:flex;flex-direction:column;gap:0;}
-.sd-row{display:grid;grid-template-columns:150px 1fr 150px;align-items:center;min-height:56px;}
+.sd-row{display:grid;grid-template-columns:160px 1fr 160px;align-items:center;min-height:60px;}
 .sd-cell{padding:var(--space-2) var(--space-3);}
 .sd-cell-left{text-align:right;}
 .sd-cell-right{text-align:left;}
-.sd-name{font-family:var(--font-mono);font-size:var(--text-sm);font-weight:700;color:var(--color-text);white-space:nowrap;}
-.sd-detail{font-family:var(--font-mono);font-size:12px;color:var(--color-text-muted);line-height:1.6;margin-top:2px;}
-.sd-badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;background:var(--color-accent-soft);color:var(--color-accent);margin-top:4px;}
+.sd-name{font-family:var(--font-mono);font-size:var(--text-sm);font-weight:700;color:#1a1a18;white-space:nowrap;}
+.sd-detail{font-family:var(--font-mono);font-size:12px;color:#6b6a63;line-height:1.7;margin-top:3px;}
+.sd-badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#faeee7;color:#c5614a;margin-top:5px;letter-spacing:0.01em;}
 /* Arrows */
-.sd-arr{display:flex;align-items:center;padding:0 var(--space-1);}
-/* → client to server: solid */
+.sd-arr{display:flex;align-items:center;padding:0 4px;}
 .sd-arr-r{flex-direction:row;}
-.sd-arr-r .sd-line{flex:1;height:2px;background:currentColor;}
-.sd-arr-r .sd-tip{width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:10px solid currentColor;flex-shrink:0;}
-/* ← server to client: dashed */
+.sd-arr-r .sd-line{flex:1;height:1.5px;background:currentColor;}
+.sd-arr-r .sd-tip{width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:8px solid currentColor;flex-shrink:0;}
 .sd-arr-l{flex-direction:row-reverse;}
-.sd-arr-l .sd-line{flex:1;height:0;border-top:2px dashed currentColor;}
-.sd-arr-l .sd-tip{width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-right:10px solid currentColor;flex-shrink:0;}
-/* Colors by message type */
-.sd-hs{color:#5b8dd9;}
-.sd-pf{color:var(--color-accent);}
-.sd-req{color:#2d5a8e;}
-.sd-res{color:#3a7d44;}
+.sd-arr-l .sd-line{flex:1;height:0;border-top:1.5px dashed currentColor;}
+.sd-arr-l .sd-tip{width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-right:8px solid currentColor;flex-shrink:0;}
+/* Colors — muted editorial palette */
+.sd-hs{color:#7090c0;}
+.sd-pf{color:#c5614a;}
+.sd-req{color:#3a5280;}
+.sd-res{color:#5a8a6a;}
 /* Divider between phases */
-.sd-divider{grid-column:1/-1;border:none;border-top:1px dashed var(--color-border);margin:var(--space-2) 0;}
+.sd-divider{grid-column:1/-1;border:none;border-top:1px dashed #e0ddd5;margin:var(--space-2) 0;}
 @media(max-width:850px){
   .sd-actors,.sd-row{grid-template-columns:110px 1fr 110px;}
   .sd-actor-name{font-size:12px;}
@@ -636,19 +633,34 @@ pass access control check.</span></code></pre>
         <div class="seqdiag-body">
           <div class="sd-actors">
             <div class="sd-actor sd-actor-client">
-              <div class="sd-actor-icon">🌐</div>
+              <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="브라우저">
+                <circle cx="22" cy="22" r="16" stroke="#3a5280" stroke-width="1.5"/>
+                <path d="M22 6C18.5 11 16.5 16.5 16.5 22C16.5 27.5 18.5 33 22 38" stroke="#3a5280" stroke-width="1.5"/>
+                <path d="M22 6C25.5 11 27.5 16.5 27.5 22C27.5 27.5 25.5 33 22 38" stroke="#3a5280" stroke-width="1.5"/>
+                <line x1="6" y1="22" x2="38" y2="22" stroke="#3a5280" stroke-width="1.5"/>
+                <path d="M8.5 15.5C13 17.5 17.5 18.5 22 18.5C26.5 18.5 31 17.5 35.5 15.5" stroke="#3a5280" stroke-width="1" opacity="0.5"/>
+                <path d="M8.5 28.5C13 26.5 17.5 25.5 22 25.5C26.5 25.5 31 26.5 35.5 28.5" stroke="#3a5280" stroke-width="1" opacity="0.5"/>
+              </svg>
               <div class="sd-actor-name">브라우저<br>(Client)</div>
             </div>
             <div></div>
             <div class="sd-actor sd-actor-server">
-              <div class="sd-actor-icon">🖥️</div>
+              <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="API 서버">
+                <rect x="5" y="7" width="34" height="22" rx="2" fill="#e8f2ea" stroke="#4a7a5a" stroke-width="1.5"/>
+                <line x1="5" y1="23" x2="39" y2="23" stroke="#4a7a5a" stroke-width="1" opacity="0.4"/>
+                <line x1="11" y1="13" x2="33" y2="13" stroke="#4a7a5a" stroke-width="1.2" opacity="0.5"/>
+                <line x1="11" y1="17" x2="28" y2="17" stroke="#4a7a5a" stroke-width="1.2" opacity="0.5"/>
+                <line x1="11" y1="21" x2="21" y2="21" stroke="#4a7a5a" stroke-width="1.2" opacity="0.5"/>
+                <line x1="19" y1="29" x2="25" y2="29" stroke="#4a7a5a" stroke-width="1.5"/>
+                <line x1="14" y1="33" x2="30" y2="33" stroke="#4a7a5a" stroke-width="2" stroke-linecap="round"/>
+              </svg>
               <div class="sd-actor-name">API 서버<br>(Server)</div>
             </div>
           </div>
           <div class="sd-msgs">
             <div class="sd-row sd-hs">
               <div class="sd-cell sd-cell-left">
-                <div class="sd-name">🤝 TCP/TLS 핸드셰이크</div>
+                <div class="sd-name">TCP/TLS 핸드셰이크</div>
                 <div class="sd-detail">연결 수립 · 암호화 협상</div>
               </div>
               <div class="sd-arr sd-arr-r"><div class="sd-line"></div><div class="sd-tip"></div></div>
@@ -691,19 +703,34 @@ pass access control check.</span></code></pre>
         <div class="seqdiag-body">
           <div class="sd-actors">
             <div class="sd-actor sd-actor-client">
-              <div class="sd-actor-icon">🌐</div>
+              <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="브라우저">
+                <circle cx="22" cy="22" r="16" stroke="#3a5280" stroke-width="1.5"/>
+                <path d="M22 6C18.5 11 16.5 16.5 16.5 22C16.5 27.5 18.5 33 22 38" stroke="#3a5280" stroke-width="1.5"/>
+                <path d="M22 6C25.5 11 27.5 16.5 27.5 22C27.5 27.5 25.5 33 22 38" stroke="#3a5280" stroke-width="1.5"/>
+                <line x1="6" y1="22" x2="38" y2="22" stroke="#3a5280" stroke-width="1.5"/>
+                <path d="M8.5 15.5C13 17.5 17.5 18.5 22 18.5C26.5 18.5 31 17.5 35.5 15.5" stroke="#3a5280" stroke-width="1" opacity="0.5"/>
+                <path d="M8.5 28.5C13 26.5 17.5 25.5 22 25.5C26.5 25.5 31 26.5 35.5 28.5" stroke="#3a5280" stroke-width="1" opacity="0.5"/>
+              </svg>
               <div class="sd-actor-name">브라우저<br>(Client)</div>
             </div>
             <div></div>
             <div class="sd-actor sd-actor-server">
-              <div class="sd-actor-icon">🖥️</div>
+              <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="API 서버">
+                <rect x="5" y="7" width="34" height="22" rx="2" fill="#e8f2ea" stroke="#4a7a5a" stroke-width="1.5"/>
+                <line x1="5" y1="23" x2="39" y2="23" stroke="#4a7a5a" stroke-width="1" opacity="0.4"/>
+                <line x1="11" y1="13" x2="33" y2="13" stroke="#4a7a5a" stroke-width="1.2" opacity="0.5"/>
+                <line x1="11" y1="17" x2="28" y2="17" stroke="#4a7a5a" stroke-width="1.2" opacity="0.5"/>
+                <line x1="11" y1="21" x2="21" y2="21" stroke="#4a7a5a" stroke-width="1.2" opacity="0.5"/>
+                <line x1="19" y1="29" x2="25" y2="29" stroke="#4a7a5a" stroke-width="1.5"/>
+                <line x1="14" y1="33" x2="30" y2="33" stroke="#4a7a5a" stroke-width="2" stroke-linecap="round"/>
+              </svg>
               <div class="sd-actor-name">API 서버<br>(Server)</div>
             </div>
           </div>
           <div class="sd-msgs">
             <div class="sd-row sd-hs">
               <div class="sd-cell sd-cell-left">
-                <div class="sd-name">🤝 TCP/TLS 핸드셰이크</div>
+                <div class="sd-name">TCP/TLS 핸드셰이크</div>
                 <div class="sd-detail">연결 수립 · 암호화 협상</div>
               </div>
               <div class="sd-arr sd-arr-r"><div class="sd-line"></div><div class="sd-tip"></div></div>
@@ -719,7 +746,7 @@ pass access control check.</span></code></pre>
             <div class="sd-divider"></div>
             <div class="sd-row sd-pf">
               <div class="sd-cell sd-cell-left">
-                <div class="sd-name">✋ OPTIONS /api/data</div>
+                <div class="sd-name">OPTIONS /api/data</div>
                 <div class="sd-detail">AC-Request-Method: POST<br>AC-Request-Headers: Content-Type, Authorization</div>
                 <div class="sd-badge">Preflight 자동 발생</div>
               </div>
