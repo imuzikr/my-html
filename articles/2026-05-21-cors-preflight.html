@@ -298,6 +298,61 @@ footer{background:var(--color-bg-alt);border-top:1px solid var(--color-border);
   .compare-cards{grid-template-columns:1fr;}
   .cf-row{flex-wrap:wrap;}
 }
+
+/* ── Sequence Diagram ─────────────────────────────── */
+.seqdiag-wrap{margin:var(--space-6) 0;display:flex;flex-direction:column;gap:var(--space-5);}
+.seqdiag{border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;background:var(--color-bg-card);}
+.seqdiag.sd-simple{border-top:3px solid #3a7d44;}
+.seqdiag.sd-complex{border-top:3px solid var(--color-accent);}
+.seqdiag-header{padding:var(--space-4) var(--space-5);border-bottom:1px solid var(--color-border);background:var(--color-bg-alt);}
+.sd-title{font-size:var(--text-base);font-weight:var(--weight-bold);color:var(--color-text);margin-bottom:2px;}
+.sd-subtitle{font-size:var(--text-sm);color:var(--color-text-muted);}
+.seqdiag-body{padding:var(--space-5);}
+/* Actors */
+.sd-actors{display:grid;grid-template-columns:150px 1fr 150px;margin-bottom:var(--space-4);}
+.sd-actor{display:flex;flex-direction:column;align-items:center;gap:var(--space-1);padding:var(--space-3) var(--space-2);border-radius:var(--radius-lg);border:1px solid var(--color-border);}
+.sd-actor-client{background:#e8f0fb;border-color:rgba(45,90,142,0.25);}
+.sd-actor-server{background:#e8f5e9;border-color:rgba(46,125,50,0.25);}
+.sd-actor-icon{font-size:1.4rem;}
+.sd-actor-name{font-size:var(--text-sm);font-weight:var(--weight-semibold);color:var(--color-text);text-align:center;line-height:1.3;}
+/* Message rows */
+.sd-msgs{display:flex;flex-direction:column;gap:0;}
+.sd-row{display:grid;grid-template-columns:150px 1fr 150px;align-items:center;min-height:56px;}
+.sd-cell{padding:var(--space-2) var(--space-3);}
+.sd-cell-left{text-align:right;}
+.sd-cell-right{text-align:left;}
+.sd-name{font-family:var(--font-mono);font-size:var(--text-sm);font-weight:700;color:var(--color-text);white-space:nowrap;}
+.sd-detail{font-family:var(--font-mono);font-size:12px;color:var(--color-text-muted);line-height:1.6;margin-top:2px;}
+.sd-badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;background:var(--color-accent-soft);color:var(--color-accent);margin-top:4px;}
+/* Arrows */
+.sd-arr{display:flex;align-items:center;padding:0 var(--space-1);}
+/* → client to server: solid */
+.sd-arr-r{flex-direction:row;}
+.sd-arr-r .sd-line{flex:1;height:2px;background:currentColor;}
+.sd-arr-r .sd-tip{width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:10px solid currentColor;flex-shrink:0;}
+/* ← server to client: dashed */
+.sd-arr-l{flex-direction:row-reverse;}
+.sd-arr-l .sd-line{flex:1;height:0;border-top:2px dashed currentColor;}
+.sd-arr-l .sd-tip{width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-right:10px solid currentColor;flex-shrink:0;}
+/* Colors by message type */
+.sd-hs{color:#5b8dd9;}
+.sd-pf{color:var(--color-accent);}
+.sd-req{color:#2d5a8e;}
+.sd-res{color:#3a7d44;}
+/* Divider between phases */
+.sd-divider{grid-column:1/-1;border:none;border-top:1px dashed var(--color-border);margin:var(--space-2) 0;}
+@media(max-width:850px){
+  .sd-actors,.sd-row{grid-template-columns:110px 1fr 110px;}
+  .sd-actor-name{font-size:12px;}
+  .sd-name{font-size:12px;}
+  .sd-detail{font-size:11px;}
+}
+@media(max-width:600px){
+  .sd-actors,.sd-row{grid-template-columns:90px 1fr 90px;}
+  .sd-actor-name{font-size:11px;}
+  .sd-name{font-size:11px;white-space:normal;}
+  .sd-detail{font-size:10px;}
+}
 </style>
 </head>
 <body>
@@ -570,52 +625,136 @@ pass access control check.</span></code></pre>
 
     <h3>전체 흐름 비교</h3>
 
-    <div class="compare-flow">
-      <div class="cf-row cf-simple">
-        <div class="cf-type">
-          <div class="cf-type-label">단순 요청</div>
-          <div class="cf-type-sub">GET, 기본 헤더</div>
+    <div class="seqdiag-wrap">
+
+      <!-- 단순 요청 -->
+      <div class="seqdiag sd-simple">
+        <div class="seqdiag-header">
+          <div class="sd-title">단순 요청 — Preflight 없음</div>
+          <div class="sd-subtitle">GET · 기본 헤더만 사용하는 경우</div>
         </div>
-        <div class="cf-chain">
-          <div class="cf-node cf-hs">
-            <div class="cf-node-icon">🤝</div>
-            <div class="cf-node-title">핸드셰이크</div>
-            <div class="cf-node-sub">TCP/TLS</div>
+        <div class="seqdiag-body">
+          <div class="sd-actors">
+            <div class="sd-actor sd-actor-client">
+              <div class="sd-actor-icon">🌐</div>
+              <div class="sd-actor-name">브라우저<br>(Client)</div>
+            </div>
+            <div></div>
+            <div class="sd-actor sd-actor-server">
+              <div class="sd-actor-icon">🖥️</div>
+              <div class="sd-actor-name">API 서버<br>(Server)</div>
+            </div>
           </div>
-          <div class="cf-arr">→</div>
-          <div class="cf-node cf-req">
-            <div class="cf-node-icon">📨</div>
-            <div class="cf-node-title">실제 요청</div>
-            <div class="cf-node-sub">GET /api/data</div>
+          <div class="sd-msgs">
+            <div class="sd-row sd-hs">
+              <div class="sd-cell sd-cell-left">
+                <div class="sd-name">🤝 TCP/TLS 핸드셰이크</div>
+                <div class="sd-detail">연결 수립 · 암호화 협상</div>
+              </div>
+              <div class="sd-arr sd-arr-r"><div class="sd-line"></div><div class="sd-tip"></div></div>
+              <div class="sd-cell sd-cell-right"></div>
+            </div>
+            <div class="sd-row sd-hs">
+              <div class="sd-cell sd-cell-left"></div>
+              <div class="sd-arr sd-arr-l"><div class="sd-line"></div><div class="sd-tip"></div></div>
+              <div class="sd-cell sd-cell-right">
+                <div class="sd-name">연결 완료</div>
+              </div>
+            </div>
+            <div class="sd-divider"></div>
+            <div class="sd-row sd-req">
+              <div class="sd-cell sd-cell-left">
+                <div class="sd-name">GET /api/data</div>
+                <div class="sd-detail">Origin: https://app.example.com</div>
+              </div>
+              <div class="sd-arr sd-arr-r"><div class="sd-line"></div><div class="sd-tip"></div></div>
+              <div class="sd-cell sd-cell-right"></div>
+            </div>
+            <div class="sd-row sd-res">
+              <div class="sd-cell sd-cell-left"></div>
+              <div class="sd-arr sd-arr-l"><div class="sd-line"></div><div class="sd-tip"></div></div>
+              <div class="sd-cell sd-cell-right">
+                <div class="sd-name">200 OK</div>
+                <div class="sd-detail">Access-Control-Allow-Origin: *</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="cf-row cf-complex">
-        <div class="cf-type">
-          <div class="cf-type-label">복잡한 요청</div>
-          <div class="cf-type-sub">POST · application/json<br>+ Authorization</div>
+
+      <!-- 복잡한 요청 -->
+      <div class="seqdiag sd-complex">
+        <div class="seqdiag-header">
+          <div class="sd-title">복잡한 요청 — Preflight 발생</div>
+          <div class="sd-subtitle">POST · application/json · Authorization 헤더 포함</div>
         </div>
-        <div class="cf-chain">
-          <div class="cf-node cf-hs">
-            <div class="cf-node-icon">🤝</div>
-            <div class="cf-node-title">핸드셰이크</div>
-            <div class="cf-node-sub">TCP/TLS</div>
+        <div class="seqdiag-body">
+          <div class="sd-actors">
+            <div class="sd-actor sd-actor-client">
+              <div class="sd-actor-icon">🌐</div>
+              <div class="sd-actor-name">브라우저<br>(Client)</div>
+            </div>
+            <div></div>
+            <div class="sd-actor sd-actor-server">
+              <div class="sd-actor-icon">🖥️</div>
+              <div class="sd-actor-name">API 서버<br>(Server)</div>
+            </div>
           </div>
-          <div class="cf-arr">→</div>
-          <div class="cf-node cf-pf">
-            <div class="cf-node-icon">✋</div>
-            <div class="cf-node-title">Preflight</div>
-            <div class="cf-node-sub">OPTIONS</div>
-            <div class="cf-pf-badge">추가 발생</div>
-          </div>
-          <div class="cf-arr">→</div>
-          <div class="cf-node cf-req">
-            <div class="cf-node-icon">📨</div>
-            <div class="cf-node-title">실제 요청</div>
-            <div class="cf-node-sub">POST /api/data</div>
+          <div class="sd-msgs">
+            <div class="sd-row sd-hs">
+              <div class="sd-cell sd-cell-left">
+                <div class="sd-name">🤝 TCP/TLS 핸드셰이크</div>
+                <div class="sd-detail">연결 수립 · 암호화 협상</div>
+              </div>
+              <div class="sd-arr sd-arr-r"><div class="sd-line"></div><div class="sd-tip"></div></div>
+              <div class="sd-cell sd-cell-right"></div>
+            </div>
+            <div class="sd-row sd-hs">
+              <div class="sd-cell sd-cell-left"></div>
+              <div class="sd-arr sd-arr-l"><div class="sd-line"></div><div class="sd-tip"></div></div>
+              <div class="sd-cell sd-cell-right">
+                <div class="sd-name">연결 완료</div>
+              </div>
+            </div>
+            <div class="sd-divider"></div>
+            <div class="sd-row sd-pf">
+              <div class="sd-cell sd-cell-left">
+                <div class="sd-name">✋ OPTIONS /api/data</div>
+                <div class="sd-detail">AC-Request-Method: POST<br>AC-Request-Headers: Authorization</div>
+                <div class="sd-badge">Preflight 자동 발생</div>
+              </div>
+              <div class="sd-arr sd-arr-r"><div class="sd-line"></div><div class="sd-tip"></div></div>
+              <div class="sd-cell sd-cell-right"></div>
+            </div>
+            <div class="sd-row sd-pf">
+              <div class="sd-cell sd-cell-left"></div>
+              <div class="sd-arr sd-arr-l"><div class="sd-line"></div><div class="sd-tip"></div></div>
+              <div class="sd-cell sd-cell-right">
+                <div class="sd-name">204 No Content</div>
+                <div class="sd-detail">AC-Allow-Origin: https://app.example.com<br>AC-Allow-Methods: POST<br>AC-Allow-Headers: Authorization</div>
+              </div>
+            </div>
+            <div class="sd-divider"></div>
+            <div class="sd-row sd-req">
+              <div class="sd-cell sd-cell-left">
+                <div class="sd-name">POST /api/data</div>
+                <div class="sd-detail">Content-Type: application/json<br>Authorization: Bearer …<br>Origin: https://app.example.com</div>
+              </div>
+              <div class="sd-arr sd-arr-r"><div class="sd-line"></div><div class="sd-tip"></div></div>
+              <div class="sd-cell sd-cell-right"></div>
+            </div>
+            <div class="sd-row sd-res">
+              <div class="sd-cell sd-cell-left"></div>
+              <div class="sd-arr sd-arr-l"><div class="sd-line"></div><div class="sd-tip"></div></div>
+              <div class="sd-cell sd-cell-right">
+                <div class="sd-name">200 OK</div>
+                <div class="sd-detail">Access-Control-Allow-Origin: https://app.example.com</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
     </div>
 
     <!-- 비교 표 -->
