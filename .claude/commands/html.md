@@ -291,6 +291,7 @@ Follow these rules for every HTML file generated, regardless of sub-command:
 - Use dashed lines (`stroke-dasharray`) for optional/async connections; solid for required/sync.
 - Charts must use the CSS color variables (pass them as `fill` or `stroke` attributes with the hex values — SVG does not inherit CSS custom properties in all contexts).
 - Add a "Download SVG" button for standalone diagram files.
+- **SVG text readability warning**: SVG text uses fixed pixel sizes that shrink proportionally when the SVG scales to mobile width. For diagrams that contain significant amounts of text — sequence diagrams, step-by-step flows, comparison charts — use HTML/CSS-based layouts instead (see T8 · HTTP Sequence Cards, T9 · Compare Flow). Reserve SVG for pure shape/line diagrams (architecture boxes, bar charts) where labels are minimal.
 
 ### Tables
 - Use `<table>` with `<thead>` / `<tbody>` for all tabular data.
@@ -332,7 +333,8 @@ Follow these rules for every HTML file generated, regardless of sub-command:
 - **기본 콘텐츠 너비: `max-width: 900px`** — 모든 아티클·리포트·설명 문서의 `main`, `.hero-inner`, `.nav-inner`에 일관되게 적용한다.
 - Use CSS Grid with `grid-template-columns: repeat(auto-fill, minmax(..., 1fr))` for card layouts.
 - For content + sidebar layouts use `grid-template-columns: 1fr 320px`; collapse to single column below 880px.
-- Add `@media (max-width: 768px)` breakpoints to collapse multi-column layouts to single column.
+- **Multi-column grid breakpoint: `@media (max-width: 850px)`** — use this for collapsing 2-column card grids (trap-grid, env-grid, compare-cards, req-cards, summary-grid) to single column. This ensures phones and most tablets see readable single-column layout.
+- Keep layout/padding breakpoints at `@media (max-width: 700px)` for hero, nav, and main padding adjustments.
 - Ensure tap targets are at least 44px tall on mobile.
 - Use `overflow-x: auto` on table wrappers.
 - Hide decorative sidebars entirely on mobile (`display: none` below breakpoint).
@@ -342,6 +344,11 @@ Follow these rules for every HTML file generated, regardless of sub-command:
 - Use `--text-*` variables for font sizes. Never use `px` or `rem` directly.
 - Use `--space-*` variables for margins, padding, and gaps. Never use magic numbers.
 - Line heights: `--leading-tight` for headings, `--leading-normal` for body text.
+- **Text size hierarchy for cards and content**:
+  - `--text-base` (1rem) — body text, card descriptions, list items, checklist content
+  - `--text-sm` (0.875rem) — secondary metadata, nav links, callout titles, code labels
+  - `--text-xs` (0.75rem) — timestamps, faint helper text, badge labels only
+  - Never use `--text-sm` for the main readable content inside a card — it will feel too small, especially on mobile.
 
 ### Animations and transitions
 - Use CSS transitions for hover states: `transition: all 180ms ease` on cards, buttons, and interactive elements.
@@ -365,6 +372,24 @@ Follow these rules for every HTML file generated, regardless of sub-command:
 - Prefer real data (from the user's context) over placeholder text wherever possible.
 - When generating example/placeholder values, make them realistic and domain-appropriate.
 - Interactive features must actually work — test the logic mentally before writing it.
+
+### Design variety (especially for `article`)
+Avoid repeating the same layout pattern across consecutive sections — it creates visual monotony. Rotate through these patterns, picking the one that best fits each section's content:
+
+| Pattern | Best for |
+|---|---|
+| `callout` (blue/green/yellow/red) | Key warnings, definitions, tips |
+| `chat-convo` dark bubble UI (T10) | Protocol conversations, request/response flows |
+| `compare-cards` two-column (T11) | Side-by-side concept comparisons |
+| `compare-flow` step chain (T9) | Before/after flow diagrams with conditional steps |
+| `hseq` HTTP message cards (T8) | Sequence diagrams with HTTP headers |
+| `req-cards` feature cards + pill tags | Feature condition sets (yes/no, allowed/blocked) |
+| `trap-grid` 2×2 warning grid | Common pitfalls, gotchas |
+| `process-flow` horizontal nodes | 3-step numbered process |
+| `stat-row` metric cards | Key numbers / quick stats |
+| `code-block` + callout | Annotated code examples |
+
+No two adjacent sections should use the same pattern. If a section naturally calls for a diagram with lots of text, use an HTML/CSS layout (T8, T9, T10) — not an SVG.
 
 ---
 
@@ -726,6 +751,327 @@ function downloadSVG(svgId, filename) {
   </svg>
   Download SVG
 </button>
+```
+
+---
+
+### T8 · HTTP Sequence Cards (hseq)
+
+Use instead of SVG sequence diagrams when HTTP headers need to be readable at all viewport sizes. Blue left-bar = browser→server, green = server→browser, gray = final actual request.
+
+```html
+<div class="hseq">
+  <div class="hseq-msg hseq-out">
+    <div class="hseq-bar"></div>
+    <div class="hseq-body">
+      <div class="hseq-top">
+        <div class="hseq-num">1</div>
+        <div class="hseq-dir">브라우저 → 서버 · Preflight</div>
+      </div>
+      <div class="hseq-line"><span class="hseq-method">OPTIONS</span> /api/data HTTP/1.1</div>
+      <div class="hseq-hdrs">
+        <div class="hseq-hdr"><span class="hseq-hk">Origin:</span> <span class="hseq-hv">https://myapp.com</span></div>
+        <div class="hseq-hdr"><span class="hseq-hk">Access-Control-Request-Method:</span> <span class="hseq-hv">POST</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="hseq-msg hseq-in">
+    <div class="hseq-bar"></div>
+    <div class="hseq-body">
+      <div class="hseq-top">
+        <div class="hseq-num">2</div>
+        <div class="hseq-dir">서버 → 브라우저 · 허용 응답</div>
+      </div>
+      <div class="hseq-line">HTTP/1.1 <span class="hseq-status">200 OK</span></div>
+      <div class="hseq-hdrs">
+        <div class="hseq-hdr"><span class="hseq-hk">Access-Control-Allow-Origin:</span> <span class="hseq-hv">https://myapp.com</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="hseq-msg hseq-final">
+    <div class="hseq-bar"></div>
+    <div class="hseq-body">
+      <div class="hseq-top">
+        <div class="hseq-num">3</div>
+        <div class="hseq-dir">브라우저 → 서버 · 실제 요청</div>
+      </div>
+      <div class="hseq-line"><span class="hseq-method">POST</span> /api/data</div>
+    </div>
+  </div>
+</div>
+```
+
+```css
+.hseq{margin:var(--space-6) 0;display:flex;flex-direction:column;gap:var(--space-3);}
+.hseq-msg{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;display:flex;}
+.hseq-bar{width:5px;flex-shrink:0;}
+.hseq-msg.hseq-out .hseq-bar{background:var(--color-blue);}
+.hseq-msg.hseq-in .hseq-bar{background:var(--color-green);}
+.hseq-msg.hseq-final .hseq-bar{background:#6b6a63;}
+.hseq-body{flex:1;padding:var(--space-4) var(--space-5);}
+.hseq-top{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-3);}
+.hseq-num{width:26px;height:26px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;font-size:var(--text-xs);font-weight:var(--weight-bold);flex-shrink:0;}
+.hseq-msg.hseq-out .hseq-num{background:var(--color-blue-soft);color:var(--color-blue);}
+.hseq-msg.hseq-in .hseq-num{background:var(--color-green-soft);color:var(--color-green);}
+.hseq-msg.hseq-final .hseq-num{background:var(--color-bg-alt);color:var(--color-text-muted);}
+.hseq-dir{font-size:var(--text-sm);color:var(--color-text-faint);font-weight:var(--weight-semibold);text-transform:uppercase;letter-spacing:0.05em;}
+.hseq-line{font-family:var(--font-mono);font-size:var(--text-base);font-weight:700;color:var(--color-text);margin-bottom:var(--space-2);}
+.hseq-method{color:var(--color-blue);}
+.hseq-status{color:var(--color-green);}
+.hseq-hdrs{background:var(--color-bg-alt);border-radius:var(--radius-sm);padding:var(--space-3) var(--space-4);}
+.hseq-hdr{font-family:var(--font-mono);font-size:var(--text-base);line-height:1.8;color:var(--color-text-muted);}
+.hseq-hk{color:var(--color-blue);}
+.hseq-hv{color:#b03a2e;}
+```
+
+---
+
+### T9 · Compare Flow (compare-flow)
+
+Visual step-chain showing conditional paths. Use instead of SVG flow diagrams when text labels need to remain readable on mobile. Green left-border = simple/happy path, accent left-border = complex/conditional path.
+
+```html
+<div class="compare-flow">
+  <div class="cf-row cf-simple">
+    <div class="cf-type">
+      <div class="cf-type-label">단순 경로</div>
+      <div class="cf-type-sub">조건 없음</div>
+    </div>
+    <div class="cf-chain">
+      <div class="cf-node cf-hs">
+        <div class="cf-node-icon">🤝</div>
+        <div class="cf-node-title">연결</div>
+        <div class="cf-node-sub">TCP/TLS</div>
+      </div>
+      <div class="cf-arr">→</div>
+      <div class="cf-node cf-req">
+        <div class="cf-node-icon">📨</div>
+        <div class="cf-node-title">요청</div>
+        <div class="cf-node-sub">GET /api</div>
+      </div>
+    </div>
+  </div>
+  <div class="cf-row cf-complex">
+    <div class="cf-type">
+      <div class="cf-type-label">복잡 경로</div>
+      <div class="cf-type-sub">추가 단계 발생</div>
+    </div>
+    <div class="cf-chain">
+      <div class="cf-node cf-hs">
+        <div class="cf-node-icon">🤝</div>
+        <div class="cf-node-title">연결</div>
+        <div class="cf-node-sub">TCP/TLS</div>
+      </div>
+      <div class="cf-arr">→</div>
+      <div class="cf-node cf-pf">
+        <div class="cf-node-icon">✋</div>
+        <div class="cf-node-title">사전 확인</div>
+        <div class="cf-node-sub">OPTIONS</div>
+        <div class="cf-pf-badge">추가</div>
+      </div>
+      <div class="cf-arr">→</div>
+      <div class="cf-node cf-req">
+        <div class="cf-node-icon">📨</div>
+        <div class="cf-node-title">요청</div>
+        <div class="cf-node-sub">POST /api</div>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+```css
+.compare-flow{display:flex;flex-direction:column;gap:var(--space-3);margin:var(--space-6) 0;}
+.cf-row{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);display:flex;align-items:center;gap:var(--space-5);}
+.cf-row.cf-simple{border-left:4px solid var(--color-green);}
+.cf-row.cf-complex{border-left:4px solid var(--color-accent);}
+.cf-type{flex-shrink:0;min-width:90px;}
+.cf-type-label{font-size:var(--text-sm);font-weight:var(--weight-bold);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;}
+.cf-simple .cf-type-label{color:var(--color-green);}
+.cf-complex .cf-type-label{color:var(--color-accent);}
+.cf-type-sub{font-size:var(--text-sm);color:var(--color-text-faint);line-height:var(--leading-snug);}
+.cf-chain{display:flex;align-items:center;gap:var(--space-2);flex:1;flex-wrap:wrap;}
+.cf-node{display:flex;flex-direction:column;align-items:center;gap:2px;padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);text-align:center;min-width:80px;}
+.cf-node.cf-hs{background:var(--color-blue-soft);border:1px solid rgba(45,90,142,0.2);}
+.cf-node.cf-pf{background:var(--color-accent-soft);border:1px dashed rgba(217,95,43,0.4);}
+.cf-node.cf-req{background:var(--color-green-soft);border:1px solid rgba(58,107,74,0.2);}
+.cf-node-icon{font-size:1.25rem;}
+.cf-node-title{font-size:var(--text-base);font-weight:var(--weight-semibold);}
+.cf-node.cf-hs .cf-node-title{color:var(--color-blue);}
+.cf-node.cf-pf .cf-node-title{color:var(--color-accent);}
+.cf-node.cf-req .cf-node-title{color:var(--color-green);}
+.cf-node-sub{font-size:var(--text-xs);color:var(--color-text-faint);font-family:var(--font-mono);}
+.cf-arr{color:var(--color-border-strong);font-size:var(--text-xl);flex-shrink:0;}
+.cf-pf-badge{background:var(--color-accent-soft);color:var(--color-accent);font-size:var(--text-xs);font-weight:700;padding:1px 5px;border-radius:3px;text-transform:uppercase;margin-top:2px;}
+@media(max-width:850px){.cf-row{flex-wrap:wrap;}}
+```
+
+---
+
+### T10 · Dark Chat Conversation (chat-convo)
+
+Dark-themed bubble UI for illustrating protocol flows, request/response exchanges, or step-by-step reasoning. Left-aligned bubbles = one actor, right-aligned = another.
+
+```html
+<div class="chat-convo">
+  <div class="chat-convo-title">브라우저 ↔ 서버 통신 흐름</div>
+
+  <!-- Left actor (browser/client) -->
+  <div class="chat-row">
+    <div class="chat-av av-browser">B</div>
+    <div class="chat-side">
+      <div class="chat-name">브라우저 내부 판단</div>
+      <div class="chat-bbl bbl-think">이 요청은 Cross-Origin이네. 먼저 허락을 받아야 해.</div>
+      <div class="chat-tag">🔒 CORS 보안 정책 자동 작동</div>
+    </div>
+  </div>
+
+  <!-- Code-formatted bubble -->
+  <div class="chat-row">
+    <div class="chat-av av-browser">B</div>
+    <div class="chat-side">
+      <div class="chat-name">브라우저 → 서버</div>
+      <div class="chat-bbl bbl-browser bbl-code">
+        <span style="color:#569cd6;font-weight:700">OPTIONS</span> /api/data HTTP/1.1<br>
+        <span style="color:#9cdcfe">Origin:</span> <span style="color:#ce9178">http://localhost:3000</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right actor (server) -->
+  <div class="chat-row chat-server">
+    <div class="chat-av av-server">S</div>
+    <div class="chat-side">
+      <div class="chat-name">서버 → 브라우저</div>
+      <div class="chat-bbl bbl-server">
+        HTTP/1.1 <span style="color:#4ec9b0;font-weight:700">200 OK</span> ✅
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+```css
+.chat-convo{display:flex;flex-direction:column;gap:var(--space-4);margin:var(--space-8) 0;padding:var(--space-6);background:#1e1e2e;border-radius:var(--radius-lg);}
+.chat-convo-title{font-size:var(--text-xs);font-weight:var(--weight-semibold);letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:var(--space-2);}
+.chat-row{display:flex;align-items:flex-start;gap:var(--space-3);}
+.chat-row.chat-server{flex-direction:row-reverse;}
+.chat-av{width:32px;height:32px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:16px;}
+.av-browser{background:#1a2236;border:1px solid #2d5a8e;color:#8ab4d4;}
+.av-server{background:#1a3526;border:1px solid #3a6b4a;color:#9fd4b0;}
+.av-think{background:#2a2418;border:1px solid rgba(201,162,39,0.4);color:#c9a227;}
+.chat-side{flex:1;min-width:0;}
+.chat-row.chat-server .chat-side{display:flex;flex-direction:column;align-items:flex-end;}
+.chat-name{font-size:var(--text-xs);font-weight:600;letter-spacing:0.04em;color:rgba(255,255,255,0.3);margin-bottom:3px;}
+.chat-bbl{display:inline-block;max-width:82%;padding:var(--space-3) var(--space-4);border-radius:12px;font-size:var(--text-base);line-height:var(--leading-snug);color:rgba(255,255,255,0.88);}
+.bbl-browser{background:#1e3050;border-radius:4px 12px 12px 12px;}
+.bbl-server{background:#1b3326;border-radius:12px 4px 12px 12px;}
+.bbl-think{background:#2a2418;border:1px dashed rgba(201,162,39,0.35);color:rgba(255,255,255,0.6);font-style:italic;border-radius:12px;}
+.bbl-code{font-family:var(--font-mono);font-size:var(--text-sm);line-height:1.9;}
+.chat-tag{display:inline-block;margin-top:4px;font-size:var(--text-xs);color:rgba(255,255,255,0.25);letter-spacing:0.03em;}
+```
+
+---
+
+### T11 · Compare Cards + Feature Pill Cards (compare-cards / req-cards)
+
+**compare-cards** — two equal-height cards for side-by-side concept comparisons:
+
+```html
+<div class="compare-cards">
+  <div class="cc-card cc-blue">
+    <div class="cc-icon">📞</div>
+    <div class="cc-title">개념 A</div>
+    <div class="cc-quote">"한 줄 설명"</div>
+    <div class="cc-desc">핵심 동작 설명</div>
+    <div class="cc-tags">
+      <span class="cc-tag">특성 1</span>
+      <span class="cc-tag">특성 2</span>
+    </div>
+    <div class="cc-note">부가 설명</div>
+  </div>
+  <div class="cc-card cc-accent">
+    <!-- same structure -->
+  </div>
+</div>
+```
+
+**req-cards** — colored header + pill-tag body for yes/no condition sets:
+
+```html
+<div class="req-cards">
+  <div class="req-card req-simple">
+    <div class="req-card-head">
+      <div class="req-card-badge">✓ 허용</div>
+      <div class="req-card-title">단순 요청</div>
+      <div class="req-card-sub">조건을 만족하면 바로 통과</div>
+    </div>
+    <div class="req-card-body">
+      <div class="req-rule">
+        <div class="req-rule-label">HTTP 메서드</div>
+        <div class="req-tags">
+          <span class="rtag tok">GET</span>
+          <span class="rtag tok">POST</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="req-card req-complex">
+    <div class="req-card-head">
+      <div class="req-card-badge">⚡ 차단/추가 단계</div>
+      <div class="req-card-title">복잡 요청</div>
+      <div class="req-card-sub">추가 확인 필요</div>
+    </div>
+    <div class="req-card-body">
+      <div class="req-rule">
+        <div class="req-rule-label">HTTP 메서드</div>
+        <div class="req-tags">
+          <span class="rtag warn">PUT</span>
+          <span class="rtag warn">DELETE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+```css
+/* compare-cards */
+.compare-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-5);margin:var(--space-6) 0;}
+.cc-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);text-align:center;}
+.cc-card.cc-blue{border-top:3px solid var(--color-blue);}
+.cc-card.cc-accent{border-top:3px solid var(--color-accent);}
+.cc-icon{font-size:2.5rem;margin-bottom:var(--space-3);}
+.cc-title{font-size:var(--text-xl);font-weight:var(--weight-bold);margin-bottom:var(--space-2);}
+.cc-card.cc-blue .cc-title{color:var(--color-blue);}
+.cc-card.cc-accent .cc-title{color:var(--color-accent);}
+.cc-quote{font-size:var(--text-base);color:var(--color-text-muted);font-style:italic;margin-bottom:var(--space-3);}
+.cc-desc{font-size:var(--text-base);font-weight:var(--weight-semibold);color:var(--color-text);margin-bottom:var(--space-4);}
+.cc-tags{display:flex;flex-wrap:wrap;gap:var(--space-2);justify-content:center;margin-bottom:var(--space-3);}
+.cc-tag{font-size:var(--text-sm);padding:3px var(--space-3);border-radius:var(--radius-full);}
+.cc-card.cc-blue .cc-tag{background:var(--color-blue-soft);color:var(--color-blue);}
+.cc-card.cc-accent .cc-tag{background:var(--color-accent-soft);color:var(--color-accent);}
+.cc-note{font-size:var(--text-sm);color:var(--color-text-faint);}
+@media(max-width:850px){.compare-cards{grid-template-columns:1fr;}}
+
+/* req-cards */
+.req-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-5);margin:var(--space-8) 0;}
+.req-card{display:flex;flex-direction:column;border-radius:var(--radius-lg);overflow:hidden;}
+.req-card-head{padding:var(--space-6);}
+.req-simple .req-card-head{background:var(--color-green);}
+.req-complex .req-card-head{background:#b03a2e;}
+.req-card-badge{font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:var(--space-2);}
+.req-card-title{font-size:var(--text-2xl);font-weight:var(--weight-bold);color:#fff;margin-bottom:var(--space-1);}
+.req-card-sub{font-size:var(--text-base);color:rgba(255,255,255,0.65);}
+.req-card-body{flex:1;background:var(--color-bg-card);border:1px solid var(--color-border);border-top:none;padding:var(--space-5);border-radius:0 0 var(--radius-lg) var(--radius-lg);}
+.req-rule{margin-bottom:var(--space-4);}
+.req-rule:last-child{margin-bottom:0;}
+.req-rule-label{font-size:12px;font-weight:600;color:var(--color-text-faint);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:var(--space-2);}
+.req-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.rtag{font-size:13px;font-family:var(--font-mono);padding:3px 8px;border-radius:var(--radius-sm);background:var(--color-bg-alt);border:1px solid var(--color-border);color:var(--color-text-muted);}
+.rtag.tok{background:var(--color-green-soft);color:var(--color-green);border-color:rgba(58,107,74,0.2);}
+.rtag.warn{background:var(--color-red-soft);color:var(--color-red);border-color:rgba(176,58,46,0.2);}
+@media(max-width:850px){.req-cards{grid-template-columns:1fr;}}
 ```
 
 ---
