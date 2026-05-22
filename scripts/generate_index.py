@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Scans all HTML files and generates a beautiful index.html."""
+"""Generates main index (category cards) and per-category sub-indexes."""
 
 import re
 from pathlib import Path
@@ -9,25 +9,27 @@ ROOT = Path(__file__).parent.parent
 
 SKIP = {"index.html", "design-system.html"}
 
-FOLDER_LABELS = {
-    "articles": "Articles",
-    "specs":    "Specs",
-    "reviews":  "Reviews",
-    "reports":  "Reports",
-    "explore":  "Explore",
-    "tools":    "Tools",
+CATEGORY_META = {
+    "insights": {
+        "label": "Insights",
+        "description": "연구 · 분석 · 학술 콘텐츠",
+        "grad_from": "2d5a8e",
+        "grad_to": "1e3d6b",
+        "gradients": [("2d5a8e","1e3d6b"), ("234e80","163460"), ("3666a0","244e82"), ("1e3d6b","122845")],
+    },
+    "vibe": {
+        "label": "Vibe",
+        "description": "웹 개발 · 네트워크 · 바이브 코딩",
+        "grad_from": "d95f2b",
+        "grad_to": "b84820",
+        "gradients": [("d95f2b","b84820"), ("bf4e20","9e3c16"), ("e07035","c85428"), ("b85020","9a3e16")],
+    },
 }
 
-FOLDER_GRADIENTS = {
-    "articles": [("d95f2b","b84820"), ("bf4e20","9e3c16"), ("e07035","c85428"), ("b85020","9a3e16")],
-    "specs":    [("2d5a8e","1e3d6b"), ("234e80","163460"), ("3666a0","244e82"), ("1e3d6b","122845")],
-    "reviews":  [("3a6b4a","2a4f38"), ("2e5c3e","1e4029"), ("468060","325a46"), ("2a4f38","1a3526")],
-    "reports":  [("8a6a00","6b5200"), ("7a5e00","5e4800"), ("9a7800","7a6000"), ("6b5200","503c00")],
-    "explore":  [("6b48c8","4e34a0"), ("5c3cb8","422890"), ("7a58d4","5e44b0"), ("4e34a0","362280")],
-    "tools":    [("2a7a7a","1d5555"), ("1e6868","144848"), ("348888","226666"), ("1d5555","103838")],
-}
-FOLDER_GRADIENT_DEFAULT = [("6b6a63","4a4a45")]
+KNOWN_CATEGORIES = list(CATEGORY_META.keys())
 
+
+# ── File metadata helpers ────────────────────────────────────────────────────
 
 def get_title(path: Path) -> str:
     text = path.read_text(encoding="utf-8", errors="ignore")
@@ -55,35 +57,38 @@ def get_og_image(path: Path) -> str:
 
 
 def collect_files():
+    """Collect files from known category folders only."""
     folders = {}
-    for html in sorted(ROOT.rglob("*.html"), reverse=True):
-        if html.name in SKIP:
+    for category in KNOWN_CATEGORIES:
+        folder_path = ROOT / category
+        if not folder_path.exists():
             continue
-        rel = html.relative_to(ROOT)
-        parts = rel.parts
-        folder = parts[0] if len(parts) > 1 else "."
-        if folder.startswith("."):
-            continue
-        folders.setdefault(folder, []).append({
-            "path": rel.as_posix(),
-            "title": get_title(html),
-            "description": get_description(html),
-            "date": get_date(html),
-            "og_image": get_og_image(html),
-        })
+        files = []
+        for html in sorted(folder_path.glob("*.html"), reverse=True):
+            if html.name in SKIP:
+                continue
+            files.append({
+                "name": html.name,
+                "path": f"{category}/{html.name}",
+                "title": get_title(html),
+                "description": get_description(html),
+                "date": get_date(html),
+                "og_image": get_og_image(html),
+            })
+        if files:
+            folders[category] = files
     return folders
 
 
-# ── Back-to-index button injection ──────────────────────────────────────────
+# ── Back-to-index button ─────────────────────────────────────────────────────
 
 BACK_BUTTON_MARKER = 'id="back-to-index"'
 
 
-def _back_button_snippet(depth: int) -> str:
-    prefix = "../" * depth
+def _back_button_snippet(href: str) -> str:
     return (
         '\n<!-- Back to index -->\n'
-        f'<a id="back-to-index" href="{prefix}index.html"'
+        f'<a id="back-to-index" href="{href}"'
         ' aria-label="목록으로 돌아가기" title="목록으로">'
         '<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"'
         ' width="18" height="18">'
@@ -103,56 +108,97 @@ def _back_button_snippet(depth: int) -> str:
 
 
 def inject_back_button(path: Path) -> bool:
-    """Inject back-to-index button before </body> if not already present."""
+    """Inject back button pointing to same-folder index.html (the sub-index)."""
     text = path.read_text(encoding="utf-8", errors="ignore")
     if BACK_BUTTON_MARKER in text:
         return False
     if "</body>" not in text:
         return False
-    rel = path.relative_to(ROOT)
-    depth = len(rel.parts) - 1
-    snippet = _back_button_snippet(depth)
+    snippet = _back_button_snippet("index.html")
     path.write_text(text.replace("</body>", snippet + "</body>", 1), encoding="utf-8")
     return True
 
 
-# ── Card rendering ───────────────────────────────────────────────────────────
+# ── Shared CSS ───────────────────────────────────────────────────────────────
 
-def render_tab_buttons(folders):
-    all_btn = '<button class="tab-btn active" onclick="filterFolder(\'all\', this)">All</button>'
-    folder_btns = ""
-    for folder in folders:
-        label = FOLDER_LABELS.get(folder, folder.title())
-        folder_btns += f'<button class="tab-btn" onclick="filterFolder(\'{folder}\', this)">{label}</button>'
-    return all_btn + folder_btns
+SHARED_CSS = """
+:root {
+  --color-bg:#f5f2ed; --color-bg-alt:#eceae4; --color-bg-card:#ffffff;
+  --color-text:#1a1a18; --color-text-muted:#6b6a63; --color-text-faint:#a09f97;
+  --color-border:#dedad2; --color-accent:#d95f2b; --color-accent-hover:#c2521f;
+  --color-accent-soft:#faeee7;
+  --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --text-sm:0.875rem; --text-base:1rem; --text-lg:1.125rem; --text-xl:1.25rem;
+  --text-2xl:1.5rem; --text-3xl:1.875rem;
+  --weight-medium:500; --weight-semibold:600; --weight-bold:700;
+  --space-2:0.5rem; --space-3:0.75rem; --space-4:1rem; --space-5:1.25rem;
+  --space-6:1.5rem; --space-8:2rem; --space-12:3rem;
+  --radius-md:8px; --radius-lg:12px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.07); --shadow-md:0 4px 12px rgba(0,0,0,0.1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--color-bg);color:var(--color-text);min-height:100vh}
+header{background:var(--color-bg-card);border-bottom:1px solid var(--color-border);padding:var(--space-6) var(--space-8);display:flex;align-items:center;gap:var(--space-4);}
+header h1{font-size:var(--text-2xl);font-weight:var(--weight-bold);}
+header .meta{font-size:var(--text-sm);color:var(--color-text-faint);margin-left:auto}
+.container{max-width:1100px;margin:0 auto;padding:var(--space-8)}
+.search input{
+  padding:var(--space-2) var(--space-4);border:1px solid var(--color-border);
+  border-radius:var(--radius-md);font-size:var(--text-sm);background:var(--color-bg-card);
+  color:var(--color-text);outline:none;width:220px;
+}
+.search input:focus{border-color:var(--color-accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--space-6)}
+.card-wrap{display:flex;flex-direction:column;gap:var(--space-3);}
+.card{
+  background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);
+  text-decoration:none;color:inherit;display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:var(--shadow-sm);transition:all 180ms ease;
+}
+.card:hover{box-shadow:var(--shadow-md);border-color:var(--color-accent);transform:translateY(-2px)}
+.card-thumb{position:relative;width:100%;height:180px;overflow:hidden;flex-shrink:0;}
+.card-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+.card-thumb-grad{/* gradient set inline */}
+.card-thumb-glass{position:absolute;inset:0;background:rgba(5,5,10,0.36);}
+.card-body{padding:var(--space-6);height:132px;overflow:hidden;display:flex;flex-direction:column;gap:var(--space-2);flex-shrink:0;}
+.card-header{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.card-folder{font-size:var(--text-sm);font-weight:var(--weight-medium);color:var(--color-accent);background:var(--color-accent-soft);padding:3px var(--space-3);border-radius:var(--radius-md);}
+.card-date{font-size:var(--text-sm);color:var(--color-text-faint)}
+.card-title{font-size:var(--text-base);font-weight:var(--weight-semibold);line-height:1.5;letter-spacing:-0.01em;color:var(--color-text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.card-desc{font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.7;padding:0 var(--space-1);}
+.empty{text-align:center;color:var(--color-text-faint);padding:var(--space-12);font-size:var(--text-lg)}
+footer{text-align:center;padding:var(--space-8);color:var(--color-text-faint);font-size:var(--text-sm);border-top:1px solid var(--color-border);margin-top:var(--space-12)}
+@media(max-width:600px){
+  header{padding:var(--space-4)}.container{padding:var(--space-4)}
+  .search input{width:100%}
+}
+"""
 
 
-def render_cards(folders):
+# ── Card HTML rendering ──────────────────────────────────────────────────────
+
+def render_cards(files, label, gradients, path_prefix=""):
     html = ""
-    for folder, files in folders.items():
-        label = FOLDER_LABELS.get(folder, folder.title())
-        variants = FOLDER_GRADIENTS.get(folder, FOLDER_GRADIENT_DEFAULT)
-        for idx, f in enumerate(files):
-            date_str = f"<span class='card-date'>{f['date']}</span>" if f["date"] else ""
-            desc_str = f"<p class='card-desc'>{f['description']}</p>" if f["description"] else ""
-
-            c1, c2 = variants[idx % len(variants)]
-            if f["og_image"]:
-                thumb = (
-                    f"<div class='card-thumb'>"
-                    f"<img src='{f['og_image']}' alt='' loading='lazy'>"
-                    f"<div class='card-thumb-glass'></div></div>"
-                )
-            else:
-                thumb = (
-                    f"<div class='card-thumb card-thumb-grad'"
-                    f" style='background:linear-gradient(135deg,#{c1},#{c2})'>"
-                    f"<div class='card-thumb-glass'></div></div>"
-                )
-
-            html += f"""
-    <div class="card-wrap" data-folder="{folder}">
-      <a class="card" href="{f['path']}">
+    for idx, f in enumerate(files):
+        date_str = f"<span class='card-date'>{f['date']}</span>" if f["date"] else ""
+        desc_str = f"<p class='card-desc'>{f['description']}</p>" if f["description"] else ""
+        href = path_prefix + f["name"] if path_prefix else f["name"]
+        c1, c2 = gradients[idx % len(gradients)]
+        if f["og_image"]:
+            thumb = (
+                f"<div class='card-thumb'>"
+                f"<img src='{f['og_image']}' alt='' loading='lazy'>"
+                f"<div class='card-thumb-glass'></div></div>"
+            )
+        else:
+            thumb = (
+                f"<div class='card-thumb card-thumb-grad'"
+                f" style='background:linear-gradient(135deg,#{c1},#{c2})'>"
+                f"<div class='card-thumb-glass'></div></div>"
+            )
+        html += f"""
+    <div class="card-wrap">
+      <a class="card" href="{href}">
         {thumb}
         <div class="card-body">
           <div class="card-header">
@@ -167,11 +213,31 @@ def render_cards(folders):
     return html
 
 
-def build(folders):
-    tab_buttons = render_tab_buttons(folders)
-    cards = render_cards(folders)
-    total = sum(len(v) for v in folders.values())
+# ── Main index (category cards) ──────────────────────────────────────────────
+
+def build_main_index(folders):
     generated = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+    total = sum(len(v) for v in folders.values())
+
+    cat_cards_html = ""
+    for key, meta in CATEGORY_META.items():
+        files = folders.get(key, [])
+        count = len(files)
+        preview_items = "".join(
+            f"<li>{f['title']}</li>" for f in files[:3]
+        )
+        cat_cards_html += f"""
+    <a class="cat-card" href="{key}/index.html">
+      <div class="cat-thumb" style="background:linear-gradient(135deg,#{meta['grad_from']},#{meta['grad_to']})">
+        <div class="cat-name">{meta['label']}</div>
+      </div>
+      <div class="cat-body">
+        <p class="cat-desc">{meta['description']}</p>
+        <div class="cat-count">{count}개 아티클</div>
+        <ul class="cat-preview">{preview_items}</ul>
+        <span class="cat-more">모두 보기 →</span>
+      </div>
+    </a>"""
 
     return f"""<!DOCTYPE html>
 <html lang="ko">
@@ -185,119 +251,55 @@ def build(folders):
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="HTML Library">
 <style>
-:root {{
-  --color-bg:#f5f2ed; --color-bg-alt:#eceae4; --color-bg-card:#ffffff;
-  --color-text:#1a1a18; --color-text-muted:#6b6a63; --color-text-faint:#a09f97;
-  --color-border:#dedad2; --color-accent:#d95f2b; --color-accent-hover:#c2521f;
-  --color-accent-soft:#faeee7;
-  --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
-  --text-sm:0.875rem; --text-base:1rem; --text-lg:1.125rem; --text-2xl:1.5rem; --text-3xl:1.875rem;
-  --weight-medium:500; --weight-semibold:600; --weight-bold:700;
-  --space-2:0.5rem; --space-3:0.75rem; --space-4:1rem; --space-6:1.5rem;
-  --space-8:2rem; --space-12:3rem;
-  --radius-md:8px; --radius-lg:12px;
-  --shadow-sm:0 1px 3px rgba(0,0,0,0.07); --shadow-md:0 4px 12px rgba(0,0,0,0.08);
-}}
-*,*::before,*::after{{box-sizing:border-box;margin:0;padding:0}}
-body{{font-family:var(--font-sans);background:var(--color-bg);color:var(--color-text);min-height:100vh}}
-header{{background:var(--color-bg-card);border-bottom:1px solid var(--color-border);padding:var(--space-6) var(--space-8);display:flex;align-items:baseline;gap:var(--space-4);}}
-header h1{{font-size:var(--text-2xl);font-weight:var(--weight-bold);}}
-header .meta{{font-size:var(--text-sm);color:var(--color-text-faint);margin-left:auto}}
-.container{{max-width:1100px;margin:0 auto;padding:var(--space-8)}}
-.toolbar{{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;margin-bottom:var(--space-6)}}
-.tab-btn{{
-  padding:var(--space-2) var(--space-4);border:1px solid var(--color-border);
-  background:var(--color-bg-card);color:var(--color-text-muted);
-  border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:var(--weight-medium);
-  cursor:pointer;transition:all 120ms ease;
-}}
-.tab-btn:hover{{border-color:var(--color-accent);color:var(--color-accent)}}
-.tab-btn.active{{background:var(--color-accent);border-color:var(--color-accent);color:#fff}}
-.search{{margin-left:auto}}
-.search input{{
-  padding:var(--space-2) var(--space-4);border:1px solid var(--color-border);
-  border-radius:var(--radius-md);font-size:var(--text-sm);background:var(--color-bg-card);
-  color:var(--color-text);outline:none;width:200px;
-}}
-.search input:focus{{border-color:var(--color-accent)}}
-.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--space-6)}}
-.card-wrap{{display:flex;flex-direction:column;gap:var(--space-3);}}
-.card{{
+{SHARED_CSS}
+/* Category cards */
+.cat-grid{{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-8);margin-top:var(--space-8);}}
+.cat-card{{
   background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);
-  text-decoration:none;color:inherit;display:flex;flex-direction:column;overflow:hidden;
-  box-shadow:var(--shadow-sm);transition:all 180ms ease;
+  overflow:hidden;text-decoration:none;color:inherit;
+  box-shadow:var(--shadow-sm);transition:all 200ms ease;display:flex;flex-direction:column;
 }}
-.card:hover{{box-shadow:var(--shadow-md);border-color:var(--color-accent);transform:translateY(-2px)}}
-.card-thumb{{position:relative;width:100%;height:180px;overflow:hidden;flex-shrink:0;}}
-.card-thumb img{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}}
-.card-thumb-grad{{/* gradient set inline */}}
-.card-thumb-glass{{position:absolute;inset:0;background:rgba(5,5,10,0.36);}}
-.card-body{{
-  padding:var(--space-6);height:132px;overflow:hidden;
-  display:flex;flex-direction:column;gap:var(--space-2);flex-shrink:0;
+.cat-card:hover{{box-shadow:var(--shadow-md);transform:translateY(-4px);border-color:transparent;}}
+.cat-thumb{{
+  height:160px;display:flex;align-items:flex-end;padding:var(--space-6);
+  position:relative;
 }}
-.card-header{{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}}
-.card-folder{{
-  font-size:var(--text-sm);font-weight:var(--weight-medium);color:var(--color-accent);
-  background:var(--color-accent-soft);padding:3px var(--space-3);border-radius:var(--radius-md);
+.cat-name{{
+  font-size:var(--text-3xl);font-weight:var(--weight-bold);color:#fff;
+  letter-spacing:-0.02em;text-shadow:0 1px 6px rgba(0,0,0,0.25);
 }}
-.card-date{{font-size:var(--text-sm);color:var(--color-text-faint)}}
-.card-title{{
-  font-size:var(--text-base);font-weight:var(--weight-semibold);line-height:1.5;
-  letter-spacing:-0.01em;color:var(--color-text);
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+.cat-body{{padding:var(--space-6);flex:1;display:flex;flex-direction:column;gap:var(--space-4);}}
+.cat-desc{{font-size:var(--text-sm);color:var(--color-text-muted);}}
+.cat-count{{font-size:var(--text-sm);font-weight:var(--weight-semibold);color:var(--color-accent);}}
+.cat-preview{{list-style:none;display:flex;flex-direction:column;gap:var(--space-2);}}
+.cat-preview li{{
+  font-size:var(--text-sm);color:var(--color-text);
+  display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;
+  padding-left:var(--space-3);border-left:2px solid var(--color-border);
+  line-height:1.5;
 }}
-.card-desc{{font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.7;padding:0 var(--space-1);}}
-.empty{{text-align:center;color:var(--color-text-faint);padding:var(--space-12);font-size:var(--text-lg)}}
-footer{{text-align:center;padding:var(--space-8);color:var(--color-text-faint);font-size:var(--text-sm);border-top:1px solid var(--color-border);margin-top:var(--space-12)}}
-@media(max-width:600px){{
-  header{{padding:var(--space-4)}}.container{{padding:var(--space-4)}}
-  .search input{{width:100%}}.toolbar{{flex-direction:column;align-items:stretch}}
-  .search{{margin-left:0}}
+.cat-more{{margin-top:auto;font-size:var(--text-sm);font-weight:var(--weight-semibold);color:var(--color-accent);padding-top:var(--space-2);}}
+.page-subtitle{{font-size:var(--text-base);color:var(--color-text-muted);margin-top:var(--space-3);}}
+@media(max-width:700px){{
+  .cat-grid{{grid-template-columns:1fr;gap:var(--space-6);}}
+  .cat-thumb{{height:120px;}}
+  .cat-name{{font-size:var(--text-2xl);}}
 }}
 </style>
 </head>
 <body>
 <header>
   <h1>My HTML Library</h1>
-  <span class="meta">{total} files · Updated {generated}</span>
+  <span class="meta">{total} articles · {generated}</span>
 </header>
 <div class="container">
-  <div class="toolbar">
-    {tab_buttons}
-    <div class="search"><input type="text" placeholder="Search..." oninput="filterSearch(this.value)"></div>
+  <p class="page-subtitle">주제를 선택하면 관련 아티클을 볼 수 있습니다.</p>
+  <div class="cat-grid">
+    {cat_cards_html}
   </div>
-  <div class="grid" id="grid">
-    {cards}
-  </div>
-  <div class="empty" id="empty" style="display:none">No files found.</div>
 </div>
 <footer>Generated by GitHub Actions · <a href="design-system.html" style="color:var(--color-accent)">Design System</a></footer>
 <script>
-let currentFolder = 'all';
-let currentSearch = '';
-function update() {{
-  const cards = document.querySelectorAll('.card-wrap');
-  let visible = 0;
-  cards.forEach(c => {{
-    const folderMatch = currentFolder === 'all' || c.dataset.folder === currentFolder;
-    const searchMatch = !currentSearch || c.textContent.toLowerCase().includes(currentSearch);
-    const show = folderMatch && searchMatch;
-    c.style.display = show ? '' : 'none';
-    if (show) visible++;
-  }});
-  document.getElementById('empty').style.display = visible === 0 ? '' : 'none';
-}}
-function filterFolder(folder, btn) {{
-  currentFolder = folder;
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  update();
-}}
-function filterSearch(val) {{
-  currentSearch = val.toLowerCase();
-  update();
-}}
 if ('serviceWorker' in navigator) {{
   navigator.serviceWorker.register('/my-html/sw.js');
 }}
@@ -307,23 +309,106 @@ if ('serviceWorker' in navigator) {{
 """
 
 
+# ── Sub-index (per category) ─────────────────────────────────────────────────
+
+def build_sub_index(key, files):
+    meta = CATEGORY_META[key]
+    generated = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+    cards = render_cards(files, meta["label"], meta["gradients"])
+    count = len(files)
+
+    return f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{meta['label']} — My HTML Library</title>
+<style>
+{SHARED_CSS}
+.breadcrumb{{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);color:var(--color-text-muted);}}
+.breadcrumb a{{color:var(--color-text-muted);text-decoration:none;}}
+.breadcrumb a:hover{{color:var(--color-accent);}}
+.breadcrumb-sep{{color:var(--color-text-faint);}}
+.cat-header{{margin-bottom:var(--space-6);}}
+.cat-header h2{{
+  font-size:var(--text-3xl);font-weight:var(--weight-bold);
+  background:linear-gradient(135deg,#{meta['grad_from']},#{meta['grad_to']});
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;margin:var(--space-2) 0;
+}}
+.cat-header p{{font-size:var(--text-base);color:var(--color-text-muted);}}
+.toolbar{{display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-6);flex-wrap:wrap;}}
+@media(max-width:600px){{.search input{{width:100%}}.toolbar{{flex-direction:column;align-items:stretch}}}}
+</style>
+</head>
+<body>
+<header>
+  <div class="breadcrumb">
+    <a href="../index.html">My HTML Library</a>
+    <span class="breadcrumb-sep">/</span>
+    <span>{meta['label']}</span>
+  </div>
+  <span class="meta">{count} articles · {generated}</span>
+</header>
+<div class="container">
+  <div class="cat-header">
+    <h2>{meta['label']}</h2>
+    <p>{meta['description']}</p>
+  </div>
+  <div class="toolbar">
+    <div class="search"><input type="text" placeholder="Search..." oninput="filterSearch(this.value)"></div>
+  </div>
+  <div class="grid" id="grid">
+    {cards}
+  </div>
+  <div class="empty" id="empty" style="display:none">No articles found.</div>
+</div>
+<footer><a href="../index.html" style="color:var(--color-accent)">← My HTML Library</a> · Generated by GitHub Actions</footer>
+<script>
+function filterSearch(val) {{
+  const q = val.toLowerCase();
+  const wraps = document.querySelectorAll('.card-wrap');
+  let visible = 0;
+  wraps.forEach(w => {{
+    const show = !q || w.textContent.toLowerCase().includes(q);
+    w.style.display = show ? '' : 'none';
+    if (show) visible++;
+  }});
+  document.getElementById('empty').style.display = visible === 0 ? '' : 'none';
+}}
+</script>
+</body>
+</html>
+"""
+
+
+# ── Main ─────────────────────────────────────────────────────────────────────
+
 if __name__ == "__main__":
-    # Inject back-to-index button into all article files
+    # Inject back buttons in category article files
     injected = 0
-    for html in sorted(ROOT.rglob("*.html")):
-        if html.name in SKIP:
+    for category in KNOWN_CATEGORIES:
+        folder_path = ROOT / category
+        if not folder_path.exists():
             continue
-        rel = html.relative_to(ROOT)
-        if rel.parts[0].startswith("."):
-            continue
-        if inject_back_button(html):
-            injected += 1
+        for html in sorted(folder_path.glob("*.html")):
+            if html.name in SKIP:
+                continue
+            if inject_back_button(html):
+                injected += 1
     if injected:
         print(f"Injected back-to-index button into {injected} file(s)")
 
     folders = collect_files()
-    html_out = build(folders)
-    out = ROOT / "index.html"
-    out.write_text(html_out, encoding="utf-8")
+
+    # Generate sub-indexes
+    for key, files in folders.items():
+        sub_out = ROOT / key / "index.html"
+        sub_out.write_text(build_sub_index(key, files), encoding="utf-8")
+        print(f"Generated {key}/index.html — {len(files)} articles")
+
+    # Generate main index
+    main_out = ROOT / "index.html"
+    main_out.write_text(build_main_index(folders), encoding="utf-8")
     total = sum(len(v) for v in folders.values())
-    print(f"Generated index.html — {total} files across {len(folders)} folders")
+    print(f"Generated index.html — {total} total articles across {len(folders)} categories")
