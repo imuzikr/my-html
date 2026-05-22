@@ -89,47 +89,11 @@
       max-width: 900px;
       margin: 0 auto;
       padding: var(--space-8) var(--space-6);
-      display: grid;
-      grid-template-columns: 1fr 210px;
-      gap: var(--space-8);
-      align-items: start;
-    }
-    @media (max-width: 880px) {
-      .layout { grid-template-columns: 1fr; }
-      .toc-sidebar { display: none; }
     }
     @media (max-width: 768px) {
       .layout { padding: var(--space-6) var(--space-4); }
     }
 
-    /* TOC */
-    .toc-sidebar { position: sticky; top: var(--space-8); }
-    .toc-title {
-      font-size: var(--text-xs);
-      font-weight: var(--weight-semibold);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--color-text-faint);
-      margin-bottom: var(--space-3);
-    }
-    .toc-list { list-style: none; }
-    .toc-list li { margin-bottom: 2px; }
-    .toc-list a {
-      font-size: var(--text-sm);
-      color: var(--color-text-muted);
-      text-decoration: none;
-      display: block;
-      padding: var(--space-1) var(--space-2);
-      border-radius: var(--radius-md);
-      border-left: 2px solid transparent;
-      transition: all 140ms ease;
-    }
-    .toc-list a:hover { color: var(--color-text); background: var(--color-bg-alt); }
-    .toc-list a.active {
-      color: var(--color-accent);
-      border-left-color: var(--color-accent);
-      background: var(--color-accent-soft);
-    }
 
     /* Sections */
     .section { margin-bottom: var(--space-12); scroll-margin-top: var(--space-8); }
@@ -960,20 +924,6 @@ app.<span class="tok-fn">get</span>(<span class="tok-string">'/api/users'</span>
 
   </main>
 
-  <!-- TOC Sidebar -->
-  <aside class="toc-sidebar">
-    <div class="toc-title">목차</div>
-    <nav>
-      <ul class="toc-list">
-        <li><a href="#s1" id="toc-s1">01. SOP vs CORS</a></li>
-        <li><a href="#s2" id="toc-s2">02. 응답 헤더</a></li>
-        <li><a href="#s3" id="toc-s3">03. Preflight</a></li>
-        <li><a href="#s4" id="toc-s4">04. 미들웨어 · 라우터</a></li>
-        <li><a href="#s5" id="toc-s5">05. 개발용 프록시</a></li>
-        <li><a href="#s6" id="toc-s6">핵심 정리</a></li>
-      </ul>
-    </nav>
-  </aside>
 </div>
 
 <script>
