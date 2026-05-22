@@ -309,19 +309,19 @@ footer{background:var(--color-bg-alt);border-top:1px solid var(--color-border);
 .sd-subtitle{font-size:var(--text-sm);color:var(--color-text-muted);}
 .seqdiag-body{padding:var(--space-6);}
 /* Actors — illustration card style */
-.sd-actors{display:grid;grid-template-columns:160px 1fr 160px;margin-bottom:var(--space-6);}
+.sd-actors{display:grid;grid-template-columns:180px 1fr 180px;margin-bottom:var(--space-6);}
 .sd-actor{display:flex;flex-direction:column;align-items:center;gap:var(--space-2);padding:var(--space-4) var(--space-3);border-radius:var(--radius-lg);border:1px solid #dedad2;background:#fff;}
 .sd-actor-client{background:#f0f5fb;border-color:#c8d8ee;}
 .sd-actor-server{background:#f0f6f1;border-color:#bdd4c2;}
 .sd-actor-name{font-size:var(--text-sm);font-weight:var(--weight-semibold);color:#1a1a18;text-align:center;line-height:1.4;margin-top:2px;}
 /* Message rows */
 .sd-msgs{display:flex;flex-direction:column;gap:0;}
-.sd-row{display:grid;grid-template-columns:160px 1fr 160px;align-items:center;min-height:60px;}
+.sd-row{display:grid;grid-template-columns:180px 1fr 180px;align-items:center;min-height:60px;}
 .sd-cell{padding:var(--space-2) var(--space-3);}
 .sd-cell-left{text-align:right;}
 .sd-cell-right{text-align:left;}
 .sd-name{font-family:var(--font-mono);font-size:var(--text-sm);font-weight:700;color:#1a1a18;white-space:nowrap;}
-.sd-detail{font-family:var(--font-mono);font-size:12px;color:#6b6a63;line-height:1.7;margin-top:3px;}
+.sd-detail{font-family:var(--font-mono);font-size:12px;color:#6b6a63;line-height:1.7;margin-top:3px;word-break:keep-all;overflow-wrap:break-word;}
 .sd-badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#faeee7;color:#c5614a;margin-top:5px;letter-spacing:0.01em;}
 /* Arrows */
 .sd-arr{display:flex;align-items:center;padding:0 4px;}
@@ -339,7 +339,7 @@ footer{background:var(--color-bg-alt);border-top:1px solid var(--color-border);
 /* Divider between phases */
 .sd-divider{grid-column:1/-1;border:none;border-top:1px dashed #e0ddd5;margin:var(--space-2) 0;}
 @media(max-width:850px){
-  .sd-actors,.sd-row{grid-template-columns:110px 1fr 110px;}
+  .sd-actors,.sd-row{grid-template-columns:130px 1fr 130px;}
   .sd-actor-name{font-size:12px;}
   .sd-name{font-size:12px;}
   .sd-detail{font-size:11px;}
