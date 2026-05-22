@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My HTML Library</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#d95f2b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="HTML Library">
 <style>
 :root {
   --color-bg:#f5f2ed; --color-bg-alt:#eceae4; --color-bg-card:#ffffff;
@@ -80,7 +85,7 @@ footer{text-align:center;padding:var(--space-8);color:var(--color-text-faint);fo
 <body>
 <header>
   <h1>My HTML Library</h1>
-  <span class="meta">10 files · Updated 2026-05-21 22:53 UTC</span>
+  <span class="meta">10 files · Updated 2026-05-22 11:49 UTC</span>
 </header>
 <div class="container">
   <div class="toolbar">
@@ -104,7 +109,7 @@ footer{text-align:center;padding:var(--space-8);color:var(--color-text-faint);fo
     </div>
     <div class="card-wrap" data-folder="articles">
       <a class="card" href="articles/2026-05-20-ouroboros-direction.html">
-        <div class='card-thumb card-thumb-grad' style='background:linear-gradient(135deg,#d95f2b,#b84820)'><div class='card-thumb-glass'></div></div>
+        <div class='card-thumb card-thumb-grad' style='background:linear-gradient(135deg,#bf4e20,#9e3c16)'><div class='card-thumb-glass'></div></div>
         <div class="card-body">
           <div class="card-header">
             <span class="card-folder">Articles</span>
@@ -130,7 +135,7 @@ footer{text-align:center;padding:var(--space-8);color:var(--color-text-faint);fo
     </div>
     <div class="card-wrap" data-folder="articles">
       <a class="card" href="articles/2026-05-20-llm-fallacy.html">
-        <div class='card-thumb card-thumb-grad' style='background:linear-gradient(135deg,#e07035,#c85428)'><div class='card-thumb-glass'></div></div>
+        <div class='card-thumb card-thumb-grad' style='background:linear-gradient(135deg,#b85020,#9a3e16)'><div class='card-thumb-glass'></div></div>
         <div class="card-body">
           <div class="card-header">
             <span class="card-folder">Articles</span>
@@ -156,7 +161,7 @@ footer{text-align:center;padding:var(--space-8);color:var(--color-text-faint);fo
     </div>
     <div class="card-wrap" data-folder="articles">
       <a class="card" href="articles/2026-05-19-ontology.html">
-        <div class='card-thumb card-thumb-grad' style='background:linear-gradient(135deg,#d95f2b,#b84820)'><div class='card-thumb-glass'></div></div>
+        <div class='card-thumb card-thumb-grad' style='background:linear-gradient(135deg,#bf4e20,#9e3c16)'><div class='card-thumb-glass'></div></div>
         <div class="card-body">
           <div class="card-header">
             <span class="card-folder">Articles</span>
@@ -182,7 +187,7 @@ footer{text-align:center;padding:var(--space-8);color:var(--color-text-faint);fo
     </div>
     <div class="card-wrap" data-folder="articles">
       <a class="card" href="articles/2026-05-19-cors.html">
-        <div class='card-thumb card-thumb-grad' style='background:linear-gradient(135deg,#e07035,#c85428)'><div class='card-thumb-glass'></div></div>
+        <div class='card-thumb card-thumb-grad' style='background:linear-gradient(135deg,#b85020,#9a3e16)'><div class='card-thumb-glass'></div></div>
         <div class="card-body">
           <div class="card-header">
             <span class="card-folder">Articles</span>
@@ -195,7 +200,7 @@ footer{text-align:center;padding:var(--space-8);color:var(--color-text-faint);fo
     </div>
     <div class="card-wrap" data-folder="articles">
       <a class="card" href="articles/2026-05-19-ai-problem-solving.html">
-        <div class='card-thumb card-thumb-grad' style='background:linear-gradient(135deg,#b85020,#9a3e16)'><div class='card-thumb-glass'></div></div>
+        <div class='card-thumb card-thumb-grad' style='background:linear-gradient(135deg,#d95f2b,#b84820)'><div class='card-thumb-glass'></div></div>
         <div class="card-body">
           <div class="card-header">
             <span class="card-folder">Articles</span>
@@ -208,7 +213,7 @@ footer{text-align:center;padding:var(--space-8);color:var(--color-text-faint);fo
     </div>
     <div class="card-wrap" data-folder="articles">
       <a class="card" href="articles/2026-05-18-github-actions-auto-deploy.html">
-        <div class='card-thumb card-thumb-grad' style='background:linear-gradient(135deg,#d95f2b,#b84820)'><div class='card-thumb-glass'></div></div>
+        <div class='card-thumb card-thumb-grad' style='background:linear-gradient(135deg,#bf4e20,#9e3c16)'><div class='card-thumb-glass'></div></div>
         <div class="card-body">
           <div class="card-header">
             <span class="card-folder">Articles</span>
@@ -247,6 +252,9 @@ function filterFolder(folder, btn) {
 function filterSearch(val) {
   currentSearch = val.toLowerCase();
   update();
+}
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/my-html/sw.js');
 }
 </script>
 </body>

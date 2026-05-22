@@ -179,6 +179,11 @@ def build(folders):
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My HTML Library</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#d95f2b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="HTML Library">
 <style>
 :root {{
   --color-bg:#f5f2ed; --color-bg-alt:#eceae4; --color-bg-card:#ffffff;
@@ -292,6 +297,9 @@ function filterFolder(folder, btn) {{
 function filterSearch(val) {{
   currentSearch = val.toLowerCase();
   update();
+}}
+if ('serviceWorker' in navigator) {{
+  navigator.serviceWorker.register('/my-html/sw.js');
 }}
 </script>
 </body>
