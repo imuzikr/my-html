@@ -190,6 +190,40 @@ footer{background:var(--color-bg-alt);border-top:1px solid var(--color-border);
 .summary-icon{font-size:var(--text-xl);flex-shrink:0;margin-top:2px;}
 .summary-title{font-size:var(--text-sm);font-weight:var(--weight-semibold);color:#fff;margin-bottom:var(--space-2);line-height:var(--leading-snug);}
 .summary-desc{font-size:var(--text-xs);color:rgba(255,255,255,0.5);line-height:var(--leading-snug);}
+.chat-convo{display:flex;flex-direction:column;gap:var(--space-4);margin:var(--space-8) 0;padding:var(--space-6);background:#1e1e2e;border-radius:var(--radius-lg);}
+.chat-convo-title{font-size:var(--text-xs);font-weight:var(--weight-semibold);letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:var(--space-2);}
+.chat-row{display:flex;align-items:flex-start;gap:var(--space-3);}
+.chat-row.chat-server{flex-direction:row-reverse;}
+.chat-av{width:32px;height:32px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:16px;}
+.av-browser{background:#1a2236;border:1px solid #2d5a8e;color:#8ab4d4;}
+.av-server{background:#1a3526;border:1px solid #3a6b4a;color:#9fd4b0;}
+.av-think{background:#2a2418;border:1px solid rgba(201,162,39,0.4);color:#c9a227;font-size:14px;}
+.chat-side{flex:1;min-width:0;}
+.chat-row.chat-server .chat-side{display:flex;flex-direction:column;align-items:flex-end;}
+.chat-name{font-size:10px;font-weight:600;letter-spacing:0.04em;color:rgba(255,255,255,0.3);margin-bottom:3px;}
+.chat-row.chat-server .chat-name{text-align:right;}
+.chat-bbl{display:inline-block;max-width:82%;padding:var(--space-3) var(--space-4);border-radius:12px;font-size:var(--text-sm);line-height:var(--leading-snug);color:rgba(255,255,255,0.88);}
+.bbl-browser{background:#1e3050;border-radius:4px 12px 12px 12px;}
+.bbl-server{background:#1b3326;border-radius:12px 4px 12px 12px;}
+.bbl-think{background:#2a2418;border:1px dashed rgba(201,162,39,0.35);color:rgba(255,255,255,0.6);font-style:italic;border-radius:12px;}
+.bbl-code{font-family:var(--font-mono);font-size:11px;line-height:1.9;}
+.chat-tag{display:inline-block;margin-top:4px;font-size:10px;color:rgba(255,255,255,0.25);letter-spacing:0.03em;}
+.req-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-5);margin:var(--space-8) 0;}
+.req-card{border-radius:var(--radius-lg);overflow:hidden;}
+.req-card-head{padding:var(--space-6);}
+.req-simple .req-card-head{background:var(--color-green);}
+.req-complex .req-card-head{background:#b03a2e;}
+.req-card-badge{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:var(--space-2);}
+.req-card-title{font-size:var(--text-2xl);font-weight:var(--weight-bold);color:#fff;margin-bottom:var(--space-1);}
+.req-card-sub{font-size:var(--text-sm);color:rgba(255,255,255,0.65);}
+.req-card-body{background:var(--color-bg-card);border:1px solid var(--color-border);border-top:none;padding:var(--space-5);border-radius:0 0 var(--radius-lg) var(--radius-lg);}
+.req-rule{margin-bottom:var(--space-4);}
+.req-rule:last-child{margin-bottom:0;}
+.req-rule-label{font-size:10px;font-weight:600;color:var(--color-text-faint);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:var(--space-2);}
+.req-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.rtag{font-size:11px;font-family:var(--font-mono);padding:3px 8px;border-radius:var(--radius-sm);background:var(--color-bg-alt);border:1px solid var(--color-border);color:var(--color-text-muted);}
+.rtag.tok{background:var(--color-green-soft);color:var(--color-green);border-color:rgba(58,107,74,0.2);}
+.rtag.warn{background:var(--color-red-soft);color:var(--color-red);border-color:rgba(176,58,46,0.2);}
 @media(max-width:700px){
   .hero-inner{grid-template-columns:1fr;}
   .hero-card{display:none;}
@@ -203,6 +237,7 @@ footer{background:var(--color-bg-alt);border-top:1px solid var(--color-border);
   .process-flow{grid-template-columns:1fr;}
   .pf-arrow{transform:rotate(90deg);padding-top:0;}
   .summary-grid{grid-template-columns:1fr;}
+  .req-cards{grid-template-columns:1fr;}
 }
 </style>
 </head>
@@ -368,57 +403,67 @@ pass access control check.</span></code></pre>
 
     <p>브라우저가 이렇게 동작하는 이유는 <strong>보안</strong> 때문입니다. 만약 어떤 악성 사이트가 사용자의 브라우저를 통해 은행 API에 마음대로 요청을 보낼 수 있다면? Preflight는 서버가 "허용된 출처"를 명확히 선언하도록 강제해서 이를 방지합니다.</p>
 
-    <p>쉽게 비유하면 이렇습니다:</p>
+    <p>브라우저와 서버가 어떤 대화를 나누는지 살펴봅시다. 실제로는 이런 일이 벌어집니다:</p>
 
-    <!-- SVG: 비유 다이어그램 -->
-    <div class="diagram-wrap">
-      <svg viewBox="0 0 680 120" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Preflight 비유: 문지기에게 먼저 허락을 받고 들어가는 구조">
-        <defs>
-          <marker id="arr-a" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
-            <polygon points="0 0,9 3.5,0 7" fill="#b8b5ac"/>
-          </marker>
-          <marker id="arr-b" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
-            <polygon points="0 0,9 3.5,0 7" fill="#3a6b4a"/>
-          </marker>
-          <marker id="arr-q" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
-            <polygon points="0 0,9 3.5,0 7" fill="#2d5a8e"/>
-          </marker>
-        </defs>
-        <rect x="0" y="0" width="680" height="120" rx="12" fill="#eceae4"/>
+    <div class="chat-convo">
+      <div class="chat-convo-title">브라우저 ↔ 서버 통신 흐름</div>
 
-        <!-- Browser -->
-        <rect x="20" y="30" width="110" height="60" rx="8" fill="#fff" stroke="#dedad2" stroke-width="1.5"/>
-        <text x="75" y="55" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#1a1a18">브라우저</text>
-        <text x="75" y="73" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#6b6a63">(React / Next.js)</text>
+      <div class="chat-row">
+        <div class="chat-av av-browser">B</div>
+        <div class="chat-side">
+          <div class="chat-name">브라우저 내부 판단 (JS 실행 전)</div>
+          <div class="chat-bbl bbl-think">이 요청은 다른 출처(Cross-Origin)이고 <strong style="color:#c9a227">Authorization 헤더 + application/json</strong>까지 있네. 먼저 허락을 받아야 해.</div>
+          <div class="chat-tag">🔒 CORS 보안 정책 자동 작동</div>
+        </div>
+      </div>
 
-        <!-- Arrow 1: 먼저 물어봄 -->
-        <line x1="132" y1="52" x2="248" y2="52" stroke="#2d5a8e" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-q)"/>
-        <text x="190" y="44" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#2d5a8e" font-weight="600">① OPTIONS (먼저 물어봄)</text>
+      <div class="chat-row">
+        <div class="chat-av av-browser">B</div>
+        <div class="chat-side">
+          <div class="chat-name">브라우저 → 서버 &nbsp;(Preflight)</div>
+          <div class="chat-bbl bbl-browser bbl-code">
+            <span style="color:#569cd6;font-weight:700">OPTIONS</span> /api/data HTTP/1.1<br>
+            <span style="color:#9cdcfe">Origin:</span> <span style="color:#ce9178">http://localhost:3000</span><br>
+            <span style="color:#9cdcfe">Access-Control-Request-Method:</span> <span style="color:#ce9178">POST</span><br>
+            <span style="color:#9cdcfe">Access-Control-Request-Headers:</span> <span style="color:#ce9178">authorization, content-type</span>
+          </div>
+          <div class="chat-tag">✋ "이런 요청 보내도 되나요?" 사전 확인</div>
+        </div>
+      </div>
 
-        <!-- Arrow 2: 허용 응답 -->
-        <line x1="248" y1="70" x2="132" y2="70" stroke="#3a6b4a" stroke-width="1.5" marker-end="url(#arr-b)"/>
-        <text x="190" y="88" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#3a6b4a" font-weight="600">② 허용 응답</text>
+      <div class="chat-row chat-server">
+        <div class="chat-av av-server">S</div>
+        <div class="chat-side">
+          <div class="chat-name">서버 → 브라우저 &nbsp;(허용 응답)</div>
+          <div class="chat-bbl bbl-server bbl-code">
+            HTTP/1.1 <span style="color:#4ec9b0;font-weight:700">200 OK</span><br>
+            <span style="color:#9cdcfe">Access-Control-Allow-Origin:</span> <span style="color:#ce9178">http://localhost:3000</span><br>
+            <span style="color:#9cdcfe">Access-Control-Allow-Methods:</span> <span style="color:#ce9178">POST</span><br>
+            <span style="color:#9cdcfe">Access-Control-Allow-Headers:</span> <span style="color:#ce9178">authorization, content-type</span>
+          </div>
+          <div class="chat-tag">✅ "허용합니다!"</div>
+        </div>
+      </div>
 
-        <!-- Gatekeeper / Server -->
-        <rect x="250" y="20" width="120" height="80" rx="8" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.5"/>
-        <text x="310" y="52" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="700" fill="#2d5a8e">서버</text>
-        <text x="310" y="68" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#2d5a8e">(문지기)</text>
-        <text x="310" y="86" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#2d5a8e">허용 목록 확인</text>
+      <div class="chat-row">
+        <div class="chat-av av-browser">B</div>
+        <div class="chat-side">
+          <div class="chat-name">브라우저 → 서버 &nbsp;(실제 요청)</div>
+          <div class="chat-bbl bbl-browser">
+            이제 진짜 요청 보냅니다 → <strong style="color:#8ab4d4">POST /api/data</strong> 🚀
+          </div>
+          <div class="chat-tag">✉️ 내가 작성한 fetch() 코드가 실제로 실행됨</div>
+        </div>
+      </div>
 
-        <!-- Arrow 3: 실제 요청 -->
-        <line x1="372" y1="60" x2="466" y2="60" stroke="#b8b5ac" stroke-width="1.5" marker-end="url(#arr-a)"/>
-        <text x="419" y="50" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#6b6a63" font-weight="600">③ 실제 POST 요청</text>
-
-        <!-- API Resource -->
-        <rect x="468" y="30" width="110" height="60" rx="8" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="1.5"/>
-        <text x="523" y="55" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#3a6b4a">API 리소스</text>
-        <text x="523" y="73" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#3a6b4a">/api/data</text>
-      </svg>
+      <div class="chat-row chat-server">
+        <div class="chat-av av-server">S</div>
+        <div class="chat-side">
+          <div class="chat-name">서버 → 브라우저</div>
+          <div class="chat-bbl bbl-server"><strong style="color:#9fd4b0">200 OK</strong> 🎉 &nbsp;데이터 전달 완료</div>
+        </div>
+      </div>
     </div>
-
-    <blockquote class="pull-quote">
-      서버라는 건물에 들어가려면, 먼저 입구의 <strong>문지기</strong>에게 허락을 받아야 합니다.<br>문지기가 OK해야만 그때 실제로 안으로 들어갑니다.
-    </blockquote>
   </section>
 
   <!-- Section 3: 핸드셰이크 vs Preflight -->
@@ -598,92 +643,69 @@ pass access control check.</span></code></pre>
 
     <p>모든 요청에 Preflight가 발생하지는 않습니다. 브라우저는 "단순하고 안전하다"고 판단되는 요청은 바로 보냅니다. 복잡하거나 위험할 수 있는 요청 앞에서만 Preflight를 먼저 보냅니다.</p>
 
-    <!-- 결정 트리 SVG -->
-    <div class="diagram-wrap">
-      <svg viewBox="0 0 680 190" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Preflight 발생 여부 결정 흐름도">
-        <defs>
-          <marker id="dt-g" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#3a6b4a"/></marker>
-          <marker id="dt-b" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#2d5a8e"/></marker>
-          <marker id="dt-o" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#d95f2b"/></marker>
-          <marker id="dt-y" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#8a6a00"/></marker>
-        </defs>
-        <rect x="0" y="0" width="680" height="190" rx="12" fill="#eceae4"/>
+    <div class="req-cards">
+      <div class="req-card req-simple">
+        <div class="req-card-head">
+          <div class="req-card-badge">✓ Preflight 없음</div>
+          <div class="req-card-title">단순 요청</div>
+          <div class="req-card-sub">조건을 만족하면 바로 서버로</div>
+        </div>
+        <div class="req-card-body">
+          <div class="req-rule">
+            <div class="req-rule-label">HTTP 메서드</div>
+            <div class="req-tags">
+              <span class="rtag tok">GET</span>
+              <span class="rtag tok">POST</span>
+              <span class="rtag tok">HEAD</span>
+            </div>
+          </div>
+          <div class="req-rule">
+            <div class="req-rule-label">Content-Type</div>
+            <div class="req-tags">
+              <span class="rtag tok">text/plain</span>
+              <span class="rtag tok">multipart/form-data</span>
+              <span class="rtag tok">application/x-www-form-urlencoded</span>
+            </div>
+          </div>
+          <div class="req-rule">
+            <div class="req-rule-label">커스텀 헤더</div>
+            <div class="req-tags">
+              <span class="rtag tok">없음</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <!-- START -->
-        <rect x="16" y="70" width="90" height="40" rx="8" fill="#fff" stroke="#dedad2" stroke-width="1.5"/>
-        <text x="61" y="87" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#1a1a18">요청 발생</text>
-        <text x="61" y="103" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#6b6a63">fetch() 호출</text>
-
-        <!-- → -->
-        <line x1="106" y1="90" x2="142" y2="90" stroke="#6b6a63" stroke-width="1.5" marker-end="url(#dt-b)"/>
-
-        <!-- DECISION 1: 다른 출처? -->
-        <rect x="144" y="62" width="116" height="56" rx="8" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.5"/>
-        <text x="202" y="84" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#2d5a8e">다른 출처?</text>
-        <text x="202" y="101" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#4a7ab0">Cross-Origin</text>
-        <text x="202" y="113" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#4a7ab0">인지 확인</text>
-
-        <!-- NO ↓ -->
-        <line x1="202" y1="118" x2="202" y2="148" stroke="#3a6b4a" stroke-width="1.5" marker-end="url(#dt-g)"/>
-        <text x="216" y="138" font-family="-apple-system,sans-serif" font-size="10" fill="#3a6b4a" font-weight="600">NO</text>
-        <rect x="152" y="150" width="100" height="28" rx="6" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="1"/>
-        <text x="202" y="169" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#3a6b4a">자유롭게 요청</text>
-
-        <!-- YES → -->
-        <line x1="260" y1="90" x2="304" y2="90" stroke="#2d5a8e" stroke-width="1.5" marker-end="url(#dt-b)"/>
-        <text x="282" y="82" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#2d5a8e" font-weight="600">YES</text>
-
-        <!-- DECISION 2: 단순 요청? -->
-        <rect x="306" y="62" width="116" height="56" rx="8" fill="#fdf5d9" stroke="#8a6a00" stroke-width="1.5"/>
-        <text x="364" y="84" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#8a6a00">단순 요청?</text>
-        <text x="364" y="101" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#8a6a00">GET · HEAD</text>
-        <text x="364" y="113" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#8a6a00">특수 헤더 없음</text>
-
-        <!-- YES ↓ -->
-        <line x1="364" y1="118" x2="364" y2="148" stroke="#3a6b4a" stroke-width="1.5" marker-end="url(#dt-g)"/>
-        <text x="378" y="138" font-family="-apple-system,sans-serif" font-size="10" fill="#3a6b4a" font-weight="600">YES</text>
-        <rect x="314" y="150" width="100" height="28" rx="6" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="1"/>
-        <text x="364" y="169" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#3a6b4a">바로 요청 전송</text>
-
-        <!-- NO → Preflight -->
-        <line x1="422" y1="90" x2="462" y2="90" stroke="#d95f2b" stroke-width="2" marker-end="url(#dt-o)"/>
-        <text x="442" y="82" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#d95f2b" font-weight="600">NO</text>
-
-        <!-- Preflight BOX (accent) -->
-        <rect x="464" y="55" width="200" height="70" rx="10" fill="#d95f2b"/>
-        <text x="564" y="82" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#fff">⚡ Preflight 발생!</text>
-        <text x="564" y="100" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="rgba(255,255,255,0.85)">OPTIONS 먼저 → 허가 확인</text>
-        <text x="564" y="116" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="rgba(255,255,255,0.65)">JSON · Authorization · PUT/DELETE …</text>
-      </svg>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>구분</th>
-            <th>단순 요청 — Preflight 없음</th>
-            <th>비단순 요청 — Preflight 발생</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>HTTP 메서드</strong></td>
-            <td class="cell-green">GET, POST, HEAD</td>
-            <td class="cell-red">PUT, DELETE, PATCH</td>
-          </tr>
-          <tr>
-            <td><strong>Content-Type</strong></td>
-            <td class="cell-green">text/plain<br>application/x-www-form-urlencoded<br>multipart/form-data</td>
-            <td class="cell-red">application/json ← 바이브 코더 99%</td>
-          </tr>
-          <tr>
-            <td><strong>커스텀 헤더</strong></td>
-            <td class="cell-green">없음</td>
-            <td class="cell-red">Authorization, X-Custom-Header 등</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="req-card req-complex">
+        <div class="req-card-head">
+          <div class="req-card-badge">⚡ Preflight 발생</div>
+          <div class="req-card-title">비단순 요청</div>
+          <div class="req-card-sub">OPTIONS 먼저 → 허가 받아야 전송</div>
+        </div>
+        <div class="req-card-body">
+          <div class="req-rule">
+            <div class="req-rule-label">HTTP 메서드</div>
+            <div class="req-tags">
+              <span class="rtag warn">PUT</span>
+              <span class="rtag warn">DELETE</span>
+              <span class="rtag warn">PATCH</span>
+            </div>
+          </div>
+          <div class="req-rule">
+            <div class="req-rule-label">Content-Type</div>
+            <div class="req-tags">
+              <span class="rtag warn">application/json ← 바이브 코더 99%</span>
+            </div>
+          </div>
+          <div class="req-rule">
+            <div class="req-rule-label">커스텀 헤더</div>
+            <div class="req-tags">
+              <span class="rtag warn">Authorization</span>
+              <span class="rtag warn">X-Custom-Header</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="callout callout-accent">
