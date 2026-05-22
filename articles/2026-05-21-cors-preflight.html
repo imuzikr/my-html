@@ -209,14 +209,14 @@ footer{background:var(--color-bg-alt);border-top:1px solid var(--color-border);
 .bbl-code{font-family:var(--font-mono);font-size:11px;line-height:1.9;}
 .chat-tag{display:inline-block;margin-top:4px;font-size:10px;color:rgba(255,255,255,0.25);letter-spacing:0.03em;}
 .req-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-5);margin:var(--space-8) 0;}
-.req-card{border-radius:var(--radius-lg);overflow:hidden;}
+.req-card{display:flex;flex-direction:column;border-radius:var(--radius-lg);overflow:hidden;}
 .req-card-head{padding:var(--space-6);}
 .req-simple .req-card-head{background:var(--color-green);}
 .req-complex .req-card-head{background:#b03a2e;}
 .req-card-badge{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:var(--space-2);}
 .req-card-title{font-size:var(--text-2xl);font-weight:var(--weight-bold);color:#fff;margin-bottom:var(--space-1);}
 .req-card-sub{font-size:var(--text-sm);color:rgba(255,255,255,0.65);}
-.req-card-body{background:var(--color-bg-card);border:1px solid var(--color-border);border-top:none;padding:var(--space-5);border-radius:0 0 var(--radius-lg) var(--radius-lg);}
+.req-card-body{flex:1;background:var(--color-bg-card);border:1px solid var(--color-border);border-top:none;padding:var(--space-5);border-radius:0 0 var(--radius-lg) var(--radius-lg);}
 .req-rule{margin-bottom:var(--space-4);}
 .req-rule:last-child{margin-bottom:0;}
 .req-rule-label{font-size:10px;font-weight:600;color:var(--color-text-faint);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:var(--space-2);}
@@ -224,6 +224,63 @@ footer{background:var(--color-bg-alt);border-top:1px solid var(--color-border);
 .rtag{font-size:11px;font-family:var(--font-mono);padding:3px 8px;border-radius:var(--radius-sm);background:var(--color-bg-alt);border:1px solid var(--color-border);color:var(--color-text-muted);}
 .rtag.tok{background:var(--color-green-soft);color:var(--color-green);border-color:rgba(58,107,74,0.2);}
 .rtag.warn{background:var(--color-red-soft);color:var(--color-red);border-color:rgba(176,58,46,0.2);}
+.compare-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-5);margin:var(--space-6) 0;}
+.cc-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);text-align:center;}
+.cc-card.cc-blue{border-top:3px solid var(--color-blue);}
+.cc-card.cc-accent{border-top:3px solid var(--color-accent);}
+.cc-icon{font-size:2.5rem;margin-bottom:var(--space-3);}
+.cc-title{font-size:var(--text-xl);font-weight:var(--weight-bold);margin-bottom:var(--space-2);}
+.cc-card.cc-blue .cc-title{color:var(--color-blue);}
+.cc-card.cc-accent .cc-title{color:var(--color-accent);}
+.cc-quote{font-size:var(--text-sm);color:var(--color-text-muted);font-style:italic;margin-bottom:var(--space-3);}
+.cc-desc{font-size:var(--text-sm);font-weight:var(--weight-semibold);color:var(--color-text);margin-bottom:var(--space-4);}
+.cc-tags{display:flex;flex-wrap:wrap;gap:var(--space-2);justify-content:center;margin-bottom:var(--space-3);}
+.cc-tag{font-size:var(--text-xs);padding:3px var(--space-3);border-radius:var(--radius-full);}
+.cc-card.cc-blue .cc-tag{background:var(--color-blue-soft);color:var(--color-blue);}
+.cc-card.cc-accent .cc-tag{background:var(--color-accent-soft);color:var(--color-accent);}
+.cc-note{font-size:var(--text-xs);color:var(--color-text-faint);}
+.compare-flow{display:flex;flex-direction:column;gap:var(--space-3);margin:var(--space-6) 0;}
+.cf-row{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);display:flex;align-items:center;gap:var(--space-5);}
+.cf-row.cf-simple{border-left:4px solid var(--color-green);}
+.cf-row.cf-complex{border-left:4px solid var(--color-accent);}
+.cf-type{flex-shrink:0;min-width:90px;}
+.cf-type-label{font-size:var(--text-xs);font-weight:var(--weight-bold);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;}
+.cf-simple .cf-type-label{color:var(--color-green);}
+.cf-complex .cf-type-label{color:var(--color-accent);}
+.cf-type-sub{font-size:var(--text-xs);color:var(--color-text-faint);line-height:var(--leading-snug);}
+.cf-chain{display:flex;align-items:center;gap:var(--space-2);flex:1;flex-wrap:wrap;}
+.cf-node{display:flex;flex-direction:column;align-items:center;gap:2px;padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);text-align:center;min-width:80px;}
+.cf-node.cf-hs{background:var(--color-blue-soft);border:1px solid rgba(45,90,142,0.2);}
+.cf-node.cf-pf{background:var(--color-accent-soft);border:1px dashed rgba(217,95,43,0.4);}
+.cf-node.cf-req{background:var(--color-green-soft);border:1px solid rgba(58,107,74,0.2);}
+.cf-node-icon{font-size:1.25rem;}
+.cf-node-title{font-size:var(--text-sm);font-weight:var(--weight-semibold);}
+.cf-node.cf-hs .cf-node-title{color:var(--color-blue);}
+.cf-node.cf-pf .cf-node-title{color:var(--color-accent);}
+.cf-node.cf-req .cf-node-title{color:var(--color-green);}
+.cf-node-sub{font-size:10px;color:var(--color-text-faint);font-family:var(--font-mono);}
+.cf-arr{color:var(--color-border-strong);font-size:var(--text-xl);flex-shrink:0;}
+.cf-pf-badge{background:var(--color-accent-soft);color:var(--color-accent);font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;letter-spacing:0.05em;text-transform:uppercase;margin-top:2px;}
+.hseq{margin:var(--space-6) 0;display:flex;flex-direction:column;gap:var(--space-3);}
+.hseq-msg{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;display:flex;}
+.hseq-bar{width:5px;flex-shrink:0;}
+.hseq-msg.hseq-out .hseq-bar{background:var(--color-blue);}
+.hseq-msg.hseq-in .hseq-bar{background:var(--color-green);}
+.hseq-msg.hseq-final .hseq-bar{background:#6b6a63;}
+.hseq-body{flex:1;padding:var(--space-4) var(--space-5);}
+.hseq-top{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-3);}
+.hseq-num{width:26px;height:26px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;font-size:var(--text-xs);font-weight:var(--weight-bold);flex-shrink:0;}
+.hseq-msg.hseq-out .hseq-num{background:var(--color-blue-soft);color:var(--color-blue);}
+.hseq-msg.hseq-in .hseq-num{background:var(--color-green-soft);color:var(--color-green);}
+.hseq-msg.hseq-final .hseq-num{background:var(--color-bg-alt);color:var(--color-text-muted);}
+.hseq-dir{font-size:var(--text-xs);color:var(--color-text-faint);font-weight:var(--weight-semibold);text-transform:uppercase;letter-spacing:0.05em;}
+.hseq-line{font-family:var(--font-mono);font-size:var(--text-base);font-weight:700;color:var(--color-text);margin-bottom:var(--space-2);}
+.hseq-method{color:var(--color-blue);}
+.hseq-status{color:var(--color-green);}
+.hseq-hdrs{background:var(--color-bg-alt);border-radius:var(--radius-sm);padding:var(--space-3) var(--space-4);}
+.hseq-hdr{font-family:var(--font-mono);font-size:var(--text-sm);line-height:1.8;color:var(--color-text-muted);}
+.hseq-hk{color:var(--color-blue);}
+.hseq-hv{color:#b03a2e;}
 @media(max-width:700px){
   .hero-inner{grid-template-columns:1fr;}
   .hero-card{display:none;}
@@ -238,6 +295,8 @@ footer{background:var(--color-bg-alt);border-top:1px solid var(--color-border);
   .pf-arrow{transform:rotate(90deg);padding-top:0;}
   .summary-grid{grid-template-columns:1fr;}
   .req-cards{grid-template-columns:1fr;}
+  .compare-cards{grid-template-columns:1fr;}
+  .cf-row{flex-wrap:wrap;}
 }
 </style>
 </head>
@@ -480,36 +539,29 @@ pass access control check.</span></code></pre>
       </p>
     </div>
 
-    <!-- 비유 SVG -->
-    <div class="diagram-wrap">
-      <svg viewBox="0 0 680 160" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="핸드셰이크와 Preflight 비유">
-        <rect x="0" y="0" width="680" height="160" rx="12" fill="#eceae4"/>
-        <!-- Left: Handshake -->
-        <rect x="16" y="16" width="308" height="128" rx="10" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.5"/>
-        <circle cx="80" cy="62" r="28" fill="#2d5a8e" opacity="0.12"/>
-        <text x="80" y="70" text-anchor="middle" font-size="22">📞</text>
-        <text x="192" y="44" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#2d5a8e">핸드셰이크 (Handshake)</text>
-        <text x="192" y="64" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#4a7ab0">"여보세요? 들리세요?"</text>
-        <text x="192" y="82" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#2d5a8e">TCP/TLS 연결 수립 · 암호화 협상</text>
-        <rect x="116" y="96" width="76" height="20" rx="10" fill="#2d5a8e" opacity="0.15"/>
-        <text x="154" y="111" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#2d5a8e" font-weight="600">거의 항상 발생</text>
-        <rect x="200" y="96" width="108" height="20" rx="10" fill="#2d5a8e" opacity="0.15"/>
-        <text x="254" y="111" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#2d5a8e" font-weight="600">브라우저 + 서버 모두</text>
-        <text x="192" y="136" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#6b6a63">인터넷 통신 자체의 기본 연결 과정</text>
-
-        <!-- Right: Preflight -->
-        <rect x="356" y="16" width="308" height="128" rx="10" fill="#faeee7" stroke="#d95f2b" stroke-width="1.5"/>
-        <circle cx="420" cy="62" r="28" fill="#d95f2b" opacity="0.12"/>
-        <text x="420" y="70" text-anchor="middle" font-size="22">✋</text>
-        <text x="532" y="44" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#d95f2b">Preflight</text>
-        <text x="532" y="64" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#b86030">"이 요청 보내도 되나요?"</text>
-        <text x="532" y="82" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#d95f2b">CORS 허가 확인 (OPTIONS)</text>
-        <rect x="460" y="96" width="76" height="20" rx="10" fill="#d95f2b" opacity="0.15"/>
-        <text x="498" y="111" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#d95f2b" font-weight="600">필요할 때만</text>
-        <rect x="544" y="96" width="104" height="20" rx="10" fill="#d95f2b" opacity="0.15"/>
-        <text x="596" y="111" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#d95f2b" font-weight="600">브라우저 환경만</text>
-        <text x="532" y="136" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#6b6a63">브라우저 CORS 보안 정책</text>
-      </svg>
+    <div class="compare-cards">
+      <div class="cc-card cc-blue">
+        <div class="cc-icon">📞</div>
+        <div class="cc-title">핸드셰이크</div>
+        <div class="cc-quote">"여보세요? 들리세요?"</div>
+        <div class="cc-desc">TCP/TLS 연결 수립 · 암호화 협상</div>
+        <div class="cc-tags">
+          <span class="cc-tag">거의 항상 발생</span>
+          <span class="cc-tag">브라우저 + 서버 모두</span>
+        </div>
+        <div class="cc-note">인터넷 통신 자체의 기본 연결 과정</div>
+      </div>
+      <div class="cc-card cc-accent">
+        <div class="cc-icon">✋</div>
+        <div class="cc-title">Preflight</div>
+        <div class="cc-quote">"이 요청 보내도 되나요?"</div>
+        <div class="cc-desc">CORS 허가 확인 (OPTIONS)</div>
+        <div class="cc-tags">
+          <span class="cc-tag">필요할 때만 발생</span>
+          <span class="cc-tag">브라우저 전용</span>
+        </div>
+        <div class="cc-note">브라우저 CORS 보안 정책</div>
+      </div>
     </div>
 
     <p>핸드셰이크는 전화를 걸 때 "여보세요?"와 같습니다. 통신 자체를 시작하기 위한 연결 수립 과정으로, HTTPS라면 여기서 암호화 방식도 맞춥니다. <strong>브라우저뿐 아니라 서버끼리 통신할 때도 항상 일어납니다.</strong></p>
@@ -518,72 +570,52 @@ pass access control check.</span></code></pre>
 
     <h3>전체 흐름 비교</h3>
 
-    <!-- 흐름 비교 SVG: 단순 vs 복잡 -->
-    <div class="diagram-wrap">
-      <svg viewBox="0 0 680 340" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="단순 요청과 복잡한 요청의 전체 통신 흐름 비교">
-        <defs>
-          <marker id="h-b" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#2d5a8e"/></marker>
-          <marker id="h-g" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3a6b4a"/></marker>
-          <marker id="h-o" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#d95f2b"/></marker>
-          <marker id="h-gr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#6b6a63"/></marker>
-        </defs>
-        <rect x="0" y="0" width="680" height="340" rx="14" fill="#eceae4"/>
-
-        <!-- ── TOP: 단순 요청 ── -->
-        <rect x="10" y="8" width="660" height="148" rx="8" fill="#edf6f0" stroke="#b0cdb9" stroke-width="1"/>
-        <text x="340" y="28" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="700" fill="#3a6b4a">단순 요청 (예: GET, 특별한 헤더 없음)</text>
-        <rect x="20" y="36" width="90" height="28" rx="6" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.5"/>
-        <text x="65" y="55" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#2d5a8e">브라우저</text>
-        <rect x="570" y="36" width="90" height="28" rx="6" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="1.5"/>
-        <text x="615" y="55" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#3a6b4a">서버</text>
-        <line x1="65" y1="64" x2="65" y2="150" stroke="#2d5a8e" stroke-width="1" stroke-dasharray="3,3"/>
-        <line x1="615" y1="64" x2="615" y2="150" stroke="#3a6b4a" stroke-width="1" stroke-dasharray="3,3"/>
-
-        <!-- Handshake -->
-        <line x1="65" y1="82" x2="612" y2="82" stroke="#2d5a8e" stroke-width="1.5" marker-end="url(#h-b)"/>
-        <line x1="615" y1="94" x2="68" y2="94" stroke="#2d5a8e" stroke-width="1.5" marker-end="url(#h-b)"/>
-        <rect x="180" y="70" width="320" height="32" rx="6" fill="#e5eef7" stroke="#b5ccdf" stroke-width="1"/>
-        <text x="340" y="83" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#2d5a8e">🤝 핸드셰이크 (TCP/TLS 연결 수립)</text>
-        <text x="340" y="96" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#4a7ab0">암호화 협상 완료</text>
-
-        <!-- 실제 요청 -->
-        <line x1="65" y1="118" x2="612" y2="118" stroke="#3a6b4a" stroke-width="1.5" marker-end="url(#h-g)"/>
-        <line x1="615" y1="130" x2="68" y2="130" stroke="#6b6a63" stroke-width="1.5" marker-end="url(#h-gr)"/>
-        <rect x="180" y="108" width="320" height="30" rx="6" fill="#e6f0e9" stroke="#b0cdb9" stroke-width="1"/>
-        <text x="340" y="121" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#3a6b4a">📨 실제 요청 (GET /api/data)</text>
-        <text x="340" y="134" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#6b6a63">← 응답</text>
-
-        <!-- ── BOTTOM: 복잡한 요청 ── -->
-        <rect x="10" y="170" width="660" height="160" rx="8" fill="#fff3ed" stroke="#e8b89a" stroke-width="1"/>
-        <text x="340" y="190" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="700" fill="#d95f2b">복잡한 요청 (예: POST + application/json + Authorization)</text>
-        <rect x="20" y="198" width="90" height="28" rx="6" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.5"/>
-        <text x="65" y="217" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#2d5a8e">브라우저</text>
-        <rect x="570" y="198" width="90" height="28" rx="6" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="1.5"/>
-        <text x="615" y="217" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#3a6b4a">서버</text>
-        <line x1="65" y1="226" x2="65" y2="324" stroke="#2d5a8e" stroke-width="1" stroke-dasharray="3,3"/>
-        <line x1="615" y1="226" x2="615" y2="324" stroke="#3a6b4a" stroke-width="1" stroke-dasharray="3,3"/>
-
-        <!-- Handshake -->
-        <line x1="65" y1="242" x2="612" y2="242" stroke="#2d5a8e" stroke-width="1.5" marker-end="url(#h-b)"/>
-        <line x1="615" y1="254" x2="68" y2="254" stroke="#2d5a8e" stroke-width="1.5" marker-end="url(#h-b)"/>
-        <rect x="180" y="230" width="320" height="32" rx="6" fill="#e5eef7" stroke="#b5ccdf" stroke-width="1"/>
-        <text x="340" y="243" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#2d5a8e">🤝 핸드셰이크 (TCP/TLS 연결 수립)</text>
-        <text x="340" y="256" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#4a7ab0">암호화 협상 완료</text>
-
-        <!-- Preflight (dashed = conditional) -->
-        <line x1="65" y1="274" x2="612" y2="274" stroke="#d95f2b" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#h-o)"/>
-        <line x1="615" y1="286" x2="68" y2="286" stroke="#d95f2b" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#h-o)"/>
-        <rect x="180" y="262" width="320" height="32" rx="6" fill="#faeee7" stroke="#e8b89a" stroke-width="1"/>
-        <text x="340" y="275" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#d95f2b">✋ Preflight (OPTIONS — 허가 확인)</text>
-        <text x="340" y="288" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#b86030">← Access-Control-Allow-* 응답</text>
-
-        <!-- 실제 요청 -->
-        <line x1="65" y1="306" x2="612" y2="306" stroke="#3a6b4a" stroke-width="1.5" marker-end="url(#h-g)"/>
-        <line x1="615" y1="318" x2="68" y2="318" stroke="#6b6a63" stroke-width="1.5" marker-end="url(#h-gr)"/>
-        <rect x="180" y="296" width="320" height="30" rx="6" fill="#e6f0e9" stroke="#b0cdb9" stroke-width="1"/>
-        <text x="340" y="309" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#3a6b4a">📨 실제 요청 (POST /api/data)</text>
-        <text x="340" y="322" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#6b6a63">← 응답</text>
-      </svg>
+    <div class="compare-flow">
+      <div class="cf-row cf-simple">
+        <div class="cf-type">
+          <div class="cf-type-label">단순 요청</div>
+          <div class="cf-type-sub">GET, 기본 헤더</div>
+        </div>
+        <div class="cf-chain">
+          <div class="cf-node cf-hs">
+            <div class="cf-node-icon">🤝</div>
+            <div class="cf-node-title">핸드셰이크</div>
+            <div class="cf-node-sub">TCP/TLS</div>
+          </div>
+          <div class="cf-arr">→</div>
+          <div class="cf-node cf-req">
+            <div class="cf-node-icon">📨</div>
+            <div class="cf-node-title">실제 요청</div>
+            <div class="cf-node-sub">GET /api/data</div>
+          </div>
+        </div>
+      </div>
+      <div class="cf-row cf-complex">
+        <div class="cf-type">
+          <div class="cf-type-label">복잡한 요청</div>
+          <div class="cf-type-sub">POST · application/json<br>+ Authorization</div>
+        </div>
+        <div class="cf-chain">
+          <div class="cf-node cf-hs">
+            <div class="cf-node-icon">🤝</div>
+            <div class="cf-node-title">핸드셰이크</div>
+            <div class="cf-node-sub">TCP/TLS</div>
+          </div>
+          <div class="cf-arr">→</div>
+          <div class="cf-node cf-pf">
+            <div class="cf-node-icon">✋</div>
+            <div class="cf-node-title">Preflight</div>
+            <div class="cf-node-sub">OPTIONS</div>
+            <div class="cf-pf-badge">추가 발생</div>
+          </div>
+          <div class="cf-arr">→</div>
+          <div class="cf-node cf-req">
+            <div class="cf-node-icon">📨</div>
+            <div class="cf-node-title">실제 요청</div>
+            <div class="cf-node-sub">POST /api/data</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 비교 표 -->
@@ -741,70 +773,47 @@ pass access control check.</span></code></pre>
 
     <p>Preflight는 총 3단계로 동작합니다. 브라우저와 서버 사이의 "대화"입니다.</p>
 
-    <!-- SVG: 3단계 흐름 -->
-    <div class="diagram-wrap">
-      <svg viewBox="0 0 680 300" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Preflight 3단계 동작 흐름">
-        <defs>
-          <filter id="sf2" x="-5%" y="-30%" width="110%" height="160%">
-            <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#1a1a18" flood-opacity="0.07"/>
-          </filter>
-          <marker id="mb" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-            <polygon points="0 0,8 3,0 6" fill="#2d5a8e"/>
-          </marker>
-          <marker id="mg2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-            <polygon points="0 0,8 3,0 6" fill="#3a6b4a"/>
-          </marker>
-          <marker id="mg3" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-            <polygon points="0 0,8 3,0 6" fill="#6b6a63"/>
-          </marker>
-        </defs>
-        <rect x="0" y="0" width="680" height="300" rx="14" fill="#eceae4"/>
-
-        <!-- Actors -->
-        <rect x="20" y="14" width="120" height="36" rx="8" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.5"/>
-        <text x="80" y="37" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#2d5a8e">브라우저</text>
-
-        <rect x="540" y="14" width="120" height="36" rx="8" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="1.5"/>
-        <text x="600" y="37" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#3a6b4a">서버</text>
-
-        <!-- Vertical lifelines -->
-        <line x1="80" y1="50" x2="80" y2="285" stroke="#2d5a8e" stroke-width="1" stroke-dasharray="4,3"/>
-        <line x1="600" y1="50" x2="600" y2="285" stroke="#3a6b4a" stroke-width="1" stroke-dasharray="4,3"/>
-
-        <!-- STEP 1: OPTIONS -->
-        <rect x="10" y="60" width="22" height="22" rx="11" fill="#2d5a8e"/>
-        <text x="21" y="76" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#fff">1</text>
-        <line x1="80" y1="71" x2="597" y2="71" stroke="#2d5a8e" stroke-width="1.8" marker-end="url(#mb)"/>
-        <rect x="150" y="56" width="370" height="36" rx="6" fill="#e5eef7" filter="url(#sf2)"/>
-        <text x="200" y="69" font-family="SF Mono,Fira Code,monospace" font-size="11" fill="#1a1a18" font-weight="600">OPTIONS /api/data</text>
-        <text x="200" y="84" font-family="SF Mono,Fira Code,monospace" font-size="10" fill="#2d5a8e">Access-Control-Request-Method: POST</text>
-
-        <!-- request headers detail -->
-        <rect x="160" y="100" width="340" height="54" rx="6" fill="#f0f4fa" stroke="#b5ccdf" stroke-width="1"/>
-        <text x="180" y="116" font-family="SF Mono,Fira Code,monospace" font-size="10" fill="#6b6a63">Access-Control-Request-Method: POST</text>
-        <text x="180" y="130" font-family="SF Mono,Fira Code,monospace" font-size="10" fill="#6b6a63">Access-Control-Request-Headers: authorization, content-type</text>
-        <text x="180" y="144" font-family="SF Mono,Fira Code,monospace" font-size="10" fill="#6b6a63">Origin: https://myapp.com</text>
-
-        <!-- STEP 2: 200 OK -->
-        <rect x="10" y="166" width="22" height="22" rx="11" fill="#3a6b4a"/>
-        <text x="21" y="182" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#fff">2</text>
-        <line x1="600" y1="177" x2="83" y2="177" stroke="#3a6b4a" stroke-width="1.8" marker-end="url(#mg2)"/>
-        <rect x="150" y="162" width="370" height="36" rx="6" fill="#e6f0e9" filter="url(#sf2)"/>
-        <text x="200" y="175" font-family="SF Mono,Fira Code,monospace" font-size="11" fill="#1a1a18" font-weight="600">HTTP/1.1 200 OK</text>
-        <text x="200" y="190" font-family="SF Mono,Fira Code,monospace" font-size="10" fill="#3a6b4a">Access-Control-Allow-Origin: https://myapp.com</text>
-
-        <!-- response headers detail -->
-        <rect x="160" y="204" width="340" height="40" rx="6" fill="#edf6f0" stroke="#b0cdb9" stroke-width="1"/>
-        <text x="180" y="220" font-family="SF Mono,Fira Code,monospace" font-size="10" fill="#6b6a63">Access-Control-Allow-Methods: POST</text>
-        <text x="180" y="234" font-family="SF Mono,Fira Code,monospace" font-size="10" fill="#6b6a63">Access-Control-Allow-Headers: authorization, content-type</text>
-
-        <!-- STEP 3: 실제 요청 -->
-        <rect x="10" y="256" width="22" height="22" rx="11" fill="#6b6a63"/>
-        <text x="21" y="272" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#fff">3</text>
-        <line x1="80" y1="267" x2="597" y2="267" stroke="#6b6a63" stroke-width="1.8" marker-end="url(#mg3)"/>
-        <rect x="150" y="253" width="370" height="26" rx="6" fill="#fff" stroke="#dedad2" stroke-width="1" filter="url(#sf2)"/>
-        <text x="200" y="271" font-family="SF Mono,Fira Code,monospace" font-size="11" fill="#1a1a18" font-weight="600">POST /api/data  (실제 요청 전송)</text>
-      </svg>
+    <div class="hseq">
+      <div class="hseq-msg hseq-out">
+        <div class="hseq-bar"></div>
+        <div class="hseq-body">
+          <div class="hseq-top">
+            <div class="hseq-num">1</div>
+            <div class="hseq-dir">브라우저 → 서버 &nbsp;·&nbsp; Preflight 요청</div>
+          </div>
+          <div class="hseq-line"><span class="hseq-method">OPTIONS</span> /api/data HTTP/1.1</div>
+          <div class="hseq-hdrs">
+            <div class="hseq-hdr"><span class="hseq-hk">Access-Control-Request-Method:</span> <span class="hseq-hv">POST</span></div>
+            <div class="hseq-hdr"><span class="hseq-hk">Access-Control-Request-Headers:</span> <span class="hseq-hv">authorization, content-type</span></div>
+            <div class="hseq-hdr"><span class="hseq-hk">Origin:</span> <span class="hseq-hv">https://myapp.com</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="hseq-msg hseq-in">
+        <div class="hseq-bar"></div>
+        <div class="hseq-body">
+          <div class="hseq-top">
+            <div class="hseq-num">2</div>
+            <div class="hseq-dir">서버 → 브라우저 &nbsp;·&nbsp; 허용 응답</div>
+          </div>
+          <div class="hseq-line">HTTP/1.1 <span class="hseq-status">200 OK</span></div>
+          <div class="hseq-hdrs">
+            <div class="hseq-hdr"><span class="hseq-hk">Access-Control-Allow-Origin:</span> <span class="hseq-hv">https://myapp.com</span></div>
+            <div class="hseq-hdr"><span class="hseq-hk">Access-Control-Allow-Methods:</span> <span class="hseq-hv">POST</span></div>
+            <div class="hseq-hdr"><span class="hseq-hk">Access-Control-Allow-Headers:</span> <span class="hseq-hv">authorization, content-type</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="hseq-msg hseq-final">
+        <div class="hseq-bar"></div>
+        <div class="hseq-body">
+          <div class="hseq-top">
+            <div class="hseq-num">3</div>
+            <div class="hseq-dir">브라우저 → 서버 &nbsp;·&nbsp; 실제 요청 전송</div>
+          </div>
+          <div class="hseq-line"><span class="hseq-method">POST</span> /api/data — 내가 작성한 fetch() 실행</div>
+        </div>
+      </div>
     </div>
 
     <div class="process-flow">
