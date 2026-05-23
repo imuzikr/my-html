@@ -884,6 +884,104 @@
     }
 
     /* ============================================================
+       CALLOUT BOXES
+       ============================================================ */
+    .callout {
+      border-radius: var(--radius-md); padding: var(--space-4) var(--space-5);
+      display: flex; gap: var(--space-3); align-items: flex-start;
+      font-size: var(--text-base); line-height: var(--leading-normal);
+      margin: var(--space-4) 0;
+    }
+    .callout-icon { flex-shrink: 0; font-size: var(--text-lg); margin-top: 1px; }
+    .callout-body { flex: 1; }
+    .callout-body strong { font-weight: var(--weight-semibold); display: block; margin-bottom: 2px; }
+    .callout.info    { background: var(--color-blue-soft);   border: 1px solid #7aabda; }
+    .callout.info    .callout-icon, .callout.info    .callout-body { color: var(--color-blue); }
+    .callout.success { background: var(--color-green-soft);  border: 1px solid #6aaa84; }
+    .callout.success .callout-icon, .callout.success .callout-body { color: var(--color-green); }
+    .callout.warning { background: var(--color-yellow-soft); border: 1px solid #d4b800; }
+    .callout.warning .callout-icon, .callout.warning .callout-body { color: var(--color-yellow); }
+    .callout.danger  { background: var(--color-red-soft);    border: 1px solid #e07070; }
+    .callout.danger  .callout-icon, .callout.danger  .callout-body { color: var(--color-red); }
+
+    /* ============================================================
+       INFO CARD + CHECK LIST
+       ============================================================ */
+    .info-card {
+      background: var(--color-bg-card); border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg); padding: var(--space-5);
+    }
+    .info-card-title {
+      font-size: var(--text-base); font-weight: var(--weight-semibold);
+      color: var(--color-text); margin-bottom: var(--space-3);
+      display: flex; align-items: center; gap: var(--space-2);
+    }
+    .check-list {
+      list-style: none; display: flex; flex-direction: column; gap: var(--space-2);
+    }
+    .check-list li {
+      display: flex; align-items: flex-start; gap: var(--space-3);
+      font-size: var(--text-base); color: var(--color-text-muted);
+      line-height: var(--leading-snug);
+    }
+    .check-list .ck-green  { color: var(--color-green);  flex-shrink: 0; }
+    .check-list .ck-red    { color: var(--color-red);    flex-shrink: 0; }
+    .check-list .ck-yellow { color: var(--color-yellow); flex-shrink: 0; }
+
+    /* ============================================================
+       RATING STARS
+       ============================================================ */
+    .rating-row { display: flex; align-items: center; gap: var(--space-3); }
+    .rating-label {
+      font-size: var(--text-sm); font-weight: var(--weight-medium);
+      color: var(--color-text-muted);
+    }
+    .stars { display: flex; gap: 2px; }
+    .star { font-size: var(--text-base); }
+    .star.on  { color: #f59e0b; }
+    .star.off { color: var(--color-border-strong); }
+
+    /* ============================================================
+       NUMBERED SECTION HEADER
+       ============================================================ */
+    .section-header {
+      display: flex; align-items: flex-start; gap: var(--space-5);
+      margin-bottom: var(--space-6);
+    }
+    .section-num {
+      flex-shrink: 0; width: 48px; height: 48px; border-radius: var(--radius-lg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--text-xl); font-weight: var(--weight-bold); color: #fff;
+    }
+    .section-title-group h2 {
+      font-size: var(--text-2xl); font-weight: var(--weight-bold);
+      line-height: var(--leading-tight); letter-spacing: -0.01em;
+    }
+    .section-title-group .subtitle {
+      font-size: var(--text-sm); color: var(--color-text-muted); margin-top: var(--space-1);
+    }
+
+    /* ============================================================
+       TAKEAWAY CARDS
+       ============================================================ */
+    .takeaway-card {
+      background: var(--color-bg-card); border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg); padding: var(--space-5);
+      display: flex; flex-direction: column; gap: var(--space-3);
+      transition: all var(--transition-base);
+    }
+    .takeaway-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .takeaway-icon {
+      width: 40px; height: 40px; border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--text-lg);
+    }
+    .takeaway-card h3 {
+      font-size: var(--text-base); font-weight: var(--weight-semibold); color: var(--color-text);
+    }
+    .takeaway-card p { font-size: var(--text-base); color: var(--color-text-muted); line-height: var(--leading-snug); }
+
+    /* ============================================================
        UTILITIES
        ============================================================ */
     .text-muted   { color: var(--color-text-muted); }
@@ -948,6 +1046,8 @@
         <a class="ds-nav-link" href="#buttons">Buttons</a>
         <a class="ds-nav-link" href="#controls">Toggles &amp; Sliders</a>
         <a class="ds-nav-link" href="#alerts">Alerts</a>
+        <a class="ds-nav-link" href="#callouts">Callouts</a>
+        <a class="ds-nav-link" href="#article-elements">Article Elements</a>
         <a class="ds-nav-link" href="#charts">Data Viz</a>
       </div>
       <div class="ds-nav-section">
@@ -1541,6 +1641,169 @@
             <text x="294" y="148" class="chart-axis-label" text-anchor="end" style="fill:#b03a2e;font-weight:600;">31%</text>
           </svg>
         </div>
+      </div>
+    </section>
+
+    <!-- ── CALLOUTS ──────────────────────────────────────────── -->
+    <section class="ds-section" id="callouts">
+      <div class="ds-section-header">
+        <h2>Callouts</h2>
+        <span class="ds-section-tag">Component</span>
+      </div>
+      <p class="text-muted mb-6" style="font-size:var(--text-sm);">Alerts보다 컴팩트한 인라인 강조 블록. 이모지 아이콘과 테두리로 의미를 전달합니다. 4가지 시맨틱 변형을 제공합니다.</p>
+
+      <div style="display:flex;flex-direction:column;gap:var(--space-3);">
+        <div class="callout info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-body">
+            <strong>Info — 참고 사항</strong>
+            일직선 흐름처럼 보여도 실제로는 서로 다른 인프라에서 각각 강제됩니다.
+          </div>
+        </div>
+        <div class="callout success">
+          <span class="callout-icon">✅</span>
+          <div class="callout-body">
+            <strong>Success — 완료·권장</strong>
+            JWT 토큰은 Google의 비공개 키로 서명되어 위조가 불가능합니다.
+          </div>
+        </div>
+        <div class="callout warning">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-body">
+            <strong>Warning — 주의</strong>
+            <code style="font-family:var(--font-mono);font-size:0.9em;background:rgba(0,0,0,0.08);padding:0 4px;border-radius:3px;">NEXT_PUBLIC_</code> 접두사가 붙은 변수는 브라우저에 노출됩니다.
+          </div>
+        </div>
+        <div class="callout danger">
+          <span class="callout-icon">🔥</span>
+          <div class="callout-body">
+            <strong>Danger — 위험·금지</strong>
+            <code style="font-family:var(--font-mono);font-size:0.9em;background:rgba(0,0,0,0.08);padding:0 4px;border-radius:3px;">allow read, write: if true</code>는 전체 DB를 인터넷에 공개합니다. 절대 배포하지 마세요.
+          </div>
+        </div>
+      </div>
+
+      <div class="code-block mt-6">
+        <div class="code-block-header">
+          <span class="code-block-lang">HTML</span>
+          <button class="code-block-copy" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code>&lt;<span class="tok-keyword">div</span> class=<span class="tok-string">"callout info"</span>&gt;
+  &lt;<span class="tok-keyword">span</span> class=<span class="tok-string">"callout-icon"</span>&gt;ℹ️&lt;/<span class="tok-keyword">span</span>&gt;
+  &lt;<span class="tok-keyword">div</span> class=<span class="tok-string">"callout-body"</span>&gt;
+    &lt;<span class="tok-keyword">strong</span>&gt;제목&lt;/<span class="tok-keyword">strong</span>&gt;
+    본문 설명 텍스트
+  &lt;/<span class="tok-keyword">div</span>&gt;
+&lt;/<span class="tok-keyword">div</span>&gt;
+<span class="tok-comment">&lt;!-- 변형: info · success · warning · danger --&gt;</span></code></pre>
+      </div>
+    </section>
+
+    <!-- ── ARTICLE ELEMENTS ───────────────────────────────────── -->
+    <section class="ds-section" id="article-elements">
+      <div class="ds-section-header">
+        <h2>Article Elements</h2>
+        <span class="ds-section-tag">Component</span>
+      </div>
+      <p class="text-muted mb-6" style="font-size:var(--text-sm);">아티클·보안 문서 등에서 반복적으로 쓰이는 복합 컴포넌트입니다.</p>
+
+      <!-- Numbered Section Header -->
+      <h4 class="mb-4">Numbered Section Header</h4>
+      <div style="background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);margin-bottom:var(--space-6);">
+        <div class="section-header">
+          <div class="section-num" style="background:linear-gradient(135deg,#2d9a6a,#1e7a4e);">2</div>
+          <div class="section-title-group">
+            <h2>App Check</h2>
+            <p class="subtitle">reCAPTCHA Enterprise · 진짜 앱에서 온 요청인지 암호학적으로 검증</p>
+          </div>
+        </div>
+        <div class="rating-row">
+          <span class="rating-label">보안 평가</span>
+          <div class="stars">
+            <span class="star on">★</span><span class="star on">★</span><span class="star on">★</span><span class="star on">★</span><span class="star off">★</span>
+          </div>
+          <span style="font-size:var(--text-sm);color:var(--color-text-muted);">봇·자동화 공격에 매우 효과적</span>
+        </div>
+      </div>
+
+      <!-- Info Card + Check List -->
+      <h4 class="mb-4">Info Card + Check List</h4>
+      <div class="demo-grid demo-grid-2 mb-6">
+        <div class="info-card">
+          <div class="info-card-title">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="#3a6b4a"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zm3.5 6.5l-4 4a.75.75 0 01-1.06 0l-2-2a.75.75 0 011.06-1.06l1.47 1.47 3.47-3.47a.75.75 0 011.06 1.06z"/></svg>
+            막을 수 있는 것
+          </div>
+          <ul class="check-list">
+            <li><span class="ck-green">✓</span>자동화 봇의 대량 API 호출</li>
+            <li><span class="ck-green">✓</span>스크래핑 · 크리덴셜 스터핑</li>
+            <li><span class="ck-green">✓</span>직접 HTTP 요청으로 Firebase 접근 시도</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="#b03a2e"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zm0 4a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 018 4zm0 8a1 1 0 110-2 1 1 0 010 2z"/></svg>
+            한계
+          </div>
+          <ul class="check-list">
+            <li><span class="ck-red">✗</span>Puppeteer 등 실제 브라우저 자동화는 일부 우회 가능</li>
+            <li><span class="ck-yellow">△</span>reCAPTCHA 점수 임계값 조정 필요</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Takeaway Cards -->
+      <h4 class="mb-4">Takeaway Cards</h4>
+      <div class="demo-grid demo-grid-2">
+        <div class="takeaway-card">
+          <div class="takeaway-icon" style="background:var(--color-accent-soft);">🔒</div>
+          <h3>직렬 배치의 힘</h3>
+          <p>하나의 레이어가 뚫려도 나머지가 막습니다. 각 레이어가 잡는 위협이 달라 빈틈이 최소화됩니다.</p>
+        </div>
+        <div class="takeaway-card">
+          <div class="takeaway-icon" style="background:var(--color-red-soft);">6</div>
+          <h3>최후 방어선이 가장 중요</h3>
+          <p>Firebase 보안 규칙이 무너지면 앞의 레이어가 모두 의미를 잃습니다. 배포 전 반드시 테스트하세요.</p>
+        </div>
+      </div>
+
+      <div class="code-block mt-6">
+        <div class="code-block-header">
+          <span class="code-block-lang">HTML · 세 컴포넌트 패턴</span>
+          <button class="code-block-copy" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code><span class="tok-comment">&lt;!-- Numbered section header --&gt;</span>
+&lt;<span class="tok-keyword">div</span> class=<span class="tok-string">"section-header"</span>&gt;
+  &lt;<span class="tok-keyword">div</span> class=<span class="tok-string">"section-num"</span> style=<span class="tok-string">"background:linear-gradient(135deg,#2d9a6a,#1e7a4e);"</span>&gt;2&lt;/<span class="tok-keyword">div</span>&gt;
+  &lt;<span class="tok-keyword">div</span> class=<span class="tok-string">"section-title-group"</span>&gt;
+    &lt;<span class="tok-keyword">h2</span>&gt;섹션 제목&lt;/<span class="tok-keyword">h2</span>&gt;
+    &lt;<span class="tok-keyword">p</span> class=<span class="tok-string">"subtitle"</span>&gt;부제목&lt;/<span class="tok-keyword">p</span>&gt;
+  &lt;/<span class="tok-keyword">div</span>&gt;
+&lt;/<span class="tok-keyword">div</span>&gt;
+
+<span class="tok-comment">&lt;!-- Rating stars --&gt;</span>
+&lt;<span class="tok-keyword">div</span> class=<span class="tok-string">"rating-row"</span>&gt;
+  &lt;<span class="tok-keyword">span</span> class=<span class="tok-string">"rating-label"</span>&gt;보안 평가&lt;/<span class="tok-keyword">span</span>&gt;
+  &lt;<span class="tok-keyword">div</span> class=<span class="tok-string">"stars"</span>&gt;
+    &lt;<span class="tok-keyword">span</span> class=<span class="tok-string">"star on"</span>&gt;★&lt;/<span class="tok-keyword">span</span>&gt;&lt;<span class="tok-keyword">span</span> class=<span class="tok-string">"star off"</span>&gt;★&lt;/<span class="tok-keyword">span</span>&gt;
+  &lt;/<span class="tok-keyword">div</span>&gt;
+&lt;/<span class="tok-keyword">div</span>&gt;
+
+<span class="tok-comment">&lt;!-- Info card + check list --&gt;</span>
+&lt;<span class="tok-keyword">div</span> class=<span class="tok-string">"info-card"</span>&gt;
+  &lt;<span class="tok-keyword">div</span> class=<span class="tok-string">"info-card-title"</span>&gt;제목&lt;/<span class="tok-keyword">div</span>&gt;
+  &lt;<span class="tok-keyword">ul</span> class=<span class="tok-string">"check-list"</span>&gt;
+    &lt;<span class="tok-keyword">li</span>&gt;&lt;<span class="tok-keyword">span</span> class=<span class="tok-string">"ck-green"</span>&gt;✓&lt;/<span class="tok-keyword">span</span>&gt;항목&lt;/<span class="tok-keyword">li</span>&gt;
+    &lt;<span class="tok-keyword">li</span>&gt;&lt;<span class="tok-keyword">span</span> class=<span class="tok-string">"ck-red"</span>&gt;✗&lt;/<span class="tok-keyword">span</span>&gt;항목&lt;/<span class="tok-keyword">li</span>&gt;
+  &lt;/<span class="tok-keyword">ul</span>&gt;
+&lt;/<span class="tok-keyword">div</span>&gt;
+
+<span class="tok-comment">&lt;!-- Takeaway card --&gt;</span>
+&lt;<span class="tok-keyword">div</span> class=<span class="tok-string">"takeaway-card"</span>&gt;
+  &lt;<span class="tok-keyword">div</span> class=<span class="tok-string">"takeaway-icon"</span> style=<span class="tok-string">"background:var(--color-accent-soft);"</span>&gt;🔒&lt;/<span class="tok-keyword">div</span>&gt;
+  &lt;<span class="tok-keyword">h3</span>&gt;제목&lt;/<span class="tok-keyword">h3</span>&gt;
+  &lt;<span class="tok-keyword">p</span>&gt;설명 텍스트&lt;/<span class="tok-keyword">p</span>&gt;
+&lt;/<span class="tok-keyword">div</span>&gt;</code></pre>
       </div>
     </section>
 
