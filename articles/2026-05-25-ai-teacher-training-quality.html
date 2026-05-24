@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 교사 연수는 왜 양적으로 늘어도 충분하지 않은가</title>
+  <meta name="description" content="미국 K-12 교사 AI 연수가 2년 사이 빠르게 확산되었지만, 대부분이 효율성 도구 수준에 머물러 실제 교수학습 혁신으로 이어지지 못하고 있다는 진단.">
+  <style>
+    :root {
+      --color-bg: #f5f2ed;
+      --color-bg-alt: #eceae4;
+      --color-bg-card: #ffffff;
+      --color-text: #1a1a18;
+      --color-text-muted: #6b6a63;
+      --color-text-faint: #a09f97;
+      --color-border: #dedad2;
+      --color-border-strong: #b8b5ac;
+      --color-accent: #d95f2b;
+      --color-accent-soft: #faeee7;
+      --color-green: #3a6b4a;
+      --color-green-soft: #e6f0e9;
+      --color-blue: #2d5a8e;
+      --color-blue-soft: #e5eef7;
+      --color-yellow: #8a6a00;
+      --color-yellow-soft: #fdf5d9;
+      --color-red: #b03a2e;
+      --color-red-soft: #fdecea;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", "Apple SD Gothic Neo", Helvetica, Arial, sans-serif;
+      --font-mono: "SF Mono", "Fira Code", "Cascadia Code", Consolas, monospace;
+      --text-xs: 0.75rem;
+      --text-sm: 0.875rem;
+      --text-base: 1rem;
+      --text-lg: 1.125rem;
+      --text-xl: 1.25rem;
+      --text-2xl: 1.5rem;
+      --text-3xl: 1.875rem;
+      --text-4xl: 2.25rem;
+      --weight-normal: 400;
+      --weight-medium: 500;
+      --weight-semibold: 600;
+      --weight-bold: 700;
+      --weight-extrabold: 800;
+      --leading-tight: 1.25;
+      --leading-snug: 1.4;
+      --leading-normal: 1.65;
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.25rem;
+      --space-6: 1.5rem;
+      --space-7: 1.75rem;
+      --space-8: 2rem;
+      --space-10: 2.5rem;
+      --space-12: 3rem;
+      --space-16: 4rem;
+      --space-20: 5rem;
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --radius-2xl: 24px;
+      --radius-full: 9999px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: var(--leading-normal);
+      font-size: var(--text-base);
+    }
+
+    /* ── Read Progress ── */
+    #read-progress {
+      position: fixed; top: 0; left: 0; height: 3px;
+      background: var(--color-blue); width: 0%;
+      transition: width 80ms linear; z-index: 300;
+    }
+
+    /* ── Sticky Nav ── */
+    .site-nav {
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(245, 242, 237, 0.96);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--color-border);
+      padding: var(--space-3) var(--space-6);
+    }
+    .nav-inner {
+      max-width: 900px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: var(--space-2);
+      text-decoration: none; color: var(--color-blue);
+      font-size: var(--text-sm); font-weight: var(--weight-semibold);
+      white-space: nowrap;
+    }
+    .nav-links {
+      display: flex; gap: var(--space-1); list-style: none; overflow-x: auto;
+    }
+    .nav-links a {
+      font-size: var(--text-sm); color: var(--color-text-muted);
+      text-decoration: none; padding: 4px 10px;
+      border-radius: var(--radius-full); white-space: nowrap;
+      transition: all 160ms ease;
+    }
+    .nav-links a:hover { color: var(--color-text); background: var(--color-bg-alt); }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(150deg, #0c1a2e 0%, #1a3558 45%, #0c1a2e 100%);
+      padding: var(--space-20) var(--space-6) var(--space-16);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 30%, rgba(45, 90, 142, 0.3) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 70%, rgba(58, 107, 74, 0.12) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .hero-inner { max-width: 900px; margin: 0 auto; position: relative; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      background: rgba(45, 90, 142, 0.25); border: 1px solid rgba(45, 90, 142, 0.4);
+      color: #90b8de; font-size: var(--text-xs); font-weight: var(--weight-semibold);
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 4px 12px; border-radius: var(--radius-full);
+      margin-bottom: var(--space-5);
+    }
+    .hero h1 {
+      font-size: clamp(1.8rem, 5.5vw, 3.2rem);
+      font-weight: var(--weight-extrabold);
+      color: #fff; line-height: var(--leading-tight);
+      letter-spacing: -0.025em; margin-bottom: var(--space-5);
+    }
+    .hero-subtitle {
+      font-size: var(--text-lg); color: rgba(255,255,255,0.62);
+      line-height: 1.7; max-width: 680px; margin-bottom: var(--space-8);
+    }
+    .hero-tags {
+      display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center;
+    }
+    .hero-tag {
+      font-size: var(--text-xs); color: rgba(255,255,255,0.45);
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+      padding: 3px 10px; border-radius: var(--radius-full);
+    }
+    .hero-source {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      color: #90b8de; text-decoration: none; font-size: var(--text-sm);
+      font-weight: var(--weight-medium); margin-left: var(--space-4);
+      transition: color 160ms ease;
+    }
+    .hero-source:hover { color: #b8d4ee; }
+
+    /* ── Main ── */
+    main { max-width: 900px; margin: 0 auto; padding: var(--space-12) var(--space-6); }
+
+    /* ── Sections ── */
+    .section { margin-bottom: var(--space-16); }
+    .section-header { display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-6); }
+    .section-num {
+      width: 38px; height: 38px; border-radius: var(--radius-full);
+      background: var(--color-blue); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--text-sm); font-weight: var(--weight-bold); flex-shrink: 0;
+    }
+    .section-title { font-size: var(--text-2xl); font-weight: var(--weight-bold); line-height: var(--leading-tight); }
+    .section-sub { font-size: var(--text-sm); color: var(--color-text-faint); margin-top: 3px; }
+
+    /* ── Body Text ── */
+    .body-text {
+      font-size: var(--text-base); line-height: var(--leading-normal);
+      color: var(--color-text-muted); margin-bottom: var(--space-5);
+    }
+    .body-text strong { color: var(--color-text); }
+
+    /* ── Key Message Box ── */
+    .key-message {
+      background: linear-gradient(140deg, #0c1a2e 0%, #1a3558 100%);
+      border-radius: var(--radius-xl); padding: var(--space-8) var(--space-10);
+      margin-bottom: var(--space-12); position: relative; overflow: hidden;
+    }
+    .key-message::before {
+      content: '\201C';
+      position: absolute; top: -30px; left: var(--space-6);
+      font-size: 130px; color: rgba(255,255,255,0.04);
+      font-family: Georgia, serif; line-height: 1; pointer-events: none;
+    }
+    .km-label {
+      font-size: var(--text-xs); font-weight: var(--weight-semibold);
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: #90b8de; margin-bottom: var(--space-3);
+    }
+    .km-text {
+      font-size: var(--text-lg); color: rgba(255,255,255,0.87);
+      line-height: 1.75;
+    }
+    .km-text strong { color: #fff; }
+
+    /* ── Callouts ── */
+    .callout {
+      border-radius: var(--radius-lg); padding: var(--space-5) var(--space-6);
+      margin: var(--space-6) 0; display: flex; gap: var(--space-4);
+    }
+    .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
+    .callout-label {
+      font-size: var(--text-xs); font-weight: var(--weight-bold);
+      text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: var(--space-2);
+    }
+    .callout-text { font-size: var(--text-base); line-height: var(--leading-normal); }
+    .callout-text strong { font-weight: var(--weight-bold); }
+    .callout.warn { background: var(--color-yellow-soft); border: 1px solid #f0d060; border-left: 4px solid #ca8a04; }
+    .callout.warn .callout-label { color: #854d0e; }
+    .callout.warn .callout-text { color: #713f12; }
+    .callout.info { background: var(--color-blue-soft); border: 1px solid #b8cfe8; border-left: 4px solid var(--color-blue); }
+    .callout.info .callout-label { color: #1a3a5c; }
+    .callout.info .callout-text { color: #1e3a5f; }
+    .callout.success { background: var(--color-green-soft); border: 1px solid #b0d4bc; border-left: 4px solid var(--color-green); }
+    .callout.success .callout-label { color: #1a3d28; }
+    .callout.success .callout-text { color: #235236; }
+    .callout.tip { background: #f0fdf4; border: 1px solid #a7f3d0; border-left: 4px solid #10b981; }
+    .callout.tip .callout-label { color: #065f46; }
+    .callout.tip .callout-text { color: #047857; }
+
+    /* ── Stat Row ── */
+    .stat-row {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4); margin: var(--space-6) 0;
+    }
+    .stat-card {
+      background: var(--color-bg-card); border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg); padding: var(--space-5) var(--space-4);
+      text-align: center; transition: all 180ms ease;
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .stat-num {
+      font-size: 2.8rem; font-weight: var(--weight-extrabold);
+      line-height: 1; margin-bottom: var(--space-2);
+    }
+    .stat-label { font-size: var(--text-sm); color: var(--color-text-muted); }
+    .stat-sub { font-size: var(--text-xs); color: var(--color-text-faint); margin-top: 4px; }
+
+    /* ── Progress Timeline ── */
+    .progress-timeline {
+      background: var(--color-bg-card); border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl); padding: var(--space-8);
+      margin: var(--space-6) 0;
+    }
+    .pt-header { font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--color-text-faint); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: var(--space-6); }
+    .pt-year-block { margin-bottom: var(--space-6); }
+    .pt-year-block:last-child { margin-bottom: 0; }
+    .pt-year-label {
+      font-size: var(--text-base); font-weight: var(--weight-bold);
+      color: var(--color-text); margin-bottom: var(--space-3);
+      display: flex; align-items: center; gap: var(--space-2);
+    }
+    .pt-year-badge {
+      font-size: var(--text-xs); font-weight: var(--weight-semibold);
+      padding: 2px 8px; border-radius: var(--radius-full);
+      background: var(--color-bg-alt); color: var(--color-text-faint);
+    }
+    .pt-bars { display: flex; flex-direction: column; gap: var(--space-2); }
+    .pt-bar-row { display: flex; align-items: center; gap: var(--space-3); }
+    .pt-bar-label { font-size: var(--text-xs); color: var(--color-text-faint); width: 72px; flex-shrink: 0; text-align: right; }
+    .pt-bar-track { flex: 1; height: 10px; background: var(--color-bg-alt); border-radius: var(--radius-full); overflow: hidden; }
+    .pt-bar-fill { height: 100%; border-radius: var(--radius-full); width: 0%; transition: width 1.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .fill-red { background: #ef4444; }
+    .fill-blue { background: #3b82f6; }
+    .fill-teal { background: #14b8a6; }
+    .pt-bar-val { font-size: var(--text-xs); font-weight: var(--weight-bold); width: 36px; }
+
+    /* ── Data Table ── */
+    .table-wrap { overflow-x: auto; border-radius: var(--radius-lg); border: 1px solid var(--color-border); margin: var(--space-6) 0; }
+    table { width: 100%; border-collapse: collapse; background: var(--color-bg-card); }
+    thead th {
+      background: var(--color-bg-alt); padding: var(--space-3) var(--space-4);
+      font-size: var(--text-xs); font-weight: var(--weight-semibold);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--color-text-faint); text-align: left;
+      border-bottom: 1px solid var(--color-border);
+    }
+    tbody td { padding: var(--space-4); border-bottom: 1px solid var(--color-border); font-size: var(--text-base); }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #f8f9fe; }
+    .badge { display: inline-block; padding: 2px 9px; border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: var(--weight-bold); }
+    .badge-red { background: #fee2e2; color: #b91c1c; }
+    .badge-blue { background: #dbeafe; color: #1d4ed8; }
+    .badge-teal { background: #ccfbf1; color: #0f766e; }
+
+    /* ── Compare Cards ── */
+    .compare-cards { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); margin: var(--space-6) 0; }
+    .cc-card {
+      background: var(--color-bg-card); border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl); padding: var(--space-6); overflow: hidden;
+    }
+    .cc-card.cc-blue { border-top: 4px solid var(--color-blue); }
+    .cc-card.cc-green { border-top: 4px solid var(--color-green); }
+    .cc-icon { font-size: 2rem; margin-bottom: var(--space-3); }
+    .cc-title { font-size: var(--text-xl); font-weight: var(--weight-bold); margin-bottom: var(--space-2); }
+    .cc-card.cc-blue .cc-title { color: var(--color-blue); }
+    .cc-card.cc-green .cc-title { color: var(--color-green); }
+    .cc-desc { font-size: var(--text-base); color: var(--color-text-muted); line-height: var(--leading-normal); margin-bottom: var(--space-4); }
+    .cc-items { list-style: none; display: flex; flex-direction: column; gap: var(--space-2); margin-bottom: var(--space-4); }
+    .cc-items li { font-size: var(--text-base); color: var(--color-text); display: flex; align-items: flex-start; gap: var(--space-2); line-height: var(--leading-snug); }
+    .cc-items li::before { content: '→'; flex-shrink: 0; }
+    .cc-card.cc-blue .cc-items li::before { color: var(--color-blue); }
+    .cc-card.cc-green .cc-items li::before { color: var(--color-green); }
+    .cc-analogy {
+      padding: var(--space-3) var(--space-4); border-radius: var(--radius-md);
+      background: var(--color-bg-alt); font-size: var(--text-sm);
+      color: var(--color-text-faint); font-style: italic; line-height: var(--leading-snug);
+    }
+
+    /* ── Quote Block ── */
+    .quote-block {
+      border-left: 4px solid var(--color-blue); padding: var(--space-5) var(--space-6);
+      background: var(--color-bg-card); border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+      margin: var(--space-6) 0; box-shadow: var(--shadow-sm);
+    }
+    .quote-text { font-size: var(--text-lg); color: var(--color-text); line-height: 1.75; font-style: italic; margin-bottom: var(--space-3); }
+    .quote-source { font-size: var(--text-sm); color: var(--color-text-faint); font-style: normal; }
+    .quote-source strong { color: var(--color-blue); }
+
+    /* ── Questions ── */
+    .q-block { display: flex; flex-direction: column; gap: var(--space-4); margin: var(--space-6) 0; }
+    .q-item {
+      background: var(--color-bg-card); border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg); padding: var(--space-5) var(--space-6);
+      display: flex; gap: var(--space-4); align-items: flex-start;
+    }
+    .q-num {
+      width: 30px; height: 30px; border-radius: var(--radius-full);
+      background: var(--color-blue-soft); color: var(--color-blue);
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--text-xs); font-weight: var(--weight-bold); flex-shrink: 0;
+    }
+    .q-text { font-size: var(--text-base); font-weight: var(--weight-semibold); color: var(--color-text); line-height: var(--leading-normal); }
+
+    /* ── Sentiment Stats ── */
+    .sentiment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin: var(--space-6) 0; }
+    .sent-card {
+      background: var(--color-bg-card); border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl); padding: var(--space-6); text-align: center;
+    }
+    .sent-big {
+      font-size: 3.5rem; font-weight: var(--weight-extrabold);
+      line-height: 1; margin-bottom: var(--space-2);
+    }
+    .sent-desc { font-size: var(--text-base); color: var(--color-text-muted); line-height: var(--leading-snug); }
+    .sent-note { font-size: var(--text-xs); color: var(--color-text-faint); margin-top: var(--space-2); }
+
+    /* ── Battle Bar ── */
+    .battle-bar {
+      background: var(--color-bg-card); border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl); padding: var(--space-6);
+      margin: var(--space-6) 0;
+    }
+    .battle-title { font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--color-text-faint); text-transform: uppercase; letter-spacing: 0.07em; text-align: center; margin-bottom: var(--space-5); }
+    .battle-labels { display: flex; justify-content: space-between; margin-bottom: var(--space-2); }
+    .battle-label { font-size: var(--text-sm); font-weight: var(--weight-bold); }
+    .battle-track {
+      height: 18px; background: var(--color-bg-alt); border-radius: var(--radius-full);
+      overflow: hidden; display: flex;
+    }
+    .battle-fill-neg {
+      background: #ef4444; height: 100%;
+      border-radius: var(--radius-full) 0 0 var(--radius-full);
+      width: 0%; transition: width 1.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .battle-fill-pos {
+      background: #16a34a; height: 100%;
+      border-radius: 0 var(--radius-full) var(--radius-full) 0;
+      width: 0%; transition: width 1.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .battle-vals { display: flex; justify-content: space-between; margin-top: var(--space-2); }
+    .battle-val { font-size: var(--text-sm); font-weight: var(--weight-bold); }
+
+    /* ── Framing Compare ── */
+    .framing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin: var(--space-6) 0; }
+    .framing-card { border-radius: var(--radius-xl); padding: var(--space-6); }
+    .framing-card.old { background: #fef2f2; border: 1px solid #fecaca; }
+    .framing-card.new { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .framing-card-label { font-size: var(--text-xs); font-weight: var(--weight-bold); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--space-3); }
+    .old .framing-card-label { color: #dc2626; }
+    .new .framing-card-label { color: #15803d; }
+    .framing-quote { font-size: var(--text-xl); font-weight: var(--weight-bold); font-style: italic; line-height: var(--leading-snug); margin-bottom: var(--space-3); }
+    .old .framing-quote { color: #991b1b; }
+    .new .framing-quote { color: #14532d; }
+    .framing-effect { font-size: var(--text-sm); line-height: var(--leading-normal); }
+    .old .framing-effect { color: #b91c1c; }
+    .new .framing-effect { color: #15803d; }
+
+    /* ── CSS Flow Diagram ── */
+    .flow-diagram {
+      background: var(--color-bg-card); border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl); padding: var(--space-8);
+      margin: var(--space-6) 0; overflow: hidden;
+    }
+    .flow-title { font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--color-text-faint); text-transform: uppercase; letter-spacing: 0.08em; text-align: center; margin-bottom: var(--space-7); }
+    .flow-nodes { display: flex; align-items: center; justify-content: center; gap: 0; overflow-x: auto; }
+    .flow-node { display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 120px; max-width: 145px; padding: 0 var(--space-2); flex-shrink: 0; }
+    .fn-circle {
+      width: 68px; height: 68px; border-radius: var(--radius-full);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; margin-bottom: var(--space-3); flex-shrink: 0;
+    }
+    .fn1 .fn-circle { background: var(--color-blue-soft); }
+    .fn2 .fn-circle { background: #ede9fe; }
+    .fn3 .fn-circle { background: var(--color-green-soft); }
+    .fn-step { font-size: var(--text-xs); font-weight: var(--weight-bold); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 3px; }
+    .fn1 .fn-step { color: var(--color-blue); }
+    .fn2 .fn-step { color: #6d28d9; }
+    .fn3 .fn-step { color: var(--color-green); }
+    .fn-label { font-size: var(--text-base); font-weight: var(--weight-bold); color: var(--color-text); margin-bottom: 4px; line-height: var(--leading-tight); }
+    .fn-desc { font-size: var(--text-xs); color: var(--color-text-faint); line-height: 1.5; }
+    .fn-sub-badge {
+      display: inline-block; margin-top: var(--space-2);
+      font-size: 10px; font-weight: var(--weight-bold); padding: 2px 7px;
+      border-radius: var(--radius-full); text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .fn1 .fn-sub-badge { background: var(--color-blue-soft); color: var(--color-blue); }
+    .fn2 .fn-sub-badge { background: #ede9fe; color: #6d28d9; }
+    .fn3 .fn-sub-badge { background: var(--color-green-soft); color: var(--color-green); }
+    .flow-connector { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; padding: 0 4px; padding-bottom: 28px; }
+    .flow-arrow-shaft { width: 32px; height: 2px; background: var(--color-border-strong); position: relative; }
+    .flow-arrow-shaft::after { content: ''; position: absolute; right: -1px; top: -4px; border-left: 8px solid var(--color-border-strong); border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+    .flow-connector-label { font-size: 10px; color: var(--color-text-faint); margin-top: var(--space-2); white-space: nowrap; }
+
+    /* ── Implication Cards ── */
+    .impl-cards { display: flex; flex-direction: column; gap: var(--space-4); margin: var(--space-6) 0; }
+    .impl-card {
+      background: var(--color-bg-card); border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl); padding: var(--space-6);
+      display: flex; gap: var(--space-5); align-items: flex-start;
+      transition: all 180ms ease;
+    }
+    .impl-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+    .impl-num-box {
+      width: 46px; height: 46px; border-radius: var(--radius-lg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--text-xl); font-weight: var(--weight-extrabold);
+      color: #fff; flex-shrink: 0;
+    }
+    .impl-num-box.n1 { background: var(--color-blue); }
+    .impl-num-box.n2 { background: #7c3aed; }
+    .impl-num-box.n3 { background: var(--color-green); }
+    .impl-title { font-size: var(--text-lg); font-weight: var(--weight-bold); margin-bottom: var(--space-2); }
+    .impl-desc { font-size: var(--text-base); color: var(--color-text-muted); line-height: var(--leading-normal); }
+    .impl-desc strong { color: var(--color-text); }
+
+    /* ── Concepts Section ── */
+    .concepts-heading { font-size: var(--text-2xl); font-weight: var(--weight-bold); margin-bottom: var(--space-5); }
+
+    /* ── Final Summary ── */
+    .final-summary {
+      background: linear-gradient(140deg, #0c1a2e 0%, #1a3558 100%);
+      border-radius: var(--radius-2xl); padding: var(--space-10);
+      margin: var(--space-12) 0;
+    }
+    .fs-label { font-size: var(--text-xs); font-weight: var(--weight-semibold); letter-spacing: 0.12em; text-transform: uppercase; color: #90b8de; margin-bottom: var(--space-4); }
+    .fs-text { font-size: var(--text-base); color: rgba(255,255,255,0.82); line-height: 1.85; }
+    .fs-text strong { color: #fff; }
+
+    /* ── Source ── */
+    .source-bar { border-top: 1px solid var(--color-border); padding-top: var(--space-6); margin-top: var(--space-10); }
+    .source-bar-label { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-faint); margin-bottom: var(--space-3); }
+    .source-link {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      color: var(--color-blue); text-decoration: none;
+      font-size: var(--text-base); font-weight: var(--weight-medium);
+      transition: all 160ms ease;
+    }
+    .source-link:hover { text-decoration: underline; }
+
+    /* ── Responsive ── */
+    @media (max-width: 850px) {
+      .compare-cards, .framing-grid, .sentiment-grid { grid-template-columns: 1fr; }
+      .stat-row { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 700px) {
+      .hero { padding: var(--space-12) var(--space-4) var(--space-10); }
+      main { padding: var(--space-8) var(--space-4); }
+      .nav-links { display: none; }
+      .stat-row { grid-template-columns: 1fr; }
+      .flow-nodes { justify-content: flex-start; }
+      .key-message { padding: var(--space-6); }
+      .final-summary { padding: var(--space-8) var(--space-6); }
+    }
+
+    /* ── Divider ── */
+    .section-divider { border: none; border-top: 1px solid var(--color-border); margin: var(--space-16) 0; }
+  </style>
+</head>
+<body>
+
+<!-- Read Progress -->
+<div id="read-progress"></div>
+
+<!-- Nav -->
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="#top" class="nav-brand">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="1" y="1" width="14" height="14" rx="3" fill="#2d5a8e" opacity="0.2"/>
+        <path d="M4 8h8M4 5h5M4 11h7" stroke="#2d5a8e" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      AI 교사 연수 리포트
+    </a>
+    <ul class="nav-links">
+      <li><a href="#sec1">숫자로 본 진전</a></li>
+      <li><a href="#sec2">효율성의 함정</a></li>
+      <li><a href="#sec3">교사의 양가감정</a></li>
+      <li><a href="#sec4">무엇이 작동하는가</a></li>
+      <li><a href="#sec5">시사점</a></li>
+      <li><a href="#concepts">핵심 개념</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero" id="top">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+        <circle cx="5" cy="5" r="4" stroke="#90b8de" stroke-width="1.2"/>
+        <path d="M5 3.5v2l1 1" stroke="#90b8de" stroke-width="1" stroke-linecap="round"/>
+      </svg>
+      EdWeek Research Center · 2024–2026 종단 조사
+    </div>
+    <h1>AI 교사 연수는 왜<br>양적으로 늘어도<br>충분하지 않은가</h1>
+    <p class="hero-subtitle">미국 K-12 교사 대상 AI 연수가 2년 사이 빠르게 확산되었지만, 대부분은 '효율성 도구' 수준에 머물러 실제 교수학습 혁신으로 이어지지 못하고 있다. 양적 확산과 질적 정체의 괴리를 짚는다.</p>
+    <div class="hero-tags">
+      <span class="hero-tag">AI 교사 연수</span>
+      <span class="hero-tag">K-12 교육</span>
+      <span class="hero-tag">생성형 AI</span>
+      <span class="hero-tag">교수학습 혁신</span>
+      <span class="hero-tag">교사 전문성 개발</span>
+      <a href="https://www.edweek.org/technology/more-schools-are-providing-ai-training-for-teachers-is-it-any-good/2026/05" target="_blank" rel="noopener" class="hero-source">
+        원문 보기 →
+      </a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Key Message -->
+  <div class="key-message">
+    <div class="km-label">핵심 메시지</div>
+    <p class="km-text">AI 교사 연수는 빠르게 늘고 있지만, 대부분 <strong>이메일 자동 작성·수업 계획 보조 같은 '효율성 도구'</strong> 수준에 머무른다. 진짜 과제는 그 너머 — AI가 교수학습 자체를 어떻게 바꿀 수 있는가에 대한 질문에 답하는 일이다.</p>
+  </div>
+
+  <!-- SECTION 1 -->
+  <section class="section" id="sec1">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <div class="section-title">숫자로 본 진전: 2년 사이 무엇이 달라졌는가</div>
+        <div class="section-sub">EdWeek Research Center 전국 반복 조사 (K-12 교사 대상)</div>
+      </div>
+    </div>
+
+    <p class="body-text">EdWeek Research Center의 추적 조사는 흐름을 또렷이 보여준다. 무연수 비율은 2024년 60%에서 2026년 42%로 낮아졌고, 다회 세션(22%)과 지속적 연수(9%) 경험자는 그만큼 늘었다.</p>
+
+    <!-- Stat Cards -->
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-num" style="color:#ef4444" data-counter="60">0%</div>
+        <div class="stat-label">연수 전혀 없음</div>
+        <div class="stat-sub">2024년 10월</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" style="color:#f59e0b" data-counter="50">0%</div>
+        <div class="stat-label">연수 전혀 없음</div>
+        <div class="stat-sub">2025년 가을</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" style="color:#16a34a" data-counter="42">0%</div>
+        <div class="stat-label">연수 전혀 없음</div>
+        <div class="stat-sub">2026년 겨울</div>
+      </div>
+    </div>
+
+    <!-- Progress Timeline -->
+    <div class="progress-timeline" id="ptl">
+      <div class="pt-header">연수 유형별 비율 변화 (애니메이션 바)</div>
+
+      <div class="pt-year-block">
+        <div class="pt-year-label">2024년 10월 <span class="pt-year-badge">기준선</span></div>
+        <div class="pt-bars">
+          <div class="pt-bar-row">
+            <div class="pt-bar-label">연수 없음</div>
+            <div class="pt-bar-track"><div class="pt-bar-fill fill-red" data-w="60"></div></div>
+            <div class="pt-bar-val" style="color:#ef4444">60%</div>
+          </div>
+          <div class="pt-bar-row">
+            <div class="pt-bar-label">다회 세션</div>
+            <div class="pt-bar-track"><div class="pt-bar-fill fill-blue" data-w="0"></div></div>
+            <div class="pt-bar-val" style="color:#a0a0a0">—</div>
+          </div>
+          <div class="pt-bar-row">
+            <div class="pt-bar-label">지속 연수</div>
+            <div class="pt-bar-track"><div class="pt-bar-fill fill-teal" data-w="0"></div></div>
+            <div class="pt-bar-val" style="color:#a0a0a0">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-year-block">
+        <div class="pt-year-label">2025년 가을 <span class="pt-year-badge">1년 후</span></div>
+        <div class="pt-bars">
+          <div class="pt-bar-row">
+            <div class="pt-bar-label">연수 없음</div>
+            <div class="pt-bar-track"><div class="pt-bar-fill fill-red" data-w="50"></div></div>
+            <div class="pt-bar-val" style="color:#ef4444">50%</div>
+          </div>
+          <div class="pt-bar-row">
+            <div class="pt-bar-label">다회 세션</div>
+            <div class="pt-bar-track"><div class="pt-bar-fill fill-blue" data-w="14"></div></div>
+            <div class="pt-bar-val" style="color:#3b82f6">14%</div>
+          </div>
+          <div class="pt-bar-row">
+            <div class="pt-bar-label">지속 연수</div>
+            <div class="pt-bar-track"><div class="pt-bar-fill fill-teal" data-w="5"></div></div>
+            <div class="pt-bar-val" style="color:#14b8a6">5%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-year-block">
+        <div class="pt-year-label">2026년 겨울 <span class="pt-year-badge" style="background:#e0f2fe;color:#0369a1">최신</span></div>
+        <div class="pt-bars">
+          <div class="pt-bar-row">
+            <div class="pt-bar-label">연수 없음</div>
+            <div class="pt-bar-track"><div class="pt-bar-fill fill-red" data-w="42"></div></div>
+            <div class="pt-bar-val" style="color:#ef4444">42%</div>
+          </div>
+          <div class="pt-bar-row">
+            <div class="pt-bar-label">다회 세션</div>
+            <div class="pt-bar-track"><div class="pt-bar-fill fill-blue" data-w="22"></div></div>
+            <div class="pt-bar-val" style="color:#3b82f6">22%</div>
+          </div>
+          <div class="pt-bar-row">
+            <div class="pt-bar-label">지속 연수</div>
+            <div class="pt-bar-track"><div class="pt-bar-fill fill-teal" data-w="9"></div></div>
+            <div class="pt-bar-val" style="color:#14b8a6">9%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>시점</th>
+            <th>연수 전혀 없음</th>
+            <th>다회 세션</th>
+            <th>지속적 연수</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>2024년 10월</strong></td>
+            <td><span class="badge badge-red">약 60%</span></td>
+            <td style="color:var(--color-text-faint)">데이터 없음</td>
+            <td style="color:var(--color-text-faint)">데이터 없음</td>
+          </tr>
+          <tr>
+            <td><strong>2025년 가을</strong></td>
+            <td><span class="badge badge-red">50%</span></td>
+            <td><span class="badge badge-blue">14%</span></td>
+            <td><span class="badge badge-teal">5%</span></td>
+          </tr>
+          <tr>
+            <td><strong>2026년 겨울</strong></td>
+            <td><span class="badge badge-red">42%</span></td>
+            <td><span class="badge badge-blue">22%</span></td>
+            <td><span class="badge badge-teal">9%</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">ℹ️</div>
+      <div>
+        <div class="callout-label">맥락</div>
+        <p class="callout-text">수치의 진전은 분명하다. 그러나 학교마다 연수의 <strong>빈도, 형식, 내용의 깊이가 제각각</strong>이다. 숫자의 개선이 질적 변화를 보장하지 않는다는 것이 이 글의 출발점이다.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 2 -->
+  <section class="section" id="sec2">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <div class="section-title">'효율성 도구'에 갇힌 연수: 무엇이 문제인가</div>
+        <div class="section-sub">진입 장벽이 낮은 출발점에서 멈추는 이유</div>
+      </div>
+    </div>
+
+    <p class="body-text">대부분의 학교에서 AI 연수는 가장 진입 장벽이 낮은 영역에서 시작된다. 코네티컷주 Daniel Hand High School의 Anthony Salutari Jr. 교장은 자기 학교 사례를 이렇게 설명한다. 행정팀은 작년부터 교사들에게 <strong>수업 계획 보조, 일정 관리, 학부모 이메일 작성</strong> 같은 업무 효율화 용도의 AI 활용법을 안내해 왔다. 시작점으로는 합리적이다. 누구나 즉각 효용을 체감할 수 있기 때문이다.</p>
+
+    <div class="quote-block">
+      <p class="quote-text">"많은 학교가 기초 단계에서 멈춰 있으며, 그래서 연수의 진짜 가치를 만들어내지 못한다."</p>
+      <div class="quote-source"><strong>Jessica Garner</strong> · ISTE+ASCD 혁신학습 책임자</div>
+    </div>
+
+    <div class="compare-cards">
+      <div class="cc-card cc-blue">
+        <div class="cc-icon">⚡</div>
+        <div class="cc-title">효율성 단계</div>
+        <div class="cc-desc">교사의 기존 업무를 더 빠르게 처리하는 데 AI를 활용한다. 즉각적 효용이 있어 수용이 쉽다.</div>
+        <ul class="cc-items">
+          <li>이메일·학부모 통신 초안 자동 작성</li>
+          <li>수업 계획서 초안 생성</li>
+          <li>일정 관리 및 행정 자동화</li>
+          <li>프롬프트 작성·도구 조작 학습</li>
+        </ul>
+        <div class="cc-analogy">비유: 자동 식기세척기 — 일은 똑같지만 더 빨리 끝남</div>
+      </div>
+      <div class="cc-card cc-green">
+        <div class="cc-icon">🎯</div>
+        <div class="cc-title">교수학습 단계</div>
+        <div class="cc-desc">학습 경험의 질과 평가 방식 자체를 바꾸는 방식으로 AI를 활용한다. 전문성이 필요하다.</div>
+        <ul class="cc-items">
+          <li>학생별 수준·관심 맞춤 차별화 지도</li>
+          <li>과정 중심 평가 설계</li>
+          <li>학생의 사고 흐름 추적·분석</li>
+          <li>교수학적 판단으로 AI 산출물 비판</li>
+        </ul>
+        <div class="cc-analogy">비유: 주방 동선 자체를 다시 설계하는 것</div>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div>
+        <div class="callout-label">흔한 오해</div>
+        <p class="callout-text">"AI 도구를 다룰 줄 알게 되었다" ≠ "AI를 교수학습에 활용할 줄 알게 되었다". 전자는 일과의 자동화이고, 후자는 학습 경험 자체의 재설계이다. 둘은 같은 출발점에서 시작하지만 <strong>도착점이 완전히 다르다</strong>.</p>
+      </div>
+    </div>
+
+    <p class="body-text">Garner가 던지는 두 가지 핵심 질문이 이 간극을 압축한다. 이 질문들은 단순한 도구 자동화로는 결코 답할 수 없으며, 여기서부터 교사의 전문성이 새롭게 요구된다.</p>
+
+    <div class="q-block">
+      <div class="q-item">
+        <div class="q-num">Q1</div>
+        <div class="q-text">AI를 활용해 학생별 수준과 관심에 맞춘 <strong>차별화된 지도</strong>를 어떻게 할 것인가?</div>
+      </div>
+      <div class="q-item">
+        <div class="q-num">Q2</div>
+        <div class="q-text">AI를 활용해 결과가 아닌 학생의 사고 과정 자체를 평가하는 <strong>과정 중심 평가</strong>를 어떻게 설계할 것인가?</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 3 -->
+  <section class="section" id="sec3">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <div class="section-title">교사들의 양가감정: 왜 따라오지 않는가</div>
+        <div class="section-sub">651명 교사 대상 · EdWeek 2026년 2–3월 조사</div>
+      </div>
+    </div>
+
+    <p class="body-text">2026년 2~3월 651명의 교사를 대상으로 한 EdWeek 조사에서 교사들의 AI 수용 의향은 뚜렷하게 양극화되어 있다. 단순히 "변화에 대한 거부감"으로 환원하기 어려운 구조적 원인이 있다.</p>
+
+    <div class="sentiment-grid" id="sentiment-grid">
+      <div class="sent-card" style="border-top: 4px solid #ef4444">
+        <div class="sent-big" style="color:#ef4444" data-counter="37">0%</div>
+        <div class="sent-desc">AI 수업 통합 학습에 적극적이지 않다고 응답</div>
+        <div class="sent-note">전혀 그렇지 않다 13% + 약간 그렇다 24%</div>
+      </div>
+      <div class="sent-card" style="border-top: 4px solid #f59e0b">
+        <div class="sent-big" style="color:#f59e0b" data-counter="47">0%</div>
+        <div class="sent-desc">향후 5년 AI 영향을 부정적으로 전망</div>
+        <div class="sent-note">43%는 긍정적으로 전망 — 의견이 반으로 갈림</div>
+      </div>
+    </div>
+
+    <div class="battle-bar" id="battle-bar">
+      <div class="battle-title">향후 5년간 AI가 교수학습에 미칠 영향 전망 — 교사 651명</div>
+      <div class="battle-labels">
+        <span class="battle-label" style="color:#ef4444">부정적 전망</span>
+        <span class="battle-label" style="color:#16a34a">긍정적 전망</span>
+      </div>
+      <div class="battle-track">
+        <div class="battle-fill-neg" data-w="47"></div>
+        <div class="battle-fill-pos" data-w="43"></div>
+      </div>
+      <div class="battle-vals">
+        <span class="battle-val" style="color:#ef4444">47%</span>
+        <span class="battle-val" style="color:#16a34a">43%</span>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-icon">🔍</div>
+      <div>
+        <div class="callout-label">핵심 진단</div>
+        <p class="callout-text">교사의 거부감은 변화에 대한 막연한 두려움이 아니라, <strong>'무엇을 해야 하는지 합의가 없는 상태'에 대한 합리적 회피</strong>에 가깝다. 가이드라인이 명확해질수록 그 회피의 명분은 줄어든다.</p>
+      </div>
+    </div>
+
+    <div class="quote-block">
+      <p class="quote-text">"학교 차원에서 AI에 대한 명확한 입장과 가이드라인이 없기 때문에 교사들이 혼란에 빠진다. 무엇이 허용되고 무엇이 금지되는지, 교과별로 어떤 방식의 활용이 적절한지에 대한 합의가 없으면 — 적극적인 교사도 보수적인 교사도 각자의 위치에서 불안할 수밖에 없다."</p>
+      <div class="quote-source"><strong>Michael Horn</strong> · Harvard 교육대학원 강사, 'Future U' 팟캐스트 공동 진행자</div>
+    </div>
+
+    <p class="body-text">Horn은 중요한 단서를 덧붙인다. 가이드라인은 행정실에서 일방적으로 내려오는 것이 아니라 <strong>교사가 그 과정에 참여해 만들어져야 한다</strong>는 점이다. 영어 과목의 글쓰기 자동화 우려와 수학 과목의 풀이 과정 자동화 우려는 결이 다르다. 위에서 내려보낸 단일 지침으로는 이 차이를 담아낼 수 없다.</p>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 4 -->
+  <section class="section" id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <div class="section-title">무엇이 작동하는가: 학생 중심 프레이밍</div>
+        <div class="section-sub">Anthony Salutari Jr. · Daniel Hand High School 교장 (2026 코네티컷주 최우수 고교 교장)</div>
+      </div>
+    </div>
+
+    <p class="body-text">Salutari 교장은 거부감을 가진 교사들을 끌어들이기 위해 의도적으로 메시지를 <strong>학생 중심</strong>으로 프레이밍한다. "AI를 가르치자"가 아니라 "학생들이 살아갈 미래를 준비시키자"로 바꾸면, AI 자체에 대한 호불호와 별개로 교사의 직업적 사명감이 작동한다.</p>
+
+    <div class="framing-grid">
+      <div class="framing-card old">
+        <div class="framing-card-label">✗ 기존 프레이밍</div>
+        <div class="framing-quote">"AI 도구를 가르칩시다"</div>
+        <div class="framing-effect">교사가 "내가 이걸 좋아하느냐"는 개인적 판단의 영역에서 의사결정. → AI 호불호에 따라 참여 여부가 갈린다.</div>
+      </div>
+      <div class="framing-card new">
+        <div class="framing-card-label">✓ 학생 중심 프레이밍</div>
+        <div class="framing-quote">"학생의 미래를 준비시킵시다"</div>
+        <div class="framing-effect">교사가 "내가 이걸 외면해도 되느냐"는 직업적 책임의 영역으로 질문이 이동. → 거부감이 있어도 참여 동기가 생긴다.</div>
+      </div>
+    </div>
+
+    <!-- CSS Flow Diagram -->
+    <div class="flow-diagram">
+      <div class="flow-title">AI 연수의 단계별 흐름 · 각 단계의 동력</div>
+      <div class="flow-nodes">
+        <div class="flow-node fn1">
+          <div class="fn-circle">⚡</div>
+          <div class="fn-step">1단계</div>
+          <div class="fn-label">효율성 도구</div>
+          <div class="fn-desc">이메일·수업안<br>자동화</div>
+          <span class="fn-sub-badge">수용 쉬움</span>
+        </div>
+        <div class="flow-connector">
+          <div class="flow-arrow-shaft"></div>
+          <div class="flow-connector-label">전문성 도전</div>
+        </div>
+        <div class="flow-node fn2">
+          <div class="fn-circle">🎯</div>
+          <div class="fn-step">2단계</div>
+          <div class="fn-label">교수학습 통합</div>
+          <div class="fn-desc">차별화 지도<br>과정 중심 평가</div>
+          <span class="fn-sub-badge">역량 심화</span>
+        </div>
+        <div class="flow-connector">
+          <div class="flow-arrow-shaft"></div>
+          <div class="flow-connector-label">사명감 작동</div>
+        </div>
+        <div class="flow-node fn3">
+          <div class="fn-circle">🌟</div>
+          <div class="fn-step">3단계</div>
+          <div class="fn-label">학생 미래 준비</div>
+          <div class="fn-desc">거부감 완화<br>지속 동력 확보</div>
+          <span class="fn-sub-badge">학생 중심</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div>
+        <div class="callout-label">프레이밍 전환의 힘</div>
+        <p class="callout-text">이 전환은 사소해 보이지만 중요하다. 교사들이 AI를 <em>좋아하게</em> 만들 필요는 없다. 다만 <strong>학생의 미래라는 더 큰 그림 안에서 AI가 외면할 수 없는 변수</strong>라는 점에 동의하게 만드는 것은 가능하다. 메시지의 프레이밍은 거부감을 가진 다수의 교사를 움직이는 가장 현실적인 지렛대이다.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 5 -->
+  <section class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <div class="section-title">시사점: 무엇이 달라져야 하는가</div>
+        <div class="section-sub">연수 기획·정책 관계자를 위한 세 가지 방향</div>
+      </div>
+    </div>
+
+    <div class="impl-cards">
+      <div class="impl-card">
+        <div class="impl-num-box n1">1</div>
+        <div>
+          <div class="impl-title">연수의 깊이를 의도적으로 설계하라</div>
+          <div class="impl-desc">효율성 도구 안내는 기획이 쉽고 만족도가 즉각적이라 자칫 그 단계만 반복하기 쉽다. 연수 로드맵을 처음부터 <strong>"효율성 → 교수학습 통합 → 평가·차별화 설계"</strong>의 다단계로 구성하고, 각 단계의 도착점을 명확히 설정해야 중간에 멈추지 않는다.</div>
+        </div>
+      </div>
+      <div class="impl-card">
+        <div class="impl-num-box n2">2</div>
+        <div>
+          <div class="impl-title">도구 사용법보다 가이드라인 합의가 우선이다</div>
+          <div class="impl-desc">교사들이 따라오지 않는 가장 큰 이유는 의지 부족이 아니라 <strong>기준 부재</strong>이다. 학생 과제에서의 AI 사용 범위, 교과별 차이, 평가 기준 변화에 대한 합의가 먼저 만들어져야 한다. 이 합의 과정에 반드시 <strong>현장 교사가 참여</strong>해야 한다.</div>
+        </div>
+      </div>
+      <div class="impl-card">
+        <div class="impl-num-box n3">3</div>
+        <div>
+          <div class="impl-title">변화의 동력을 '도구'가 아닌 '학생'에서 찾아라</div>
+          <div class="impl-desc">교사들이 AI를 좋아하게 만들 필요는 없다. 다만 <strong>학생의 미래라는 더 큰 그림</strong> 안에서 AI가 외면할 수 없는 변수라는 점에 동의하게 만들 수 있다. 메시지 프레이밍의 전환은 거부감을 가진 다수를 움직이는 가장 현실적인 지렛대이다.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">🗺️</div>
+      <div>
+        <div class="callout-label">한 줄 적용 가이드</div>
+        <p class="callout-text">"우리 학교의 AI 연수는 지금 <strong>효율성 단계</strong>에 있는가, <strong>교수학습 단계</strong>에 있는가?" — 이 질문 하나에 답할 수 없다면, 다음 연수를 기획하기 전에 먼저 단계 지도를 그려보아야 한다.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- CONCEPTS -->
+  <section class="section" id="concepts">
+    <div class="concepts-heading">핵심 개념 정리</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>개념</th>
+            <th>의미</th>
+            <th>일상적 비유</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>효율성 도구로서의 AI</strong></td>
+            <td>기존 업무의 속도와 부담을 줄여주는 활용 방식</td>
+            <td>자동 식기세척기 — 일은 똑같지만 더 빨리 끝남</td>
+          </tr>
+          <tr>
+            <td><strong>교수학습 통합 AI</strong></td>
+            <td>학습 경험의 질과 평가 방식 자체를 바꾸는 활용</td>
+            <td>주방의 동선 자체를 다시 설계하는 것</td>
+          </tr>
+          <tr>
+            <td><strong>과정 중심 평가</strong></td>
+            <td>결과가 아닌 학생의 사고 흐름을 추적해 평가하는 방식</td>
+            <td>등산 정상 도착이 아닌, 경로 선택 과정을 평가</td>
+          </tr>
+          <tr>
+            <td><strong>학생 중심 프레이밍</strong></td>
+            <td>"AI를 가르치자"가 아닌 "학생의 미래를 준비하자"로 메시지를 짜는 전략</td>
+            <td>운동을 권할 때 "건강해지자" 대신 "오래 곁에 있어주자"로 말하기</td>
+          </tr>
+          <tr>
+            <td><strong>차별화된 지도</strong></td>
+            <td>학생별 수준·관심·학습 속도에 맞춘 맞춤형 교수법</td>
+            <td>같은 책을 다른 속도로 읽는 독서 모임 운영</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Final Summary -->
+  <div class="final-summary">
+    <div class="fs-label">전체 흐름 요약</div>
+    <p class="fs-text">미국 K-12 교사 AI 연수는 <strong>2024년 60% 미경험에서 2026년 42% 미경험</strong>으로 빠르게 확산되었지만, 대부분은 이메일·수업안 자동화 같은 <strong>효율성 도구 단계</strong>에 멈춰 있다. 진짜 과제인 차별화 지도와 과정 중심 평가 같은 교수학습 혁신으로 넘어가지 못하는 배경에는 교사 거부감이 있으며, 그 거부감은 변화에 대한 막연한 두려움이 아니라 <strong>학교 차원의 명확한 가이드라인 부재</strong>에서 비롯된다. 해법은 효율성을 출발점으로 삼되 교수학습 통합 단계로 끌어올리는 <strong>다단계 연수 로드맵</strong>, 교사가 참여하는 가이드라인 합의, 그리고 'AI 도구'가 아닌 <strong>'학생의 미래 준비'</strong>라는 프레이밍 전환에 있다.</p>
+  </div>
+
+  <!-- Source -->
+  <div class="source-bar">
+    <div class="source-bar-label">참고 자료</div>
+    <a href="https://www.edweek.org/technology/more-schools-are-providing-ai-training-for-teachers-is-it-any-good/2026/05" target="_blank" rel="noopener" class="source-link">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <path d="M5.5 2.5H2.5a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-3" stroke="#2d5a8e" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M8.5 1.5h5v5M13.5 1.5L7.5 7.5" stroke="#2d5a8e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      More Schools Are Providing AI Training for Teachers. Is It Any Good? — Education Week, 2026.05
+    </a>
+  </div>
+
+</main>
+
+<script>
+  // Read progress bar
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+    document.getElementById('read-progress').style.width = pct + '%';
+  });
+
+  // Animate counters
+  function animateCounter(el, target) {
+    let current = 0;
+    const duration = 1200;
+    const steps = 50;
+    const step = target / steps;
+    const interval = duration / steps;
+    const timer = setInterval(() => {
+      current = Math.min(current + step, target);
+      el.textContent = Math.round(current) + '%';
+      if (current >= target) clearInterval(timer);
+    }, interval);
+  }
+
+  // Intersection Observer — trigger animations when visible
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+
+      // Animate progress bars
+      entry.target.querySelectorAll('.pt-bar-fill[data-w]').forEach(bar => {
+        const w = bar.getAttribute('data-w');
+        setTimeout(() => { bar.style.width = w + '%'; }, 150);
+      });
+
+      // Animate counters
+      entry.target.querySelectorAll('[data-counter]').forEach(el => {
+        const target = parseInt(el.getAttribute('data-counter'));
+        animateCounter(el, target);
+      });
+
+      // Animate battle bars
+      entry.target.querySelectorAll('.battle-fill-neg[data-w], .battle-fill-pos[data-w]').forEach(bar => {
+        const w = bar.getAttribute('data-w');
+        setTimeout(() => { bar.style.width = w + '%'; }, 200);
+      });
+
+      io.unobserve(entry.target);
+    });
+  }, { threshold: 0.25 });
+
+  document.querySelectorAll(
+    '#ptl, .stat-row, #sentiment-grid, #battle-bar'
+  ).forEach(el => io.observe(el));
+</script>
+</body>
+</html>
