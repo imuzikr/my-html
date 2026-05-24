@@ -119,6 +119,37 @@ def inject_back_button(path: Path) -> bool:
     return True
 
 
+# ── Mobile font scaling injection ───────────────────────────────────────────
+
+MOBILE_FONT_MARKER = 'id="mobile-font-scale"'
+
+MOBILE_FONT_CSS = (
+    '\n<style id="mobile-font-scale">\n'
+    '@media(max-width:700px){\n'
+    '  :root{\n'
+    '    --text-sm:0.95rem;\n'
+    '    --text-base:1.05rem;\n'
+    '    --text-lg:1.2rem;\n'
+    '    --text-xl:1.35rem;\n'
+    '    --text-2xl:1.6rem;\n'
+    '    --text-3xl:2rem;\n'
+    '  }\n'
+    '}\n'
+    '</style>\n'
+)
+
+
+def inject_mobile_fonts(path: Path) -> bool:
+    """Inject mobile font scaling into article files that don't have it yet."""
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    if MOBILE_FONT_MARKER in text:
+        return False
+    if "</head>" not in text:
+        return False
+    path.write_text(text.replace("</head>", MOBILE_FONT_CSS + "</head>", 1), encoding="utf-8")
+    return True
+
+
 # ── Shared CSS ───────────────────────────────────────────────────────────────
 
 SHARED_CSS = """
@@ -171,6 +202,16 @@ footer{text-align:center;padding:var(--space-8);color:var(--color-text-faint);fo
 @media(max-width:600px){
   header{padding:var(--space-4)}.container{padding:var(--space-4)}
   .search input{width:100%}
+}
+@media(max-width:700px){
+  :root{
+    --text-sm:0.95rem;
+    --text-base:1.05rem;
+    --text-lg:1.2rem;
+    --text-xl:1.35rem;
+    --text-2xl:1.6rem;
+    --text-3xl:2rem;
+  }
 }
 """
 
@@ -399,8 +440,9 @@ def bump_sw_cache(root: Path) -> None:
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    # Inject back buttons in category article files
+    # Inject back buttons and mobile font scaling into category article files
     injected = 0
+    fonts_injected = 0
     for category in KNOWN_CATEGORIES:
         folder_path = ROOT / category
         if not folder_path.exists():
@@ -410,8 +452,12 @@ if __name__ == "__main__":
                 continue
             if inject_back_button(html):
                 injected += 1
+            if inject_mobile_fonts(html):
+                fonts_injected += 1
     if injected:
         print(f"Injected back-to-index button into {injected} file(s)")
+    if fonts_injected:
+        print(f"Injected mobile font scaling into {fonts_injected} file(s)")
 
     folders = collect_files()
 
