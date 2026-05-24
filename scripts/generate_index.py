@@ -382,6 +382,20 @@ function filterSearch(val) {{
 """
 
 
+# ── Service Worker cache version bump ────────────────────────────────────────
+
+def bump_sw_cache(root: Path) -> None:
+    sw_path = root / "sw.js"
+    if not sw_path.exists():
+        return
+    version = datetime.utcnow().strftime("%Y%m%d-%H%M")
+    text = sw_path.read_text(encoding="utf-8")
+    new_text = re.sub(r"const CACHE = 'my-html-v[^']*';", f"const CACHE = 'my-html-v{version}';", text)
+    if new_text != text:
+        sw_path.write_text(new_text, encoding="utf-8")
+        print(f"Updated sw.js cache version → my-html-v{version}")
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -412,3 +426,6 @@ if __name__ == "__main__":
     main_out.write_text(build_main_index(folders), encoding="utf-8")
     total = sum(len(v) for v in folders.values())
     print(f"Generated index.html — {total} total articles across {len(folders)} categories")
+
+    # Bump service worker cache version
+    bump_sw_cache(ROOT)
