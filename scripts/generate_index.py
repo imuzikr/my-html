@@ -127,12 +127,12 @@ MOBILE_FONT_CSS = (
     '\n<style id="mobile-font-scale">\n'
     '@media(max-width:700px){\n'
     '  :root{\n'
-    '    --text-sm:0.95rem;\n'
-    '    --text-base:1.05rem;\n'
-    '    --text-lg:1.2rem;\n'
-    '    --text-xl:1.35rem;\n'
-    '    --text-2xl:1.6rem;\n'
-    '    --text-3xl:2rem;\n'
+    '    --text-sm:1rem;\n'
+    '    --text-base:1.15rem;\n'
+    '    --text-lg:1.35rem;\n'
+    '    --text-xl:1.55rem;\n'
+    '    --text-2xl:1.85rem;\n'
+    '    --text-3xl:2.25rem;\n'
     '  }\n'
     '}\n'
     '</style>\n'
@@ -205,12 +205,12 @@ footer{text-align:center;padding:var(--space-8);color:var(--color-text-faint);fo
 }
 @media(max-width:700px){
   :root{
-    --text-sm:0.95rem;
-    --text-base:1.05rem;
-    --text-lg:1.2rem;
-    --text-xl:1.35rem;
-    --text-2xl:1.6rem;
-    --text-3xl:2rem;
+    --text-sm:1rem;
+    --text-base:1.15rem;
+    --text-lg:1.35rem;
+    --text-xl:1.55rem;
+    --text-2xl:1.85rem;
+    --text-3xl:2.25rem;
   }
 }
 """
