@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 시대, 교육 현장에서 요구되는 핵심 역량 전환</title>
+  <meta name="description" content="AI 시대 교육 현장에서 요구되는 역량 전환을 문제 정의 능력과 도메인 이해력의 관점에서 분석하고, 교사와 학생에게 필요한 실천 방향을 정리합니다.">
+  <style>
+    :root {
+      --color-bg:#f5f2ed; --color-bg-alt:#eceae4; --color-bg-card:#ffffff;
+      --color-text:#1a1a18; --color-text-muted:#6b6a63; --color-text-faint:#a09f97;
+      --color-border:#dedad2; --color-accent:#d95f2b; --color-accent-hover:#c2521f;
+      --color-accent-soft:#faeee7;
+      --color-green:#3a6b4a; --color-green-soft:#e6f0e9;
+      --color-blue:#2d5a8e; --color-blue-soft:#e5eef7;
+      --color-yellow:#8a6a00; --color-yellow-soft:#fdf5d9;
+      --color-red:#b03a2e; --color-red-soft:#fdecea;
+      --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR","Apple SD Gothic Neo",Helvetica,Arial,sans-serif;
+      --font-mono:"SF Mono","Fira Code",Consolas,"Liberation Mono",monospace;
+      --text-xs:0.75rem; --text-sm:0.875rem; --text-base:1rem; --text-lg:1.125rem;
+      --text-xl:1.25rem; --text-2xl:1.5rem; --text-3xl:1.875rem;
+      --weight-medium:500; --weight-semibold:600; --weight-bold:700;
+      --leading-tight:1.25; --leading-normal:1.6; --leading-loose:1.8;
+      --space-1:0.25rem; --space-2:0.5rem; --space-3:0.75rem; --space-4:1rem;
+      --space-5:1.25rem; --space-6:1.5rem; --space-8:2rem; --space-12:3rem;
+      --radius-md:8px; --radius-lg:12px; --radius-full:9999px;
+      --shadow-sm:0 1px 3px rgba(0,0,0,0.07); --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--font-sans);background:var(--color-bg);color:var(--color-text);line-height:var(--leading-normal);word-break:keep-all}
+    #read-progress{position:fixed;top:0;left:0;width:0;height:3px;background:var(--color-accent);z-index:1000;transition:width 80ms linear}
+    .site-nav{position:sticky;top:0;z-index:500;background:rgba(245,242,237,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--color-border)}
+    .nav-inner{max-width:900px;margin:0 auto;padding:var(--space-3) var(--space-6);display:flex;justify-content:space-between;align-items:center;gap:var(--space-4)}
+    .nav-brand{color:var(--color-accent);font-weight:var(--weight-bold);text-decoration:none;font-size:var(--text-sm);white-space:nowrap}
+    .nav-links{display:flex;gap:var(--space-1);list-style:none;overflow-x:auto}
+    .nav-links a{display:block;color:var(--color-text-muted);text-decoration:none;font-size:var(--text-sm);padding:var(--space-1) var(--space-3);border-radius:var(--radius-full);white-space:nowrap;transition:all 180ms ease}
+    .nav-links a:hover{background:var(--color-bg-alt);color:var(--color-text)}
+    .hero{background:linear-gradient(145deg,#101826 0%,#1f3a60 52%,#4f2b1f 100%);padding:var(--space-12) var(--space-6);position:relative;overflow:hidden}
+    .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 15% 20%,rgba(217,95,43,.28),transparent 35%),radial-gradient(circle at 85% 30%,rgba(45,90,142,.34),transparent 38%);pointer-events:none}
+    .hero-inner{max-width:900px;margin:0 auto;position:relative}
+    .eyebrow{display:inline-flex;color:#ffd6c5;border:1px solid rgba(255,214,197,.35);background:rgba(255,255,255,.08);border-radius:var(--radius-full);padding:var(--space-1) var(--space-3);font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.08em;text-transform:uppercase;margin-bottom:var(--space-5)}
+    h1{font-size:clamp(2rem,5.5vw,3.35rem);line-height:var(--leading-tight);letter-spacing:-.04em;color:#fff;margin-bottom:var(--space-5)}
+    .hero-lead{font-size:var(--text-lg);color:rgba(255,255,255,.76);max-width:760px;line-height:var(--leading-loose);margin-bottom:var(--space-6)}
+    .hero-tags{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+    .hero-tag{font-size:var(--text-xs);color:rgba(255,255,255,.74);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);padding:var(--space-1) var(--space-3);border-radius:var(--radius-full)}
+    main{max-width:900px;margin:0 auto;padding:var(--space-12) var(--space-6)}
+    .summary{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-8);margin-bottom:var(--space-12)}
+    .summary-label{font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.08em;text-transform:uppercase;color:var(--color-accent);margin-bottom:var(--space-3)}
+    .summary p{font-size:var(--text-lg);line-height:var(--leading-loose);color:var(--color-text)}
+    section{margin-bottom:var(--space-12);scroll-margin-top:80px}
+    .section-header{display:flex;gap:var(--space-4);align-items:flex-start;margin-bottom:var(--space-5)}
+    .section-num{width:40px;height:40px;border-radius:var(--radius-full);background:var(--color-blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:var(--weight-bold);flex-shrink:0}
+    h2{font-size:var(--text-2xl);line-height:var(--leading-tight);letter-spacing:-.02em;margin-bottom:var(--space-2)}
+    h3{font-size:var(--text-xl);margin:var(--space-6) 0 var(--space-3);line-height:var(--leading-tight)}
+    p{color:var(--color-text-muted);margin-bottom:var(--space-4);line-height:var(--leading-loose)}
+    strong{color:var(--color-text)}
+    .quote{border-left:4px solid var(--color-accent);background:var(--color-accent-soft);padding:var(--space-5) var(--space-6);border-radius:0 var(--radius-lg) var(--radius-lg) 0;color:#5b2b18;margin:var(--space-6) 0;font-weight:var(--weight-medium)}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-5);margin:var(--space-6) 0}
+    .card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);box-shadow:var(--shadow-sm)}
+    .card h4{font-size:var(--text-lg);margin-bottom:var(--space-3)}
+    .card ul,.check-list{list-style:none;display:flex;flex-direction:column;gap:var(--space-3)}
+    .card li,.check-list li{position:relative;padding-left:1.45rem;color:var(--color-text-muted);line-height:var(--leading-normal)}
+    .card li::before,.check-list li::before{content:"";position:absolute;left:0;top:.58rem;width:8px;height:8px;border-radius:50%;background:var(--color-accent)}
+    .flow{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-6) 0;overflow-x:auto}
+    .flow svg{width:100%;min-width:620px;height:auto;display:block}
+    .tabs{margin:var(--space-6) 0;background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
+    .tab-list{display:flex;gap:var(--space-2);padding:var(--space-3);background:var(--color-bg-alt);overflow-x:auto}
+    .tab-btn{border:0;background:transparent;color:var(--color-text-muted);font:inherit;font-weight:var(--weight-semibold);padding:var(--space-2) var(--space-4);border-radius:var(--radius-full);cursor:pointer;min-height:44px;transition:background 140ms ease}
+    .tab-btn[aria-selected="true"]{background:var(--color-accent);color:#fff}
+    .tab-panel{display:none;padding:var(--space-6)}
+    .tab-panel.active{display:block}
+    .practice{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4);margin-top:var(--space-6)}
+    .practice .card{padding:var(--space-5)}
+    .practice .badge{display:inline-flex;background:var(--color-blue-soft);color:#1e3d6b;border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:var(--weight-bold);padding:var(--space-1) var(--space-3);margin-bottom:var(--space-3)}
+    .conclusion{background:linear-gradient(145deg,#1a1a18,#2d5a8e);color:#fff;border-radius:var(--radius-lg);padding:var(--space-8);margin-top:var(--space-12)}
+    .conclusion h2,.conclusion p{color:#fff}.conclusion p{opacity:.82}
+    footer{max-width:900px;margin:0 auto;padding:0 var(--space-6) var(--space-12);color:var(--color-text-faint);font-size:var(--text-sm)}
+    #back-to-index{position:fixed;bottom:1.5rem;left:1.5rem;width:44px;height:44px;background:#6b6a63;color:#fff;border-radius:9999px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.18);transition:background .15s,transform .15s;z-index:800}
+    #back-to-index:hover{background:#d95f2b;transform:translateX(-2px)}
+    @media(max-width:768px){.nav-inner{align-items:flex-start;flex-direction:column}.grid-2,.practice{grid-template-columns:1fr}.summary{padding:var(--space-6)}.hero{padding:var(--space-8) var(--space-5)}main{padding:var(--space-8) var(--space-5)}}
+    @media(max-width:700px){:root{--text-sm:1rem;--text-base:1.15rem;--text-lg:1.35rem;--text-xl:1.55rem;--text-2xl:1.85rem;--text-3xl:2.25rem}}
+  </style>
+
+<style id="mobile-font-scale">
+@media(max-width:700px){
+  :root{
+    --text-sm:1rem;
+    --text-base:1.15rem;
+    --text-lg:1.35rem;
+    --text-xl:1.55rem;
+    --text-2xl:1.85rem;
+    --text-3xl:2.25rem;
+  }
+}
+</style>
+</head>
+<body>
+  <div id="read-progress" aria-hidden="true"></div>
+  <nav class="site-nav" aria-label="문서 목차">
+    <div class="nav-inner">
+      <a class="nav-brand" href="index.html">← Insights</a>
+      <ul class="nav-links">
+        <li><a href="#intro">서론</a></li>
+        <li><a href="#shift">역설</a></li>
+        <li><a href="#problem">문제 정의</a></li>
+        <li><a href="#domain">도메인 이해</a></li>
+        <li><a href="#practice">실천</a></li>
+        <li><a href="#conclusion">결론</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">AI Education Report</div>
+      <h1>AI 시대, 교육 현장에서 요구되는 핵심 역량 전환</h1>
+      <p class="hero-lead">문제 정의와 도메인 이해력을 중심으로, AI가 결과물을 빠르게 만들어내는 시대에 교사와 학생에게 남는 인간 고유의 역할을 다시 묻습니다.</p>
+      <div class="hero-tags">
+        <span class="hero-tag">문제 정의 능력</span>
+        <span class="hero-tag">도메인 이해력</span>
+        <span class="hero-tag">과정 중심 평가</span>
+        <span class="hero-tag">AI 활용 교육</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <article>
+      <div class="summary">
+        <div class="summary-label">Core Thesis</div>
+        <p>AI가 답과 산출물을 더 빠르게 만들어줄수록, 교육의 핵심은 결과물의 완성도에서 <strong>질문을 세우는 힘</strong>, <strong>현실 맥락을 읽는 힘</strong>, 그리고 <strong>자기 판단을 설명하는 힘</strong>으로 이동합니다.</p>
+      </div>
+
+      <section id="intro">
+        <div class="section-header"><div class="section-num">1</div><div><h2>서론: 도구는 강력해졌는데, 교육은 달라졌는가</h2></div></div>
+        <p>AI 도구의 보급으로 무언가를 만들고 정리하는 속도가 비약적으로 빨라졌습니다. 교사는 수업 자료를 더 쉽게 제작할 수 있게 되었고, 학생은 과제를 더 빠르게 완성할 수 있게 되었습니다. 겉으로 보면 교육의 생산성이 전반적으로 높아진 것처럼 보입니다.</p>
+        <p>그러나 이러한 변화가 학습의 질적 향상으로 자동 연결되지는 않습니다. 결과물의 평균 수준이 올라간 만큼, 그 이면에 있는 사고의 깊이와 현실 감각이 교사와 학생 모두에게 더욱 절실하게 요구되고 있기 때문입니다. 도구가 해결해주는 영역이 넓어질수록, 인간이 담당해야 할 고유한 역할이 무엇인지 다시 질문해야 할 시점입니다.</p>
+        <p>본 리포트는 이 변화의 핵심을 <strong>문제 정의 능력</strong>과 <strong>도메인 이해력</strong>이라는 두 축으로 정리하고, 교육 현장에서 교사와 학생 각각에게 어떤 역량이 필요한지 구체적으로 분석합니다.</p>
+      </section>
+
+      <section id="shift">
+        <div class="section-header"><div class="section-num">2</div><div><h2>결과물은 정교해졌지만, 사고는 깊어졌는가</h2></div></div>
+        <p>학생들의 과제물 수준은 눈에 띄게 달라지고 있습니다. 생성형 AI, 자동 요약 기능, AI 번역 도구 등을 활용하여 보고서의 문장은 매끄러워졌고, 발표 자료의 시각적 품질은 높아졌으며, 탐구 과제의 외형적 완성도 역시 이전과 비교하기 어려울 만큼 올라갔습니다.</p>
+        <p>그러나 결과물들을 자세히 들여다보면 한 가지 공통된 빈자리가 드러납니다. 결과물은 정교해졌지만, 그 안에 담긴 질문의 깊이와 판단의 흔적이 오히려 희미해지는 역설입니다. 형식은 갖추어져 있으나 왜 이 주제를 선택했는지, 어떤 문제의식에서 출발했는지, 과정에서 어떤 선택을 내렸는지가 잘 보이지 않는 경우가 많습니다.</p>
+        <p>교사의 상황도 다르지 않습니다. AI로 수업 자료를 빠르게 생성할 수 있지만, 그 자료가 지금 이 학생들에게 왜 필요한지, 어떤 학습 문제를 해결하기 위한 것인지에 대한 판단 없이 제작된다면, 도구의 효율성이 교육의 효과성으로 이어지기 어렵습니다.</p>
+        <div class="quote">지금 우리 교육은 결과물의 완성도를 높이는 데 집중하고 있는가, 아니면 그 결과물 뒤에 있는 사고의 질을 기르는 데 집중하고 있는가.</div>
+        <div class="flow" aria-label="AI 시대 교육 역량 전환 다이어그램">
+          <svg viewBox="0 0 860 260" role="img" aria-labelledby="flow-title">
+            <title id="flow-title">도구 중심에서 사고 중심으로 이동하는 교육 역량 구조</title>
+            <defs>
+              <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#d95f2b" /></marker>
+            </defs>
+            <rect x="20" y="40" width="220" height="150" rx="14" fill="#faeee7" stroke="#d95f2b"/>
+            <text x="130" y="85" text-anchor="middle" fill="#1a1a18" font-size="20" font-weight="700">AI 도구</text>
+            <text x="130" y="120" text-anchor="middle" fill="#6b6a63" font-size="15">생성 · 요약 · 번역</text>
+            <text x="130" y="148" text-anchor="middle" fill="#6b6a63" font-size="15">자료 제작 자동화</text>
+            <path d="M250 115 C310 115, 315 115, 365 115" stroke="#d95f2b" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+            <rect x="380" y="30" width="220" height="170" rx="14" fill="#ffffff" stroke="#dedad2"/>
+            <text x="490" y="78" text-anchor="middle" fill="#1a1a18" font-size="20" font-weight="700">인간의 판단</text>
+            <text x="490" y="113" text-anchor="middle" fill="#6b6a63" font-size="15">왜 이 문제인가</text>
+            <text x="490" y="141" text-anchor="middle" fill="#6b6a63" font-size="15">어떤 맥락인가</text>
+            <text x="490" y="169" text-anchor="middle" fill="#6b6a63" font-size="15">무엇을 선택할 것인가</text>
+            <path d="M610 115 C670 115, 675 115, 725 115" stroke="#d95f2b" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+            <rect x="740" y="40" width="100" height="150" rx="14" fill="#e5eef7" stroke="#2d5a8e"/>
+            <text x="790" y="100" text-anchor="middle" fill="#1a1a18" font-size="18" font-weight="700">학습</text>
+            <text x="790" y="132" text-anchor="middle" fill="#2d5a8e" font-size="14">사고의</text>
+            <text x="790" y="158" text-anchor="middle" fill="#2d5a8e" font-size="14">흔적</text>
+          </svg>
+        </div>
+      </section>
+
+      <section id="problem">
+        <div class="section-header"><div class="section-num">3</div><div><h2>문제 정의 능력: 교사와 학생에게 각각 요구되는 방향</h2></div></div>
+        <div class="tabs">
+          <div class="tab-list" role="tablist" aria-label="문제 정의 능력 대상별 설명">
+            <button class="tab-btn" role="tab" aria-selected="true" aria-controls="tab-student" id="btn-student">학생</button>
+            <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-teacher" id="btn-teacher">교사</button>
+            <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-compare" id="btn-compare">핵심 비교</button>
+          </div>
+          <div id="tab-student" class="tab-panel active" role="tabpanel" aria-labelledby="btn-student">
+            <h3>학생에게 필요한 문제 정의 능력</h3>
+            <p>AI 시대에 학생에게 가장 필요한 역량 중 하나는 주어진 과제를 단순히 수행하는 것을 넘어, 스스로 풀어야 할 질문을 발견하고 그 질문의 가치를 설명하는 힘입니다. 도구가 답을 만들어주는 시대일수록, 어떤 질문을 던질 것인가가 학습의 출발점이자 핵심이 됩니다.</p>
+            <p>예를 들어 “지역 환경 문제를 조사하라”는 과제가 주어졌을 때, AI에게 검색과 정리를 맡기면 깔끔한 보고서를 빠르게 만들 수 있습니다. 하지만 학생이 스스로 “우리 동네에서 가장 민원이 많은 환경 문제는 무엇이고, 왜 해결되지 않고 있는가”라는 구체적인 질문을 세울 수 있다면, 같은 도구를 사용하더라도 결과물의 깊이는 근본적으로 달라집니다.</p>
+            <ul class="check-list">
+              <li>현상 속에서 구체적인 질문을 추출한다.</li>
+              <li>그 질문이 왜 중요한지 자기 언어로 설명한다.</li>
+              <li>한정된 시간과 자원 안에서 질문의 범위를 조절한다.</li>
+            </ul>
+          </div>
+          <div id="tab-teacher" class="tab-panel" role="tabpanel" aria-labelledby="btn-teacher">
+            <h3>교사에게 필요한 문제 정의 능력</h3>
+            <p>교사의 문제 정의 능력은 수업 설계의 출발점에서 작동합니다. 교사의 본질적 역할은 단순히 교과 내용을 전달하는 것이 아니라, 지금 이 학생들이 실제로 어디에서 막혀 있는지를 진단하고 그에 맞는 학습 경험을 설계하는 것입니다.</p>
+            <p>AI가 수업안 초안을 만들어줄 수 있고 평가 문항을 생성해줄 수도 있습니다. 그러나 “이 반 학생들은 개념 이해보다 개념 간 연결에서 어려움을 겪고 있다”거나 “이 학생은 결과물의 완성도는 높지만 자기 언어로 설명하는 데 약하다”와 같은 진단은 현장의 맥락을 읽는 교사만이 내릴 수 있는 판단입니다.</p>
+            <ul class="check-list">
+              <li>학습자의 실제 어려움을 관찰과 상호작용으로 파악한다.</li>
+              <li>교과 목표와 학습자의 현재 상태 사이의 간극을 인식한다.</li>
+              <li>그 간극을 줄이기 위한 수업 활동의 우선순위를 정한다.</li>
+            </ul>
+          </div>
+          <div id="tab-compare" class="tab-panel" role="tabpanel" aria-labelledby="btn-compare">
+            <div class="grid-2">
+              <div class="card"><h4>학생의 방향</h4><ul><li>질문을 발견한다</li><li>탐구 가치를 설명한다</li><li>범위를 조절한다</li></ul></div>
+              <div class="card"><h4>교사의 방향</h4><ul><li>막힘을 진단한다</li><li>학습 경험을 설계한다</li><li>판단의 근거를 끌어낸다</li></ul></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="domain">
+        <div class="section-header"><div class="section-num">4</div><div><h2>도메인 이해력: ‘전문지식’이 아닌 ‘맥락’의 교육적 의미</h2></div></div>
+        <p>도메인 이해력이라는 표현은 자칫 해당 분야의 전문지식을 깊이 갖추어야 한다는 의미로 오해될 수 있습니다. 그러나 교육 현장에서 학생에게 요구되는 도메인 이해력은 방대한 지식량을 의미하지 않습니다. 그보다는 자신이 다루는 주제가 현실에서 어떻게 작동하는지, 실제 사람들의 삶과 어떻게 연결되는지를 구체적으로 상상하고 확인해본 경험에 가깝습니다.</p>
+        <div class="grid-2">
+          <div class="card">
+            <h4>학생의 도메인 이해</h4>
+            <p>학교 급식 만족도 조사를 한다면, 설문과 그래프 작성만으로는 충분하지 않습니다. 학생들이 솔직하게 답했는지, 급식실 운영자는 결과를 어떻게 받아들일지, 예산 안에서 가능한 개선안은 무엇인지까지 물어야 합니다.</p>
+          </div>
+          <div class="card">
+            <h4>교사의 도메인 이해</h4>
+            <p>교사는 교과 내용이 실제 세계에서 어떻게 의미를 갖는지 이해해야 하며, 동시에 지금 이 교실에 있는 학생들의 동기와 어려움이라는 ‘학습자 도메인’을 읽어야 합니다.</p>
+          </div>
+        </div>
+        <p>이러한 맥락을 읽는 힘을 기르는 가장 효과적인 방법은 실제 현실과의 접점을 만드는 것입니다. 탐구 결과를 당사자에게 공유하고 피드백을 받는 경험, 지역 사회 구성원과 인터뷰하는 활동, 자신의 제안이 현실적으로 실행 가능한지 검증해보는 과정이 여기에 해당합니다.</p>
+        <p>머릿속으로 상상한 문제와 현실에서 실제로 부딪히는 문제 사이에는 상당한 간극이 존재하며, 그 간극을 경험적으로 확인하는 것 자체가 학습의 핵심이 됩니다.</p>
+      </section>
+
+      <section id="practice">
+        <div class="section-header"><div class="section-num">5</div><div><h2>교육 현장에서의 실천 방향</h2></div></div>
+        <div class="practice">
+          <div class="card">
+            <span class="badge">수업 설계</span>
+            <h4>결과물에서 과정으로</h4>
+            <p>과제의 출발점에 “왜 이 주제를 선택했는가”를 명시하게 하고, 중간에는 “처음 계획과 달라진 점과 그 이유”를 기록하게 하며, 최종 발표에는 “현실과 예상의 차이”를 포함하도록 안내합니다.</p>
+          </div>
+          <div class="card">
+            <span class="badge">평가 방식</span>
+            <h4>완성도에서 판단력으로</h4>
+            <p>결과물의 완성도만 측정하지 않고, 문제 정의의 구체성, 대안 검토 과정, 실제 현실과 대조했을 때 발견한 한계를 함께 평가합니다.</p>
+          </div>
+          <div class="card">
+            <span class="badge">AI 활용</span>
+            <h4>도구 사용법보다 질문 설계력</h4>
+            <p>AI에게 결과물을 요청하기 전에 “지금 내가 풀어야 할 문제가 무엇인지”를 먼저 정의하도록 훈련합니다. 사고를 도구에 위임하지 않고, 사고의 결과를 도구로 실행하게 해야 합니다.</p>
+          </div>
+        </div>
+        <div class="quote">“환경 오염에 대한 보고서를 써줘”와 “우리 학교 주변 하천의 수질이 최근 5년간 어떻게 변화했고, 그 원인이 무엇인지 분석하고 싶다” 사이에는 문제 정의의 유무라는 근본적 차이가 있습니다.</div>
+      </section>
+
+      <section id="conclusion" class="conclusion">
+        <h2>결론: 도구를 넘어 사고하는 사람을 길러내는 교육</h2>
+        <p>AI가 답을 만들어주는 시대에, 교육의 가치는 답을 만드는 능력이 아니라 질문을 세우는 능력에서 다시 정의됩니다. 학생에게는 AI가 만들어준 결과물 뒤에 자신만의 질문과 판단을 남기는 능력이 필요하고, 교사에게는 학생의 현실을 진단하고 그에 맞는 학습 경험을 설계하며 사고의 과정을 이끌어내는 능력이 필요합니다.</p>
+        <p>도구가 강력해질수록 그 도구를 왜, 어떤 맥락에서 사용하는지를 결정하는 인간의 판단이 더 귀해집니다. 교육 현장이 결과물의 양과 완성도가 아니라 사고의 깊이와 현실 감각을 기르는 방향으로 전환할 때, 학생들은 AI와 함께 살아가면서도 대체되지 않는 사람으로 성장할 수 있습니다.</p>
+      </section>
+    </article>
+  </main>
+
+  <footer>AI 시대 교육 현장에서 요구되는 역량 전환의 방향을 문제 정의 능력과 도메인 이해력의 관점에서 정리한 리포트입니다.</footer>
+
+  <a id="back-to-index" href="index.html" aria-label="목록으로 돌아가기" title="목록으로">
+    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18" aria-hidden="true"><path d="M8.5 15L3 10l5.5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10h14" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+  </a>
+
+  <script>
+    const progress = document.getElementById('read-progress');
+    function updateProgress(){
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - window.innerHeight;
+      progress.style.width = height > 0 ? `${Math.min(100, (scrollTop / height) * 100)}%` : '0%';
+    }
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    updateProgress();
+
+    const buttons = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.tab-panel');
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        buttons.forEach(b => b.setAttribute('aria-selected', 'false'));
+        panels.forEach(p => p.classList.remove('active'));
+        button.setAttribute('aria-selected', 'true');
+        document.getElementById(button.getAttribute('aria-controls')).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
