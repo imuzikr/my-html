@@ -2,6 +2,7 @@
 """Generates main index (category cards) and per-category sub-indexes."""
 
 import re
+from html import escape
 from pathlib import Path
 from datetime import datetime
 
@@ -27,6 +28,14 @@ CATEGORY_META = {
 }
 
 KNOWN_CATEGORIES = list(CATEGORY_META.keys())
+
+
+def esc_text(value: str) -> str:
+    return escape(value or "", quote=False)
+
+
+def esc_attr(value: str) -> str:
+    return escape(value or "", quote=True)
 
 
 # ── File metadata helpers ────────────────────────────────────────────────────
@@ -82,7 +91,7 @@ def collect_files():
 
 # ── Back-to-index button ─────────────────────────────────────────────────────
 
-BACK_BUTTON_MARKER = 'id="back-to-index"'
+BACK_BUTTON_RE = re.compile(r'\bid=["\']back-to-index["\']', re.IGNORECASE)
 
 
 def _back_button_snippet(href: str) -> str:
@@ -110,7 +119,7 @@ def _back_button_snippet(href: str) -> str:
 def inject_back_button(path: Path) -> bool:
     """Inject back button pointing to same-folder index.html (the sub-index)."""
     text = path.read_text(encoding="utf-8", errors="ignore")
-    if BACK_BUTTON_MARKER in text:
+    if BACK_BUTTON_RE.search(text):
         return False
     if "</body>" not in text:
         return False
@@ -220,15 +229,21 @@ footer{text-align:center;padding:var(--space-8);color:var(--color-text-faint);fo
 
 def render_cards(files, label, gradients, path_prefix=""):
     html = ""
+    label_text = esc_text(label)
     for idx, f in enumerate(files):
-        date_str = f"<span class='card-date'>{f['date']}</span>" if f["date"] else ""
-        desc_str = f"<p class='card-desc'>{f['description']}</p>" if f["description"] else ""
+        title = esc_text(f["title"])
+        date = esc_text(f["date"])
+        description = esc_text(f["description"])
+        date_str = f"<span class='card-date'>{date}</span>" if date else ""
+        desc_str = f"<p class='card-desc'>{description}</p>" if description else ""
         href = path_prefix + f["name"] if path_prefix else f["name"]
+        href_attr = esc_attr(href)
         c1, c2 = gradients[idx % len(gradients)]
         if f["og_image"]:
+            og_image = esc_attr(f["og_image"])
             thumb = (
                 f"<div class='card-thumb'>"
-                f"<img src='{f['og_image']}' alt='' loading='lazy'>"
+                f"<img src='{og_image}' alt='' loading='lazy'>"
                 f"<div class='card-thumb-glass'></div></div>"
             )
         else:
@@ -239,14 +254,14 @@ def render_cards(files, label, gradients, path_prefix=""):
             )
         html += f"""
     <div class="card-wrap">
-      <a class="card" href="{href}">
+      <a class="card" href="{href_attr}">
         {thumb}
         <div class="card-body">
           <div class="card-header">
-            <span class="card-folder">{label}</span>
+            <span class="card-folder">{label_text}</span>
             {date_str}
           </div>
-          <h3 class="card-title">{f['title']}</h3>
+          <h3 class="card-title">{title}</h3>
         </div>
       </a>
       {desc_str}
@@ -265,15 +280,18 @@ def build_main_index(folders):
         files = folders.get(key, [])
         count = len(files)
         preview_items = "".join(
-            f"<li>{f['title']}</li>" for f in files[:3]
+            f"<li>{esc_text(f['title'])}</li>" for f in files[:3]
         )
+        key_attr = esc_attr(key)
+        label = esc_text(meta["label"])
+        description = esc_text(meta["description"])
         cat_cards_html += f"""
-    <a class="cat-card" href="{key}/index.html">
+    <a class="cat-card" href="{key_attr}/index.html">
       <div class="cat-thumb" style="background:linear-gradient(135deg,#{meta['grad_from']},#{meta['grad_to']})">
-        <div class="cat-name">{meta['label']}</div>
+        <div class="cat-name">{label}</div>
       </div>
       <div class="cat-body">
-        <p class="cat-desc">{meta['description']}</p>
+        <p class="cat-desc">{description}</p>
         <div class="cat-count">{count}개 아티클</div>
         <ul class="cat-preview">{preview_items}</ul>
         <span class="cat-more">모두 보기 →</span>
@@ -289,6 +307,7 @@ def build_main_index(folders):
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#d95f2b">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="HTML Library">
 <style>
@@ -357,13 +376,15 @@ def build_sub_index(key, files):
     generated = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
     cards = render_cards(files, meta["label"], meta["gradients"])
     count = len(files)
+    label = esc_text(meta["label"])
+    description = esc_text(meta["description"])
 
     return f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{meta['label']} — My HTML Library</title>
+<title>{label} — My HTML Library</title>
 <style>
 {SHARED_CSS}
 .breadcrumb{{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);color:var(--color-text-muted);}}
@@ -371,7 +392,7 @@ def build_sub_index(key, files):
 .breadcrumb a:hover{{color:var(--color-accent);}}
 .breadcrumb-sep{{color:var(--color-text-faint);}}
 .cat-header{{margin-bottom:var(--space-6);}}
-.cat-header h2{{
+.cat-header h1{{
   font-size:var(--text-3xl);font-weight:var(--weight-bold);
   background:linear-gradient(135deg,#{meta['grad_from']},#{meta['grad_to']});
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
@@ -387,14 +408,14 @@ def build_sub_index(key, files):
   <div class="breadcrumb">
     <a href="../index.html">My HTML Library</a>
     <span class="breadcrumb-sep">/</span>
-    <span>{meta['label']}</span>
+    <span>{label}</span>
   </div>
   <span class="meta">{count} articles · {generated}</span>
 </header>
 <div class="container">
   <div class="cat-header">
-    <h2>{meta['label']}</h2>
-    <p>{meta['description']}</p>
+    <h1>{label}</h1>
+    <p>{description}</p>
   </div>
   <div class="toolbar">
     <div class="search"><input type="text" placeholder="Search..." oninput="filterSearch(this.value)"></div>
