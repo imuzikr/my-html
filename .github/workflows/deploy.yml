@@ -34,7 +34,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
           git diff --cached --quiet || git commit -m "chore: regenerate indexes and bump sw cache [skip ci]"
-          git push origin main || true
+          git push origin main
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

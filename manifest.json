@@ -10,9 +10,22 @@
   "lang": "ko",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%23d95f2b'/><text x='96' y='130' font-size='110' text-anchor='middle' font-family='system-ui' fill='white'></text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%23d95f2b'/><text x='96' y='124' font-size='96' font-weight='700' text-anchor='middle' font-family='system-ui' fill='white'>H</text></svg>",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%23d95f2b'/><text x='256' y='330' font-size='260' font-weight='700' text-anchor='middle' font-family='system-ui' fill='white'>H</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%23d95f2b'/><circle cx='256' cy='256' r='196' fill='%23b84820'/><text x='256' y='332' font-size='248' font-weight='700' text-anchor='middle' font-family='system-ui' fill='white'>H</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ]
 }
