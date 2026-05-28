@@ -192,53 +192,59 @@
         <p>흥미롭게도 오늘날의 AI는 단순히 답만 내놓는 도구가 아니다. 방대한 데이터를 분석하다가 <em>“이 두 변수 사이에 숨겨진 관계가 있지 않을까?”</em>, <em>“이 이상치는 새로운 현상의 신호가 아닐까?”</em> 같은 가설을 스스로 제안하기도 한다. 과학계에서는 이를 <strong>가설 생성(Hypothesis Generation)</strong>이라고 부르며, AI가 인간 연구자보다 빠르게 연구의 단서를 던지는 사례도 늘고 있다.</p>
         <p>겉보기에는 AI도 질문을 만들어내는 것처럼 보인다. 그러나 그 질문의 정체를 들여다보면, 인간의 질문과는 결이 전혀 다르다는 사실을 깨닫게 된다. AI의 질문은 결국 <strong>데이터 안에서 발견되는 통계적 빈칸, 패턴의 어긋남, 확률적 가능성</strong>을 가리키는 화살표에 가깝다. 그것은 정교하지만, <strong>‘왜 이것이 중요한가’</strong>에 대해서는 답하지 못한다.</p>
 
-        <div class="diagram" aria-label="AI 질문과 인간 질문의 기원 비교 다이어그램">
-          <svg viewBox="0 0 820 280" role="img" aria-labelledby="diagram-title">
-            <title id="diagram-title">AI의 질문은 데이터에서, 인간의 질문은 삶에서 태어난다</title>
-            <defs>
-              <marker id="arr-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#2d5a8e"/></marker>
-              <marker id="arr-orange" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#d95f2b"/></marker>
-              <linearGradient id="grad-ai" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#e5eef7"/>
-                <stop offset="100%" stop-color="#cdddef"/>
-              </linearGradient>
-              <linearGradient id="grad-human" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#faeee7"/>
-                <stop offset="100%" stop-color="#f0d6c4"/>
-              </linearGradient>
-            </defs>
+        <div class="diagram" aria-label="AI 질문과 인간 질문 비교">
+          <svg viewBox="0 0 740 310" role="img" aria-labelledby="diagram-title">
+            <title id="diagram-title">AI의 질문과 인간의 질문 비교</title>
 
-            <!-- AI 측 -->
-            <rect x="20" y="40" width="220" height="170" rx="14" fill="url(#grad-ai)" stroke="#2d5a8e" stroke-width="1.5"/>
-            <text x="130" y="78" text-anchor="middle" fill="#1a1a18" font-size="18" font-weight="700">AI의 질문</text>
-            <text x="130" y="108" text-anchor="middle" fill="#2d5a8e" font-size="14">통계적 빈칸</text>
-            <text x="130" y="132" text-anchor="middle" fill="#2d5a8e" font-size="14">패턴의 어긋남</text>
-            <text x="130" y="156" text-anchor="middle" fill="#2d5a8e" font-size="14">확률적 가능성</text>
-            <text x="130" y="188" text-anchor="middle" fill="#6b6a63" font-size="12" font-style="italic">데이터에서 태어난다</text>
+            <!-- AI 카드 배경 -->
+            <rect x="10" y="10" width="340" height="290" rx="12" fill="#eef3f9" stroke="#b8cfe0" stroke-width="1.5"/>
+            <!-- AI 카드 헤더 (위쪽 둥근 모서리) -->
+            <path d="M22,10 Q10,10 10,22 L10,58 L350,58 L350,22 Q350,10 338,10 Z" fill="#2d5a8e"/>
+            <text x="185" y="42" text-anchor="middle" fill="white" font-size="17" font-weight="700">AI의 질문</text>
 
-            <!-- 화살표 → 가운데 -->
-            <path d="M245 125 L 320 125" stroke="#2d5a8e" stroke-width="2.5" fill="none" marker-end="url(#arr-blue)"/>
+            <!-- AI 행: 출처 -->
+            <text x="28" y="82" fill="#5580a0" font-size="11" font-weight="700" letter-spacing="1.5">출처</text>
+            <text x="28" y="104" fill="#1a1a18" font-size="14">데이터의 빈칸 · 패턴의 이상치</text>
+            <line x1="16" y1="118" x2="344" y2="118" stroke="#ccdbe8" stroke-width="1"/>
 
-            <!-- 중앙 결과 -->
-            <rect x="330" y="65" width="160" height="120" rx="14" fill="#ffffff" stroke="#dedad2" stroke-width="1.5"/>
-            <text x="410" y="100" text-anchor="middle" fill="#1a1a18" font-size="14" font-weight="700">분석의 단서</text>
-            <text x="410" y="125" text-anchor="middle" fill="#6b6a63" font-size="12">정교하지만</text>
-            <text x="410" y="145" text-anchor="middle" fill="#6b6a63" font-size="12">‘왜 중요한가’를</text>
-            <text x="410" y="165" text-anchor="middle" fill="#6b6a63" font-size="12">묻지 못한다</text>
+            <!-- AI 행: 특징 -->
+            <text x="28" y="140" fill="#5580a0" font-size="11" font-weight="700" letter-spacing="1.5">특징</text>
+            <text x="28" y="162" fill="#1a1a18" font-size="14">통계 · 확률 기반의 가설 제안</text>
+            <line x1="16" y1="176" x2="344" y2="176" stroke="#ccdbe8" stroke-width="1"/>
 
-            <!-- 화살표 → 인간 측 -->
-            <path d="M580 125 L 505 125" stroke="#d95f2b" stroke-width="2.5" fill="none" marker-end="url(#arr-orange)"/>
+            <!-- AI 행: 한계 -->
+            <text x="28" y="198" fill="#5580a0" font-size="11" font-weight="700" letter-spacing="1.5">한계</text>
+            <text x="28" y="220" fill="#1a1a18" font-size="14">"왜 이것이 중요한가"를</text>
+            <text x="28" y="242" fill="#1a1a18" font-size="14">스스로 판단할 수 없다</text>
 
-            <!-- 인간 측 -->
-            <rect x="580" y="40" width="220" height="170" rx="14" fill="url(#grad-human)" stroke="#d95f2b" stroke-width="1.5"/>
-            <text x="690" y="78" text-anchor="middle" fill="#1a1a18" font-size="18" font-weight="700">인간의 질문</text>
-            <text x="690" y="108" text-anchor="middle" fill="#d95f2b" font-size="14">공감 · 불편함</text>
-            <text x="690" y="132" text-anchor="middle" fill="#d95f2b" font-size="14">윤리 · 가치관</text>
-            <text x="690" y="156" text-anchor="middle" fill="#d95f2b" font-size="14">시대와 맥락</text>
-            <text x="690" y="188" text-anchor="middle" fill="#6b6a63" font-size="12" font-style="italic">삶에서 태어난다</text>
+            <!-- AI 하단 배지 -->
+            <rect x="22" y="263" width="170" height="26" rx="7" fill="#dbeafe"/>
+            <text x="107" y="281" text-anchor="middle" fill="#1e40af" font-size="12" font-weight="600">데이터에서 태어난다</text>
 
-            <!-- 하단 캡션 -->
-            <text x="410" y="250" text-anchor="middle" fill="#a09f97" font-size="13">의미와 방향을 부여하는 것은 결국 인간의 질문</text>
+            <!-- 인간 카드 배경 -->
+            <rect x="390" y="10" width="340" height="290" rx="12" fill="#fef2ec" stroke="#e8c4ab" stroke-width="1.5"/>
+            <!-- 인간 카드 헤더 -->
+            <path d="M402,10 Q390,10 390,22 L390,58 L730,58 L730,22 Q730,10 718,10 Z" fill="#d95f2b"/>
+            <text x="560" y="42" text-anchor="middle" fill="white" font-size="17" font-weight="700">인간의 질문</text>
+
+            <!-- 인간 행: 출처 -->
+            <text x="408" y="82" fill="#b06040" font-size="11" font-weight="700" letter-spacing="1.5">출처</text>
+            <text x="408" y="104" fill="#1a1a18" font-size="14">삶의 경험 · 공감 · 불편함</text>
+            <line x1="396" y1="118" x2="724" y2="118" stroke="#e8c8b8" stroke-width="1"/>
+
+            <!-- 인간 행: 특징 -->
+            <text x="408" y="140" fill="#b06040" font-size="11" font-weight="700" letter-spacing="1.5">특징</text>
+            <text x="408" y="162" fill="#1a1a18" font-size="14">윤리 · 가치관 · 문화적 맥락</text>
+            <line x1="396" y1="176" x2="724" y2="176" stroke="#e8c8b8" stroke-width="1"/>
+
+            <!-- 인간 행: 강점 -->
+            <text x="408" y="198" fill="#b06040" font-size="11" font-weight="700" letter-spacing="1.5">강점</text>
+            <text x="408" y="220" fill="#1a1a18" font-size="14">"왜 이것이 중요한가"를</text>
+            <text x="408" y="242" fill="#1a1a18" font-size="14">스스로 판단하고 답할 수 있다</text>
+
+            <!-- 인간 하단 배지 -->
+            <rect x="402" y="263" width="170" height="26" rx="7" fill="#fde8dc"/>
+            <text x="487" y="281" text-anchor="middle" fill="#c2521f" font-size="12" font-weight="600">삶에서 태어난다</text>
           </svg>
         </div>
       </section>
