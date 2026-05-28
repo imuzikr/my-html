@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>인간의 질문, 그 깊이가 만드는 세상</title>
+  <meta name="description" content="AI가 답을 생산하는 시대에, 인간이 던지는 질문이 왜 더욱 귀해지는지를 데이터의 질문과 삶의 질문이라는 두 결로 비교하여 설명합니다.">
+  <meta property="og:title" content="인간의 질문, 그 깊이가 만드는 세상">
+  <meta property="og:description" content="AI는 데이터의 빈칸을 가리키지만, 인간의 질문은 삶에서 태어난다. 답이 넘쳐나는 시대에 가장 귀해진 능력에 대하여.">
+  <style>
+    :root {
+      --color-bg:#f5f2ed; --color-bg-alt:#eceae4; --color-bg-card:#ffffff;
+      --color-text:#1a1a18; --color-text-muted:#6b6a63; --color-text-faint:#a09f97;
+      --color-border:#dedad2;
+      --color-accent:#d95f2b; --color-accent-hover:#c2521f; --color-accent-soft:#faeee7;
+      --color-blue:#2d5a8e; --color-blue-soft:#e5eef7;
+      --color-purple:#5b3a7a; --color-purple-soft:#ece4f5;
+      --color-gold:#a07a1a; --color-gold-soft:#f6efd9;
+      --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR","Apple SD Gothic Neo",Helvetica,Arial,sans-serif;
+      --font-serif:"Noto Serif KR","Apple SD Gothic Neo",ui-serif,Georgia,serif;
+      --text-xs:0.75rem; --text-sm:0.875rem; --text-base:1rem; --text-lg:1.125rem;
+      --text-xl:1.25rem; --text-2xl:1.5rem; --text-3xl:1.875rem;
+      --weight-medium:500; --weight-semibold:600; --weight-bold:700;
+      --leading-tight:1.25; --leading-normal:1.6; --leading-loose:1.85;
+      --space-1:0.25rem; --space-2:0.5rem; --space-3:0.75rem; --space-4:1rem;
+      --space-5:1.25rem; --space-6:1.5rem; --space-8:2rem; --space-12:3rem;
+      --radius-md:8px; --radius-lg:12px; --radius-full:9999px;
+      --shadow-sm:0 1px 3px rgba(0,0,0,0.07); --shadow-md:0 6px 18px rgba(0,0,0,0.08);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--font-sans);background:var(--color-bg);color:var(--color-text);line-height:var(--leading-normal);word-break:keep-all}
+    #read-progress{position:fixed;top:0;left:0;width:0;height:3px;background:var(--color-accent);z-index:1000;transition:width 80ms linear}
+
+    .site-nav{position:sticky;top:0;z-index:500;background:rgba(245,242,237,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--color-border)}
+    .nav-inner{max-width:900px;margin:0 auto;padding:var(--space-3) var(--space-6);display:flex;justify-content:space-between;align-items:center;gap:var(--space-4)}
+    .nav-brand{color:var(--color-accent);font-weight:var(--weight-bold);text-decoration:none;font-size:var(--text-sm);white-space:nowrap}
+    .nav-links{display:flex;gap:var(--space-1);list-style:none;overflow-x:auto}
+    .nav-links a{display:block;color:var(--color-text-muted);text-decoration:none;font-size:var(--text-sm);padding:var(--space-1) var(--space-3);border-radius:var(--radius-full);white-space:nowrap;transition:all 180ms ease}
+    .nav-links a:hover{background:var(--color-bg-alt);color:var(--color-text)}
+
+    .hero{background:linear-gradient(140deg,#0d1525 0%,#1a2d52 40%,#3a2a55 75%,#5c2e1d 100%);padding:calc(var(--space-12) * 1.4) var(--space-6) var(--space-12);position:relative;overflow:hidden}
+    .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 18% 22%,rgba(217,95,43,.30),transparent 38%),radial-gradient(circle at 82% 28%,rgba(91,58,122,.34),transparent 42%);pointer-events:none}
+    .hero::after{content:"";position:absolute;left:6%;bottom:14%;width:280px;height:280px;border-radius:50%;border:1px solid rgba(255,255,255,.08);box-shadow:0 0 0 60px rgba(255,255,255,.025);pointer-events:none}
+    .hero-inner{max-width:900px;margin:0 auto;position:relative}
+    .eyebrow{display:inline-flex;align-items:center;gap:var(--space-2);color:#ffd6c5;border:1px solid rgba(255,214,197,.35);background:rgba(255,255,255,.08);border-radius:var(--radius-full);padding:var(--space-1) var(--space-4);font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.10em;text-transform:uppercase;margin-bottom:var(--space-6)}
+    .eyebrow-dot{width:6px;height:6px;border-radius:50%;background:#ffb39a;display:inline-block}
+    h1{font-size:clamp(2.1rem,5.8vw,3.55rem);line-height:var(--leading-tight);letter-spacing:-.04em;color:#fff;margin-bottom:var(--space-5);font-weight:var(--weight-bold)}
+    h1 .hl{background:linear-gradient(90deg,#ffd6c5,#ffae89 60%,#e2b9ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero-lead{font-size:var(--text-lg);color:rgba(255,255,255,.78);max-width:760px;line-height:var(--leading-loose);margin-bottom:var(--space-6)}
+    .hero-meta{display:flex;flex-wrap:wrap;gap:var(--space-2);align-items:center}
+    .hero-tag{font-size:var(--text-xs);color:rgba(255,255,255,.78);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);padding:var(--space-1) var(--space-3);border-radius:var(--radius-full)}
+
+    main{max-width:900px;margin:0 auto;padding:var(--space-12) var(--space-6)}
+
+    .summary{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-8);margin-bottom:var(--space-12);position:relative;overflow:hidden}
+    .summary::before{content:"";position:absolute;top:0;left:0;width:6px;height:100%;background:linear-gradient(180deg,var(--color-accent),var(--color-purple))}
+    .summary-label{font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.10em;text-transform:uppercase;color:var(--color-accent);margin-bottom:var(--space-3)}
+    .summary p{font-size:var(--text-lg);line-height:var(--leading-loose);color:var(--color-text)}
+
+    section{margin-bottom:var(--space-12);scroll-margin-top:80px}
+    .section-header{display:flex;gap:var(--space-4);align-items:flex-start;margin-bottom:var(--space-6)}
+    .section-num{width:42px;height:42px;border-radius:var(--radius-full);background:linear-gradient(135deg,var(--color-blue),var(--color-purple));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:var(--weight-bold);flex-shrink:0;font-size:var(--text-lg);box-shadow:var(--shadow-sm)}
+    h2{font-size:var(--text-2xl);line-height:var(--leading-tight);letter-spacing:-.02em;margin-bottom:var(--space-2)}
+    h3{font-size:var(--text-xl);margin:var(--space-6) 0 var(--space-3);line-height:var(--leading-tight)}
+    p{color:var(--color-text-muted);margin-bottom:var(--space-4);line-height:var(--leading-loose);font-size:var(--text-base)}
+    strong{color:var(--color-text);font-weight:var(--weight-semibold)}
+
+    .pull-quote{border-left:4px solid var(--color-accent);background:var(--color-accent-soft);padding:var(--space-5) var(--space-6);border-radius:0 var(--radius-lg) var(--radius-lg) 0;color:#5b2b18;margin:var(--space-6) 0;font-weight:var(--weight-medium);font-size:var(--text-lg);line-height:var(--leading-loose)}
+
+    .compare{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-5);margin:var(--space-6) 0}
+    .compare-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+    .compare-card.ai::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#2d5a8e,#3a7ac0)}
+    .compare-card.human::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#d95f2b,#e58b5b)}
+    .compare-badge{display:inline-flex;align-items:center;gap:var(--space-2);font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.05em;text-transform:uppercase;padding:var(--space-1) var(--space-3);border-radius:var(--radius-full);margin-bottom:var(--space-3)}
+    .compare-card.ai .compare-badge{background:var(--color-blue-soft);color:var(--color-blue)}
+    .compare-card.human .compare-badge{background:var(--color-accent-soft);color:var(--color-accent)}
+    .compare-card h4{font-size:var(--text-lg);margin-bottom:var(--space-3);line-height:var(--leading-tight)}
+    .compare-card ul{list-style:none;display:flex;flex-direction:column;gap:var(--space-3)}
+    .compare-card li{position:relative;padding-left:1.35rem;color:var(--color-text-muted);line-height:var(--leading-normal);font-size:var(--text-sm)}
+    .compare-card.ai li::before{content:"";position:absolute;left:0;top:.55rem;width:8px;height:8px;border-radius:50%;background:var(--color-blue)}
+    .compare-card.human li::before{content:"";position:absolute;left:0;top:.55rem;width:8px;height:8px;border-radius:50%;background:var(--color-accent)}
+
+    .diagram{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-6) 0;overflow-x:auto;box-shadow:var(--shadow-sm)}
+    .diagram svg{width:100%;min-width:620px;height:auto;display:block}
+
+    .question-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-6) 0}
+    .question-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);box-shadow:var(--shadow-sm);transition:transform .2s ease,box-shadow .2s ease}
+    .question-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+    .question-mark{font-family:var(--font-serif);font-size:2.4rem;color:var(--color-accent);line-height:1;margin-bottom:var(--space-2);font-weight:var(--weight-bold)}
+    .question-text{color:var(--color-text);font-size:var(--text-base);line-height:var(--leading-normal);font-weight:var(--weight-medium)}
+    .question-source{display:block;font-size:var(--text-xs);color:var(--color-text-faint);margin-top:var(--space-3);letter-spacing:.05em}
+
+    .source-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:var(--space-4);margin:var(--space-6) 0}
+    .source-pill{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);text-align:center;box-shadow:var(--shadow-sm)}
+    .source-icon{font-size:1.8rem;margin-bottom:var(--space-2);display:block}
+    .source-label{font-size:var(--text-sm);font-weight:var(--weight-semibold);color:var(--color-text);margin-bottom:var(--space-1)}
+    .source-desc{font-size:var(--text-xs);color:var(--color-text-muted);line-height:var(--leading-normal)}
+
+    .timeline{position:relative;padding-left:var(--space-6);margin:var(--space-6) 0;border-left:2px solid var(--color-border)}
+    .timeline-item{position:relative;padding-bottom:var(--space-6)}
+    .timeline-item:last-child{padding-bottom:0}
+    .timeline-item::before{content:"";position:absolute;left:calc(var(--space-6) * -1 - 1px);top:.4rem;width:14px;height:14px;border-radius:50%;background:var(--color-accent);border:3px solid var(--color-bg);margin-left:-6px}
+    .timeline-q{font-size:var(--text-lg);color:var(--color-text);font-weight:var(--weight-semibold);margin-bottom:var(--space-2);line-height:var(--leading-tight)}
+    .timeline-a{font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-normal)}
+
+    .conclusion{background:linear-gradient(140deg,#0d1525 0%,#1a2d52 50%,#5b3a7a 100%);color:#fff;border-radius:var(--radius-lg);padding:var(--space-12) var(--space-8);margin-top:var(--space-12);position:relative;overflow:hidden}
+    .conclusion::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(217,95,43,.22),transparent 45%);pointer-events:none}
+    .conclusion-inner{position:relative}
+    .conclusion h2{color:#fff;margin-bottom:var(--space-4);font-size:var(--text-2xl);line-height:var(--leading-tight)}
+    .conclusion p{color:rgba(255,255,255,.82);font-size:var(--text-lg);line-height:var(--leading-loose);margin-bottom:var(--space-4)}
+    .conclusion .closer{font-size:var(--text-xl);color:#fff;font-weight:var(--weight-semibold);margin-top:var(--space-6);padding-top:var(--space-6);border-top:1px solid rgba(255,255,255,.18);line-height:var(--leading-tight)}
+
+    footer{max-width:900px;margin:0 auto;padding:0 var(--space-6) var(--space-12);color:var(--color-text-faint);font-size:var(--text-sm)}
+
+    @media(max-width:768px){
+      .nav-inner{align-items:flex-start;flex-direction:column}
+      .compare{grid-template-columns:1fr}
+      .hero{padding:var(--space-12) var(--space-5) var(--space-8)}
+      main{padding:var(--space-8) var(--space-5)}
+      .summary{padding:var(--space-6)}
+      .conclusion{padding:var(--space-8) var(--space-6)}
+    }
+  </style>
+</head>
+<body>
+  <div id="read-progress" aria-hidden="true"></div>
+
+  <nav class="site-nav" aria-label="문서 목차">
+    <div class="nav-inner">
+      <a class="nav-brand" href="index.html">← Insights</a>
+      <ul class="nav-links">
+        <li><a href="#intro">서론</a></li>
+        <li><a href="#ai-question">AI의 질문</a></li>
+        <li><a href="#human-question">인간의 질문</a></li>
+        <li><a href="#direction">질문의 방향</a></li>
+        <li><a href="#future">인간다움</a></li>
+        <li><a href="#closing">맺으며</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow"><span class="eyebrow-dot"></span>The Power of Questions</div>
+      <h1>인간의 질문,<br><span class="hl">그 깊이가 만드는 세상</span></h1>
+      <p class="hero-lead">AI가 답을 만들어내는 시대, 인간에게 남은 것은 질문이다. 데이터의 빈칸이 아니라 삶에서 태어나는 질문, 그리고 그 질문이 세상의 방향을 결정짓는 가장 인간적인 능력에 대하여.</p>
+      <div class="hero-meta">
+        <span class="hero-tag">질문하는 힘</span>
+        <span class="hero-tag">가설 생성</span>
+        <span class="hero-tag">AI 시대 인간다움</span>
+        <span class="hero-tag">교육</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <article>
+      <div class="summary">
+        <div class="summary-label">Core Thesis</div>
+        <p>답이 부족하던 시대는 끝났다. 이제 가장 귀해진 능력은 <strong>“답을 찾는 힘”이 아니라 “질문을 던지는 힘”</strong>이다. AI는 데이터의 빈칸을 가리키지만, 인간의 질문은 공감과 불편함, 윤리와 맥락이라는 삶의 결에서 태어난다. 질문이 곧 세상의 방향을 결정한다.</p>
+      </div>
+
+      <section id="intro">
+        <div class="section-header">
+          <div class="section-num">1</div>
+          <div><h2>답이 넘쳐나는 시대, 우리에게 남은 질문</h2></div>
+        </div>
+        <p>스마트폰을 켜는 순간 우리는 인류가 쌓아온 거의 모든 지식과 마주한다. 생성형 AI에게 묻기만 하면 몇 초 안에 정돈된 답이 돌아온다. 한때는 “얼마나 많이 아는가”가 사람의 능력을 가늠하는 잣대였지만, 이제는 답이 부족한 시대가 아니라 <strong>답이 넘쳐나는 시대</strong>가 되었다.</p>
+        <p>그래서 역설적으로, 지금 가장 귀해진 능력은 “답을 찾는 힘”이 아니라 <strong>“질문을 던지는 힘”</strong>이다. 답의 희소성이 사라진 자리에서, 무엇을 물을 것인가가 새로운 가치의 출발점이 된다.</p>
+        <div class="pull-quote">답을 가장 빨리 외우는 사람의 시대는 지나갔다. 이제는 세상에 없던 질문을 던질 줄 아는 사람의 시대다.</div>
+      </section>
+
+      <section id="ai-question">
+        <div class="section-header">
+          <div class="section-num">2</div>
+          <div><h2>AI도 질문을 만들 수 있다, 그러나…</h2></div>
+        </div>
+        <p>흥미롭게도 오늘날의 AI는 단순히 답만 내놓는 도구가 아니다. 방대한 데이터를 분석하다가 <em>“이 두 변수 사이에 숨겨진 관계가 있지 않을까?”</em>, <em>“이 이상치는 새로운 현상의 신호가 아닐까?”</em> 같은 가설을 스스로 제안하기도 한다. 과학계에서는 이를 <strong>가설 생성(Hypothesis Generation)</strong>이라고 부르며, AI가 인간 연구자보다 빠르게 연구의 단서를 던지는 사례도 늘고 있다.</p>
+        <p>겉보기에는 AI도 질문을 만들어내는 것처럼 보인다. 그러나 그 질문의 정체를 들여다보면, 인간의 질문과는 결이 전혀 다르다는 사실을 깨닫게 된다. AI의 질문은 결국 <strong>데이터 안에서 발견되는 통계적 빈칸, 패턴의 어긋남, 확률적 가능성</strong>을 가리키는 화살표에 가깝다. 그것은 정교하지만, <strong>‘왜 이것이 중요한가’</strong>에 대해서는 답하지 못한다.</p>
+
+        <div class="diagram" aria-label="AI 질문과 인간 질문의 기원 비교 다이어그램">
+          <svg viewBox="0 0 820 280" role="img" aria-labelledby="diagram-title">
+            <title id="diagram-title">AI의 질문은 데이터에서, 인간의 질문은 삶에서 태어난다</title>
+            <defs>
+              <marker id="arr-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#2d5a8e"/></marker>
+              <marker id="arr-orange" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#d95f2b"/></marker>
+              <linearGradient id="grad-ai" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#e5eef7"/>
+                <stop offset="100%" stop-color="#cdddef"/>
+              </linearGradient>
+              <linearGradient id="grad-human" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#faeee7"/>
+                <stop offset="100%" stop-color="#f0d6c4"/>
+              </linearGradient>
+            </defs>
+
+            <!-- AI 측 -->
+            <rect x="20" y="40" width="220" height="170" rx="14" fill="url(#grad-ai)" stroke="#2d5a8e" stroke-width="1.5"/>
+            <text x="130" y="78" text-anchor="middle" fill="#1a1a18" font-size="18" font-weight="700">AI의 질문</text>
+            <text x="130" y="108" text-anchor="middle" fill="#2d5a8e" font-size="14">통계적 빈칸</text>
+            <text x="130" y="132" text-anchor="middle" fill="#2d5a8e" font-size="14">패턴의 어긋남</text>
+            <text x="130" y="156" text-anchor="middle" fill="#2d5a8e" font-size="14">확률적 가능성</text>
+            <text x="130" y="188" text-anchor="middle" fill="#6b6a63" font-size="12" font-style="italic">데이터에서 태어난다</text>
+
+            <!-- 화살표 → 가운데 -->
+            <path d="M245 125 L 320 125" stroke="#2d5a8e" stroke-width="2.5" fill="none" marker-end="url(#arr-blue)"/>
+
+            <!-- 중앙 결과 -->
+            <rect x="330" y="65" width="160" height="120" rx="14" fill="#ffffff" stroke="#dedad2" stroke-width="1.5"/>
+            <text x="410" y="100" text-anchor="middle" fill="#1a1a18" font-size="14" font-weight="700">분석의 단서</text>
+            <text x="410" y="125" text-anchor="middle" fill="#6b6a63" font-size="12">정교하지만</text>
+            <text x="410" y="145" text-anchor="middle" fill="#6b6a63" font-size="12">‘왜 중요한가’를</text>
+            <text x="410" y="165" text-anchor="middle" fill="#6b6a63" font-size="12">묻지 못한다</text>
+
+            <!-- 화살표 → 인간 측 -->
+            <path d="M580 125 L 505 125" stroke="#d95f2b" stroke-width="2.5" fill="none" marker-end="url(#arr-orange)"/>
+
+            <!-- 인간 측 -->
+            <rect x="580" y="40" width="220" height="170" rx="14" fill="url(#grad-human)" stroke="#d95f2b" stroke-width="1.5"/>
+            <text x="690" y="78" text-anchor="middle" fill="#1a1a18" font-size="18" font-weight="700">인간의 질문</text>
+            <text x="690" y="108" text-anchor="middle" fill="#d95f2b" font-size="14">공감 · 불편함</text>
+            <text x="690" y="132" text-anchor="middle" fill="#d95f2b" font-size="14">윤리 · 가치관</text>
+            <text x="690" y="156" text-anchor="middle" fill="#d95f2b" font-size="14">시대와 맥락</text>
+            <text x="690" y="188" text-anchor="middle" fill="#6b6a63" font-size="12" font-style="italic">삶에서 태어난다</text>
+
+            <!-- 하단 캡션 -->
+            <text x="410" y="250" text-anchor="middle" fill="#a09f97" font-size="13">의미와 방향을 부여하는 것은 결국 인간의 질문</text>
+          </svg>
+        </div>
+      </section>
+
+      <section id="human-question">
+        <div class="section-header">
+          <div class="section-num">3</div>
+          <div><h2>인간의 질문은 어디에서 오는가</h2></div>
+        </div>
+        <p>인간의 질문은 데이터의 빈칸에서 태어나지 않는다. 그것은 <strong>삶에서 태어난다</strong>. 통계로는 잡히지 않는 사람의 표정, 침묵의 무게, 시대의 분위기 같은 것들이 질문의 재료가 된다. 즉, 인간의 질문은 데이터의 산물이 아니라 <strong>삶의 산물</strong>이다.</p>
+
+        <div class="question-list">
+          <div class="question-card">
+            <div class="question-mark">“</div>
+            <div class="question-text">왜 이 도시는 어떤 사람에게는 거대한 벽일까?</div>
+            <span class="question-source">— 휠체어를 마주한 시선에서</span>
+          </div>
+          <div class="question-card">
+            <div class="question-mark">“</div>
+            <div class="question-text">왜 우리는 연결될수록 더 외로워지는가?</div>
+            <span class="question-source">— 친구의 외로움을 지켜본 마음에서</span>
+          </div>
+          <div class="question-card">
+            <div class="question-mark">“</div>
+            <div class="question-text">좋은 삶이란 무엇인가?</div>
+            <span class="question-source">— 죽음을 마주한 자리에서</span>
+          </div>
+        </div>
+
+        <p>이런 질문들은 <strong>공감</strong>에서 시작되고, <strong>불편함</strong>에서 자라며, <strong>윤리적 고민</strong>에서 깊어지고, <strong>문화적 맥락</strong> 속에서 다듬어진다.</p>
+
+        <div class="source-grid">
+          <div class="source-pill">
+            <span class="source-icon" aria-hidden="true">💗</span>
+            <div class="source-label">공감</div>
+            <div class="source-desc">타인의 처지에 머무는 시선</div>
+          </div>
+          <div class="source-pill">
+            <span class="source-icon" aria-hidden="true">⚡</span>
+            <div class="source-label">불편함</div>
+            <div class="source-desc">당연한 것에 대한 의심</div>
+          </div>
+          <div class="source-pill">
+            <span class="source-icon" aria-hidden="true">⚖️</span>
+            <div class="source-label">윤리</div>
+            <div class="source-desc">옳고 그름에 대한 고민</div>
+          </div>
+          <div class="source-pill">
+            <span class="source-icon" aria-hidden="true">🌐</span>
+            <div class="source-label">맥락</div>
+            <div class="source-desc">시대와 문화 속에서의 의미</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="direction">
+        <div class="section-header">
+          <div class="section-num">4</div>
+          <div><h2>질문이 곧 방향이다</h2></div>
+        </div>
+        <p>AI는 거대한 도서관 안에서 숨겨진 연결고리를 누구보다 빠르게 찾아내는 뛰어난 분석가다. 그러나 <strong>“애초에 왜 이 책을 펼쳐야 하는가”</strong>를 묻는 일은 여전히 인간의 몫이다. 어떤 질문을 던지느냐에 따라 같은 데이터에서 전혀 다른 미래가 만들어진다.</p>
+        <p>세상을 바꾼 모든 변화는 누군가의 질문에서 시작되었다. 이런 질문들은 시대의 상식을 흔들었고, 그 흔들림이 새로운 가능성을 열었다.</p>
+
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-q">“왜 여성은 투표할 수 없는가?”</div>
+            <div class="timeline-a">참정권 운동을 일으키며 민주주의의 외연을 넓혔다.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-q">“왜 인간은 하늘을 날 수 없는가?”</div>
+            <div class="timeline-a">물리 법칙에 대한 도전이 항공 시대를 열었다.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-q">“왜 어떤 아이들은 학교에 갈 수 없는가?”</div>
+            <div class="timeline-a">교육의 보편적 권리에 대한 질문이 공교육 제도를 만들었다.</div>
+          </div>
+        </div>
+
+        <div class="pull-quote">답은 질문 뒤에 따라온다. 질문이 없는 곳에서는 어떤 혁신도, 어떤 진보도 일어나지 않는다.</div>
+      </section>
+
+      <section id="future">
+        <div class="section-header">
+          <div class="section-num">5</div>
+          <div><h2>AI 시대에 인간이 인간다워지는 길</h2></div>
+        </div>
+        <p>AI가 답을 더 잘 만들어낼수록, 인간에게 요구되는 것은 더 깊고 더 본질적인 질문이 된다. <strong>무엇을 문제로 볼 것인가, 무엇이 의미 있는가, 어떤 세상을 만들고 싶은가.</strong> 이 결정은 데이터에서 자동으로 도출되지 않는다. 그것은 한 사람의 경험, 가치관, 윤리, 그리고 세상을 향한 시선에서 비롯된다.</p>
+
+        <div class="compare">
+          <div class="compare-card ai">
+            <span class="compare-badge">AI가 잘하는 일</span>
+            <h4>패턴 분석과 가설 제안</h4>
+            <ul>
+              <li>방대한 데이터를 빠르게 탐색한다</li>
+              <li>통계적 이상치를 발견한다</li>
+              <li>변수 간 상관관계를 제안한다</li>
+              <li>가능한 답들을 정렬하여 제시한다</li>
+            </ul>
+          </div>
+          <div class="compare-card human">
+            <span class="compare-badge">인간만 할 수 있는 일</span>
+            <h4>의미와 방향의 결정</h4>
+            <ul>
+              <li>무엇을 문제로 볼지 정의한다</li>
+              <li>왜 이것이 중요한지 설명한다</li>
+              <li>어떤 가치를 우선할지 선택한다</li>
+              <li>어떤 미래를 향해 갈지 결단한다</li>
+            </ul>
+          </div>
+        </div>
+
+        <p>그래서 교실에서 던지는 <strong>“너는 무엇이 궁금하니?”</strong>라는 한마디는 결코 가볍지 않다. 그것은 학생을 답을 받아 적는 사람에서, 자기만의 지도를 그리는 사람으로 바꾸어 놓는다. 질문을 가진 사람은 더 이상 답을 기다리지 않는다. 자기가 발견한 문제를 향해 걸어간다.</p>
+      </section>
+
+      <section id="closing" class="conclusion">
+        <div class="conclusion-inner">
+          <h2>맺으며 — 질문이 인간을 가장 인간답게 한다</h2>
+          <p>질문은 단순한 호기심이 아니다. 그것은 한 사람의 삶이 세상과 만나는 지점이며, 인간이 자신의 가치관으로 미래를 빚어내는 가장 인간적인 행위다.</p>
+          <p>AI가 아무리 정교한 답을 만들어내도, 그 답에 의미와 방향을 부여하는 일은 결국 묻는 사람의 몫이다.</p>
+          <div class="closer">답을 가장 빨리 외우는 사람의 시대는 지나갔다.<br>이제는 세상에 없던 질문을 던질 줄 아는 사람의 시대다.</div>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>AI가 답을 생산하는 시대에 인간의 질문이 갖는 고유한 가치를 정리한 글입니다.</footer>
+
+  <script>
+    const progress = document.getElementById('read-progress');
+    function updateProgress(){
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - window.innerHeight;
+      progress.style.width = height > 0 ? `${Math.min(100, (scrollTop / height) * 100)}%` : '0%';
+    }
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    updateProgress();
+  </script>
+</body>
+</html>
