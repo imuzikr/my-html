@@ -116,6 +116,13 @@
     .conclusion strong{color:#fff}
     .conclusion .closer{font-size:var(--text-xl);color:#fff;font-weight:var(--weight-semibold);margin-top:var(--space-6);padding-top:var(--space-6);border-top:1px solid rgba(255,255,255,.18);line-height:var(--leading-tight)}
 
+    /* 기능 카드 그리드 */
+    .feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--space-4);margin:var(--space-6) 0}
+    .feature-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);box-shadow:var(--shadow-sm)}
+    .feature-card-icon{font-size:1.5rem;margin-bottom:var(--space-3);display:block;line-height:1}
+    .feature-card-title{font-size:var(--text-base);font-weight:var(--weight-semibold);color:var(--color-text);margin-bottom:var(--space-2)}
+    .feature-card-desc{font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-normal)}
+
     footer{max-width:900px;margin:0 auto;padding:0 var(--space-6) var(--space-12);color:var(--color-text-faint);font-size:var(--text-sm)}
 
     @media(max-width:768px){
@@ -169,30 +176,30 @@
 
   <main>
     <article>
-      <!-- Git 소개 -->
-      <section id="git-intro" style="margin-bottom:var(--space-8)">
+      <!-- 1. Git 소개 -->
+      <section id="git-intro">
         <div class="section-header">
-          <div class="section-num" style="background:linear-gradient(135deg,#3a6b4a,#2d5a8e)">?</div>
+          <div class="section-num">1</div>
           <div><h2>Git이란 무엇인가요?</h2></div>
         </div>
         <p><strong>Git</strong>은 파일의 변경 이력을 추적하고 관리하는 <strong>버전 관리 시스템(Version Control System)</strong>입니다. 코드뿐만 아니라 어떤 텍스트 파일이든 "언제, 누가, 무엇을 바꿨는지"를 기록해 두고, 필요하면 과거 어느 시점으로도 되돌릴 수 있습니다.</p>
         <p>마치 문서 편집기의 <strong>실행 취소(Ctrl+Z)</strong>가 무한히 저장되는 것과 비슷하지만, Git은 여러 사람이 동시에 같은 프로젝트를 작업할 때도 서로의 변경 내용이 충돌 없이 합쳐질 수 있도록 도와준다는 점에서 훨씬 강력합니다. 오늘날 소프트웨어 개발 현장에서 사실상 표준으로 쓰이는 협업 도구입니다.</p>
 
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--space-4);margin:var(--space-6) 0">
-          <div style="background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);box-shadow:var(--shadow-sm)">
-            <div style="font-size:1.6rem;margin-bottom:var(--space-2)">🕐</div>
-            <div style="font-weight:var(--weight-semibold);margin-bottom:var(--space-1)">변경 이력 추적</div>
-            <div style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-normal)">누가 언제 무엇을 바꿨는지 모든 기록이 남습니다</div>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <span class="feature-card-icon">🕐</span>
+            <div class="feature-card-title">변경 이력 추적</div>
+            <div class="feature-card-desc">누가 언제 무엇을 바꿨는지 모든 기록이 남습니다</div>
           </div>
-          <div style="background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);box-shadow:var(--shadow-sm)">
-            <div style="font-size:1.6rem;margin-bottom:var(--space-2)">↩️</div>
-            <div style="font-weight:var(--weight-semibold);margin-bottom:var(--space-1)">되돌리기</div>
-            <div style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-normal)">실수해도 과거 어느 시점으로든 복구할 수 있습니다</div>
+          <div class="feature-card">
+            <span class="feature-card-icon">↩️</span>
+            <div class="feature-card-title">되돌리기</div>
+            <div class="feature-card-desc">실수해도 과거 어느 시점으로든 복구할 수 있습니다</div>
           </div>
-          <div style="background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);box-shadow:var(--shadow-sm)">
-            <div style="font-size:1.6rem;margin-bottom:var(--space-2)">🤝</div>
-            <div style="font-weight:var(--weight-semibold);margin-bottom:var(--space-1)">협업</div>
-            <div style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-normal)">여러 사람이 동시에 작업해도 변경 내용을 안전하게 합칩니다</div>
+          <div class="feature-card">
+            <span class="feature-card-icon">🤝</span>
+            <div class="feature-card-title">협업</div>
+            <div class="feature-card-desc">여러 사람이 동시에 작업해도 변경 내용을 안전하게 합칩니다</div>
           </div>
         </div>
       </section>
@@ -202,10 +209,10 @@
         <p>Merge는 <strong>기록을 있는 그대로</strong> 보존하고, Rebase는 <strong>한 줄로 깔끔하게</strong> 정리하며, Squash는 <strong>자잘한 커밋들을 하나로</strong> 묶습니다. 셋 모두 브랜치를 합치는 방법이지만, 히스토리를 어떻게 남길지에 따라 선택이 달라집니다.</p>
       </div>
 
-      <!-- 0. 커밋과 브랜치 -->
+      <!-- 2. 커밋과 브랜치 -->
       <section id="basics">
         <div class="section-header">
-          <div class="section-num">0</div>
+          <div class="section-num">2</div>
           <div><h2>들어가기 전에 — 커밋과 브랜치가 뭔가요?</h2></div>
         </div>
         <p>본격적인 이야기를 하기 전에, 두 단어만 알고 가면 됩니다.</p>
@@ -260,10 +267,10 @@
         </div>
       </section>
 
-      <!-- 1. Merge -->
+      <!-- 3. Merge -->
       <section id="merge">
         <div class="section-header">
-          <div class="section-num">1</div>
+          <div class="section-num">3</div>
           <div><h2>Merge — 기록을 있는 그대로 합친다</h2></div>
         </div>
         <p>가장 기본적인 방법입니다. 두 브랜치의 작업 내용을 합치면서 <strong>"병합했다"는 기록이 담긴 커밋(M)</strong>이 하나 새로 생깁니다. feature 브랜치에서 작업한 D, E가 그대로 보존되고, 언제 어디서 갈라져 언제 합쳤는지 전체 흐름이 히스토리에 남습니다.</p>
@@ -316,10 +323,10 @@ git merge feature</code></pre>
         </div>
       </section>
 
-      <!-- 2. Rebase -->
+      <!-- 4. Rebase -->
       <section id="rebase">
         <div class="section-header">
-          <div class="section-num">2</div>
+          <div class="section-num">4</div>
           <div><h2>Rebase — 커밋들을 줄기 끝에 옮겨 붙인다</h2></div>
         </div>
         <p>feature 브랜치의 커밋들을 main 브랜치 끝에 옮겨 붙이는 방식입니다. 마치 처음부터 main에서 순서대로 작업한 것처럼 히스토리가 <strong>한 줄로</strong> 깔끔해집니다. 대신 "갈라져서 합쳤다"는 기록은 사라집니다.</p>
@@ -398,10 +405,10 @@ git merge feature</code></pre>
         </div>
       </section>
 
-      <!-- 3. Squash -->
+      <!-- 5. Squash -->
       <section id="squash">
         <div class="section-header">
-          <div class="section-num">3</div>
+          <div class="section-num">5</div>
           <div><h2>Squash — 여러 커밋을 하나로 눌러 합친다</h2></div>
         </div>
         <p>feature 브랜치의 여러 커밋을 <strong>하나로 합쳐서</strong> main에 붙이는 방식입니다. feature에서 시행착오를 거치며 커밋을 여러 번 했더라도, main에는 깔끔하게 <strong>하나의 커밋</strong>으로만 남습니다.</p>
@@ -470,10 +477,10 @@ git commit -m "기능 완성: 로그인 폼 추가"</code></pre>
         </div>
       </section>
 
-      <!-- 4. 비교 -->
+      <!-- 6. 비교 -->
       <section id="comparison">
         <div class="section-header">
-          <div class="section-num">4</div>
+          <div class="section-num">6</div>
           <div><h2>언제 뭘 쓰나요? — 세 방법 한눈에 비교</h2></div>
         </div>
         <p>팀마다 선호하는 방식이 다르고 정해진 정답은 없습니다. 다만 아래 기준으로 고르면 대부분의 상황에서 적합한 선택이 됩니다.</p>
@@ -518,10 +525,10 @@ git commit -m "기능 완성: 로그인 폼 추가"</code></pre>
         <div class="pull-quote">혼자 작업하는 브랜치에서는 Rebase나 Squash로 정리하고, 여러 명이 공유하는 브랜치에서는 Merge를 쓰는 경우가 많습니다.</div>
       </section>
 
-      <!-- 5. 주의사항 -->
+      <!-- 7. 주의사항 -->
       <section id="caution">
         <div class="section-header">
-          <div class="section-num">5</div>
+          <div class="section-num">7</div>
           <div><h2>초보자가 꼭 알아 둘 두 가지</h2></div>
         </div>
 
