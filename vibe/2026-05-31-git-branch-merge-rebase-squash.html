@@ -22,7 +22,7 @@
       --text-xs:0.75rem; --text-sm:0.875rem; --text-base:1rem; --text-lg:1.125rem;
       --text-xl:1.25rem; --text-2xl:1.5rem; --text-3xl:1.875rem;
       --weight-medium:500; --weight-semibold:600; --weight-bold:700;
-      --leading-tight:1.25; --leading-normal:1.6; --leading-loose:1.85;
+      --leading-tight:1.25; --leading-normal:1.6; --leading-loose:1.8;
       --space-1:0.25rem; --space-2:0.5rem; --space-3:0.75rem; --space-4:1rem;
       --space-5:1.25rem; --space-6:1.5rem; --space-8:2rem; --space-12:3rem;
       --radius-md:8px; --radius-lg:12px; --radius-full:9999px;
@@ -113,6 +113,7 @@
     .conclusion-inner{position:relative}
     .conclusion h2{color:#fff;margin-bottom:var(--space-4);font-size:var(--text-2xl);line-height:var(--leading-tight)}
     .conclusion p{color:rgba(255,255,255,.82);font-size:var(--text-lg);line-height:var(--leading-loose);margin-bottom:var(--space-4)}
+    .conclusion strong{color:#fff}
     .conclusion .closer{font-size:var(--text-xl);color:#fff;font-weight:var(--weight-semibold);margin-top:var(--space-6);padding-top:var(--space-6);border-top:1px solid rgba(255,255,255,.18);line-height:var(--leading-tight)}
 
     footer{max-width:900px;margin:0 auto;padding:0 var(--space-6) var(--space-12);color:var(--color-text-faint);font-size:var(--text-sm)}
@@ -141,6 +142,7 @@
     <div class="nav-inner">
       <a class="nav-brand" href="index.html">← Vibe</a>
       <ul class="nav-links">
+        <li><a href="#git-intro">Git이란?</a></li>
         <li><a href="#basics">커밋과 브랜치</a></li>
         <li><a href="#merge">Merge</a></li>
         <li><a href="#rebase">Rebase</a></li>
@@ -167,6 +169,34 @@
 
   <main>
     <article>
+      <!-- Git 소개 -->
+      <section id="git-intro" style="margin-bottom:var(--space-8)">
+        <div class="section-header">
+          <div class="section-num" style="background:linear-gradient(135deg,#3a6b4a,#2d5a8e)">?</div>
+          <div><h2>Git이란 무엇인가요?</h2></div>
+        </div>
+        <p><strong>Git</strong>은 파일의 변경 이력을 추적하고 관리하는 <strong>버전 관리 시스템(Version Control System)</strong>입니다. 코드뿐만 아니라 어떤 텍스트 파일이든 "언제, 누가, 무엇을 바꿨는지"를 기록해 두고, 필요하면 과거 어느 시점으로도 되돌릴 수 있습니다.</p>
+        <p>마치 문서 편집기의 <strong>실행 취소(Ctrl+Z)</strong>가 무한히 저장되는 것과 비슷하지만, Git은 여러 사람이 동시에 같은 프로젝트를 작업할 때도 서로의 변경 내용이 충돌 없이 합쳐질 수 있도록 도와준다는 점에서 훨씬 강력합니다. 오늘날 소프트웨어 개발 현장에서 사실상 표준으로 쓰이는 협업 도구입니다.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--space-4);margin:var(--space-6) 0">
+          <div style="background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);box-shadow:var(--shadow-sm)">
+            <div style="font-size:1.6rem;margin-bottom:var(--space-2)">🕐</div>
+            <div style="font-weight:var(--weight-semibold);margin-bottom:var(--space-1)">변경 이력 추적</div>
+            <div style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-normal)">누가 언제 무엇을 바꿨는지 모든 기록이 남습니다</div>
+          </div>
+          <div style="background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);box-shadow:var(--shadow-sm)">
+            <div style="font-size:1.6rem;margin-bottom:var(--space-2)">↩️</div>
+            <div style="font-weight:var(--weight-semibold);margin-bottom:var(--space-1)">되돌리기</div>
+            <div style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-normal)">실수해도 과거 어느 시점으로든 복구할 수 있습니다</div>
+          </div>
+          <div style="background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);box-shadow:var(--shadow-sm)">
+            <div style="font-size:1.6rem;margin-bottom:var(--space-2)">🤝</div>
+            <div style="font-weight:var(--weight-semibold);margin-bottom:var(--space-1)">협업</div>
+            <div style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-normal)">여러 사람이 동시에 작업해도 변경 내용을 안전하게 합칩니다</div>
+          </div>
+        </div>
+      </section>
+
       <div class="summary">
         <div class="summary-label">이 글의 핵심</div>
         <p>Merge는 <strong>기록을 있는 그대로</strong> 보존하고, Rebase는 <strong>한 줄로 깔끔하게</strong> 정리하며, Squash는 <strong>자잘한 커밋들을 하나로</strong> 묶습니다. 셋 모두 브랜치를 합치는 방법이지만, 히스토리를 어떻게 남길지에 따라 선택이 달라집니다.</p>
