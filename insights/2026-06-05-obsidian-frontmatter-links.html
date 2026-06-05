@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>옵시디언 노트 연결성과 프론트매터 정리법</title>
+  <meta name="description" content="uxdev.org의 옵시디언 노트 연결성과 프론트매터 작성법 글을 바탕으로 링크, 태그, 프론트매터, 템플릿, MOC 운영 원칙을 정리한 해설 문서입니다.">
+  <meta property="og:title" content="옵시디언 노트 연결성과 프론트매터 정리법">
+  <meta property="og:description" content="프론트매터보다 링크 구조가 먼저라는 관점에서 옵시디언을 오래 쓰기 위한 실전 운영 방식을 정리합니다.">
+  <style>
+:root {
+  --color-bg:#f5f2ed; --color-bg-alt:#eceae4; --color-bg-card:#ffffff;
+  --color-text:#1a1a18; --color-text-muted:#6b6a63; --color-text-faint:#a09f97;
+  --color-border:#dedad2; --color-accent:#d95f2b; --color-accent-hover:#c2521f;
+  --color-accent-soft:#faeee7;
+  --color-green:#3a6b4a; --color-green-soft:#e6f0e9;
+  --color-blue:#2d5a8e; --color-blue-soft:#e5eef7;
+  --color-yellow:#8a6a00; --color-yellow-soft:#fdf5d9;
+  --color-red:#b03a2e; --color-red-soft:#fdecea;
+  --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --font-mono:"SF Mono","Fira Code",Consolas,"Liberation Mono",monospace;
+  --text-xs:0.75rem; --text-sm:0.875rem; --text-base:1rem; --text-lg:1.125rem;
+  --text-xl:1.25rem; --text-2xl:1.5rem; --text-3xl:1.875rem;
+  --weight-medium:500; --weight-semibold:600; --weight-bold:700;
+  --leading-tight:1.25; --leading-normal:1.6; --leading-loose:1.8;
+  --space-1:0.25rem; --space-2:0.5rem; --space-3:0.75rem; --space-4:1rem;
+  --space-5:1.25rem; --space-6:1.5rem; --space-8:2rem; --space-12:3rem;
+  --radius-md:8px; --radius-lg:12px; --radius-full:9999px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.07); --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+}
+    *,*::before,*::after{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:var(--font-sans);background:var(--color-bg);color:var(--color-text);line-height:var(--leading-normal);word-break:keep-all}
+    #read-progress{position:fixed;top:0;left:0;width:0;height:var(--space-1);background:var(--color-accent);z-index:1000;transition:width 140ms ease}
+    .site-nav{position:sticky;top:0;z-index:900;background:rgba(255,255,255,.92);border-bottom:1px solid var(--color-border);backdrop-filter:blur(10px)}
+    .nav-inner{max-width:900px;margin:0 auto;padding:var(--space-3) var(--space-6);display:flex;align-items:center;justify-content:space-between;gap:var(--space-4)}
+    .brand{color:var(--color-accent);font-size:var(--text-sm);font-weight:var(--weight-bold);text-decoration:none;white-space:nowrap}
+    .nav-links{display:flex;gap:var(--space-1);list-style:none;margin:0;padding:0;overflow-x:auto}
+    .nav-links a{display:block;min-height:44px;padding:var(--space-3) var(--space-4);border-radius:var(--radius-full);color:var(--color-text-muted);font-size:var(--text-sm);text-decoration:none;white-space:nowrap;transition:all 180ms ease}
+    .nav-links a:hover{background:var(--color-bg-alt);color:var(--color-text)}
+    .hero{background:linear-gradient(135deg,#1a1a18 0%,#2d5a8e 58%,#3a6b4a 100%);color:var(--color-bg-card);padding:var(--space-12) var(--space-6)}
+    .hero-inner{max-width:900px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(260px,.65fr);gap:var(--space-8);align-items:center}
+    .eyebrow{display:inline-flex;align-items:center;gap:var(--space-2);margin-bottom:var(--space-5);padding:var(--space-2) var(--space-4);border:1px solid rgba(255,255,255,.22);border-radius:var(--radius-full);color:var(--color-accent-soft);font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.08em;text-transform:uppercase}
+    .eyebrow::before{content:"";width:var(--space-2);height:var(--space-2);border-radius:var(--radius-full);background:var(--color-accent)}
+    h1{margin:0 0 var(--space-5);font-size:clamp(var(--text-3xl),6vw,4rem);line-height:var(--leading-tight);letter-spacing:-.03em}
+    .hero-lead{margin:0;color:rgba(255,255,255,.82);font-size:var(--text-lg);line-height:var(--leading-loose)}
+    .hero-card{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:var(--radius-lg);padding:var(--space-6);box-shadow:var(--shadow-md)}
+    .hero-card-title{margin:0 0 var(--space-4);font-size:var(--text-sm);font-weight:var(--weight-bold);letter-spacing:.08em;text-transform:uppercase;color:var(--color-accent-soft)}
+    .hero-list{margin:0;padding:0;list-style:none;display:grid;gap:var(--space-3)}
+    .hero-list li{display:flex;gap:var(--space-3);color:rgba(255,255,255,.82);font-size:var(--text-sm);line-height:var(--leading-normal)}
+    .hero-list li::before{content:"";width:var(--space-2);height:var(--space-2);margin-top:var(--space-2);border-radius:var(--radius-full);background:var(--color-accent);flex:0 0 auto}
+    main{max-width:900px;margin:0 auto;padding:var(--space-12) var(--space-6)}
+    section{scroll-margin-top:calc(var(--space-12) * 1.4)}
+    .summary{margin-bottom:var(--space-12);padding:var(--space-8);background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm)}
+    .summary-label{margin-bottom:var(--space-3);color:var(--color-accent);font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.08em;text-transform:uppercase}
+    .summary p{margin:0;color:var(--color-text);font-size:var(--text-lg);line-height:var(--leading-loose)}
+    .section-header{display:flex;align-items:flex-start;gap:var(--space-5);margin:var(--space-12) 0 var(--space-6)}
+    .section-num{width:48px;height:48px;border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:var(--color-accent);color:var(--color-bg-card);font-weight:var(--weight-bold);box-shadow:var(--shadow-sm)}
+    h2{margin:0 0 var(--space-2);font-size:var(--text-2xl);line-height:var(--leading-tight);letter-spacing:-.01em}
+    h3{margin:0 0 var(--space-3);font-size:var(--text-lg);line-height:var(--leading-tight)}
+    .subtitle{margin:0;color:var(--color-text-muted);font-size:var(--text-sm);line-height:var(--leading-normal)}
+    p{color:var(--color-text-muted);font-size:var(--text-base);line-height:var(--leading-loose)}
+    strong{color:var(--color-text);font-weight:var(--weight-semibold)}
+    .card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-5);margin:var(--space-6) 0}
+    .card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);box-shadow:var(--shadow-sm);transition:all 180ms ease}
+    .card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--color-accent)}
+    .card-kicker{margin-bottom:var(--space-2);color:var(--color-accent);font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.08em;text-transform:uppercase}
+    .card p{margin:0;font-size:var(--text-sm);line-height:var(--leading-loose)}
+    .tabs{margin:var(--space-6) 0;background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden}
+    .tab-list{display:flex;border-bottom:1px solid var(--color-border);overflow-x:auto}
+    .tab-btn{min-height:44px;padding:var(--space-4) var(--space-5);background:var(--color-bg-card);border:0;border-right:1px solid var(--color-border);color:var(--color-text-muted);cursor:pointer;font:inherit;font-size:var(--text-sm);font-weight:var(--weight-semibold);white-space:nowrap;transition:background 140ms ease}
+    .tab-btn:hover{background:var(--color-bg-alt)}
+    .tab-btn.active{color:var(--color-accent);background:var(--color-accent-soft)}
+    .tab-panel{display:none;padding:var(--space-6)}
+    .tab-panel.active{display:block}
+    .table-wrap{overflow-x:auto;border:1px solid var(--color-border);border-radius:var(--radius-lg);background:var(--color-bg-card);box-shadow:var(--shadow-sm);margin:var(--space-6) 0}
+    table{width:100%;min-width:680px;border-collapse:collapse}
+    th,td{padding:var(--space-4);border-bottom:1px solid var(--color-border);text-align:left;vertical-align:top}
+    th{background:var(--color-bg-alt);color:var(--color-text);font-size:var(--text-sm);font-weight:var(--weight-bold)}
+    td{color:var(--color-text-muted);font-size:var(--text-sm);line-height:var(--leading-normal)}
+    tr:last-child td{border-bottom:0}
+    .badge{display:inline-flex;align-items:center;min-height:24px;padding:var(--space-1) var(--space-3);border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:var(--weight-bold);white-space:nowrap}
+    .badge-blue{background:var(--color-blue-soft);color:var(--color-blue)}
+    .badge-green{background:var(--color-green-soft);color:var(--color-green)}
+    .badge-yellow{background:var(--color-yellow-soft);color:var(--color-yellow)}
+    .callout{display:flex;gap:var(--space-3);margin:var(--space-6) 0;padding:var(--space-5);border:1px solid var(--color-blue);border-radius:var(--radius-md);background:var(--color-blue-soft);color:var(--color-blue)}
+    .callout strong{display:block;margin-bottom:var(--space-1);color:inherit}
+    .diagram{margin:var(--space-6) 0;padding:var(--space-5);background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow-x:auto}
+    .diagram svg{display:block;width:100%;min-width:680px;height:auto}
+    .code-block{margin:var(--space-6) 0;overflow:hidden;border-radius:var(--radius-lg);background:var(--color-text);box-shadow:var(--shadow-sm)}
+    .code-block-header{display:flex;align-items:center;justify-content:space-between;padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--color-text-muted);color:var(--color-text-faint);font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.06em;text-transform:uppercase}
+    .code-block-copy{min-height:32px;padding:var(--space-1) var(--space-3);border:1px solid var(--color-text-muted);border-radius:var(--radius-md);background:transparent;color:var(--color-bg-card);cursor:pointer;font:inherit;font-size:var(--text-xs);transition:all 180ms ease}
+    .code-block-copy:hover{border-color:var(--color-bg-card);transform:translateY(-2px)}
+    pre{margin:0;padding:var(--space-5);overflow-x:auto}
+    code{font-family:var(--font-mono);font-size:var(--text-sm);line-height:var(--leading-loose)}
+    .code-block code{color:var(--color-bg-card)}
+    .tok-keyword{color:var(--color-accent-soft)}
+    .tok-string{color:var(--color-green-soft)}
+    .tok-comment{color:var(--color-text-faint)}
+    details{margin:var(--space-4) 0;background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-md);box-shadow:var(--shadow-sm);overflow:hidden}
+    summary{min-height:44px;padding:var(--space-4) var(--space-5);cursor:pointer;color:var(--color-text);font-weight:var(--weight-semibold);transition:background 140ms ease}
+    summary:hover{background:var(--color-bg-alt)}
+    details p,details ul{margin:0;padding:0 var(--space-5) var(--space-5)}
+    details ul{color:var(--color-text-muted);line-height:var(--leading-loose)}
+    .checklist{display:grid;gap:var(--space-3);margin:var(--space-6) 0;padding:0;list-style:none}
+    .checklist li{display:flex;gap:var(--space-3);align-items:flex-start;padding:var(--space-4);background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-md);color:var(--color-text-muted);box-shadow:var(--shadow-sm)}
+    .checklist li::before{content:"";width:var(--space-4);height:var(--space-4);margin-top:var(--space-1);border-radius:var(--radius-full);background:var(--color-green);flex:0 0 auto}
+    .final-note{margin-top:var(--space-12);padding:var(--space-8);border-radius:var(--radius-lg);background:var(--color-text);color:var(--color-bg-card)}
+    .final-note h2{color:var(--color-bg-card)}
+    .final-note p{margin-bottom:0;color:rgba(255,255,255,.82);font-size:var(--text-lg)}
+    footer{max-width:900px;margin:0 auto;padding:0 var(--space-6) var(--space-12);color:var(--color-text-faint);font-size:var(--text-sm)}
+    @media(max-width:880px){.hero-inner{grid-template-columns:1fr}}
+    @media(max-width:768px){.nav-inner{align-items:flex-start;flex-direction:column}.hero{padding:var(--space-12) var(--space-5)}main{padding:var(--space-8) var(--space-5)}.card-grid{grid-template-columns:1fr}.summary{padding:var(--space-6)}.section-header{gap:var(--space-4)}.tab-list{flex-direction:column}.tab-btn{border-right:0;border-bottom:1px solid var(--color-border);text-align:left}}
+  </style>
+</head>
+<body>
+  <div id="read-progress" aria-hidden="true"></div>
+  <nav class="site-nav" aria-label="문서 목차">
+    <div class="nav-inner">
+      <a class="brand" href="index.html">Insights</a>
+      <ul class="nav-links">
+        <li><a href="#overview">개요</a></li>
+        <li><a href="#links">링크</a></li>
+        <li><a href="#frontmatter">프론트매터</a></li>
+        <li><a href="#workflow">운영 방식</a></li>
+        <li><a href="#plugins">플러그인</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="eyebrow">Obsidian Note System</div>
+        <h1>옵시디언은 분류보다 연결이 먼저입니다</h1>
+        <p class="hero-lead">
+          uxdev.org의 글은 옵시디언을 처음 쓸 때 흔히 빠지는 함정을 짚습니다.
+          폴더와 태그를 촘촘하게 설계하기보다, 실제로 함께 읽어야 하는 노트들을
+          `[[링크]]`로 연결하고 프론트매터는 필요한 구조화 정보만 담으라는 관점입니다.
+        </p>
+      </div>
+      <aside class="hero-card" aria-label="핵심 결론">
+        <div class="hero-card-title">핵심 결론</div>
+        <ul class="hero-list">
+          <li>노트 간 실제 관계는 위키 링크로 연결합니다.</li>
+          <li>태그는 넓은 분류에만 사용합니다.</li>
+          <li>상태, 생성일, 유형은 프론트매터에 둡니다.</li>
+          <li>반복 입력은 템플릿으로 자동화합니다.</li>
+        </ul>
+      </aside>
+    </div>
+  </header>
+
+  <main>
+    <article>
+      <div class="summary" id="overview">
+        <div class="summary-label">Source-Based Summary</div>
+        <p>
+          원문은 옵시디언 사용자가 처음 고민하는 두 가지 문제, 즉 <strong>노트 연결성과
+          프론트매터 정리법</strong>을 함께 다룹니다. 핵심은 프론트매터나 태그 체계를 먼저
+          과도하게 설계하지 말고, 본문 안의 `[[위키 링크]]`를 통해 지식이 자연스럽게
+          이어지도록 만드는 것입니다.
+        </p>
+      </div>
+
+      <section id="links">
+        <div class="section-header">
+          <div class="section-num">1</div>
+          <div>
+            <h2>프론트매터보다 링크 구조가 먼저입니다</h2>
+            <p class="subtitle">원문은 옵시디언의 강점을 개별 문서 저장이 아니라 노트 네트워크에 둡니다.</p>
+          </div>
+        </div>
+        <p>
+          글은 초보 사용자가 속성, 태그, 분류 체계를 먼저 세밀하게 만들려는 경향을 경계합니다.
+          옵시디언에서 연결성을 높이는 직접적인 도구는 `[[위키 링크]]`입니다.
+          예를 들어 프로젝트 관리 글에서 `[[옵시디언 템플릿]]`, `[[개인 지식 관리]]` 같은
+          관련 노트를 본문에 연결하면, 읽는 사람은 문맥을 따라 자연스럽게 이동할 수 있습니다.
+        </p>
+        <div class="diagram" aria-label="태그, 링크, 프론트매터의 역할 구분">
+          <svg viewBox="0 0 760 260" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="옵시디언 노트 관리 요소의 역할">
+            <defs>
+              <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0,10 3.5,0 7" fill="#6b6a63"/>
+              </marker>
+              <marker id="arrow-dash" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0,10 3.5,0 7" fill="#a09f97"/>
+              </marker>
+            </defs>
+            <rect x="40" y="52" width="170" height="76" rx="8" fill="#ffffff" stroke="#dedad2" stroke-width="1.5"/>
+            <text x="125" y="84" text-anchor="middle" font-size="14" fill="#1a1a18" font-family="-apple-system,sans-serif" font-weight="700">본문 링크</text>
+            <text x="125" y="108" text-anchor="middle" font-size="12" fill="#6b6a63" font-family="-apple-system,sans-serif">실제 관계 연결</text>
+
+            <rect x="290" y="52" width="170" height="76" rx="8" fill="#ffffff" stroke="#dedad2" stroke-width="1.5"/>
+            <text x="375" y="84" text-anchor="middle" font-size="14" fill="#1a1a18" font-family="-apple-system,sans-serif" font-weight="700">태그</text>
+            <text x="375" y="108" text-anchor="middle" font-size="12" fill="#6b6a63" font-family="-apple-system,sans-serif">넓은 범주 표시</text>
+
+            <rect x="540" y="52" width="170" height="76" rx="8" fill="#ffffff" stroke="#dedad2" stroke-width="1.5"/>
+            <text x="625" y="84" text-anchor="middle" font-size="14" fill="#1a1a18" font-family="-apple-system,sans-serif" font-weight="700">프론트매터</text>
+            <text x="625" y="108" text-anchor="middle" font-size="12" fill="#6b6a63" font-family="-apple-system,sans-serif">구조화 데이터</text>
+
+            <rect x="205" y="170" width="350" height="52" rx="8" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.5"/>
+            <text x="380" y="201" text-anchor="middle" font-size="13" fill="#2d5a8e" font-family="-apple-system,sans-serif" font-weight="700">오래 쓰는 시스템 = 세 역할을 섞지 않는 것</text>
+            <line x1="125" y1="128" x2="300" y2="170" stroke="#6b6a63" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <line x1="375" y1="128" x2="375" y2="170" stroke="#6b6a63" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <line x1="625" y1="128" x2="460" y2="170" stroke="#a09f97" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arrow-dash)"/>
+          </svg>
+        </div>
+        <div class="callout">
+          <div aria-hidden="true">i</div>
+          <div>
+            <strong>원문에 근거한 판단</strong>
+            `CSS`, `TailwindCSS`, `디자인 시스템`, `컴포넌트 재사용`처럼 실제 맥락에서 서로 이어지는 개념은
+            태그만 붙이기보다 본문 링크로 연결하는 편이 더 유용하다고 설명합니다.
+          </div>
+        </div>
+      </section>
+
+      <section id="frontmatter">
+        <div class="section-header">
+          <div class="section-num">2</div>
+          <div>
+            <h2>프론트매터는 최소한으로 시작합니다</h2>
+            <p class="subtitle">많은 필드를 처음부터 만들면 쓰는 사람이 지칩니다.</p>
+          </div>
+        </div>
+        <p>
+          프론트매터는 노트 맨 위에 들어가는 YAML 메타데이터입니다. 제목, 태그, 생성일,
+          상태처럼 일정한 형식으로 관리하고 싶은 정보를 담습니다. 다만 글은 처음부터
+          많은 필드를 넣는 방식이 오히려 지속성을 떨어뜨린다고 봅니다.
+        </p>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>YAML · 최소 시작 예시</span>
+            <button class="code-block-copy" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code><span class="tok-comment">---</span>
+<span class="tok-keyword">type</span>: <span class="tok-string">note</span>
+<span class="tok-keyword">status</span>: <span class="tok-string">active</span>
+<span class="tok-keyword">tags</span>: []
+<span class="tok-keyword">created</span>: <span class="tok-string">2026-04-15</span>
+<span class="tok-keyword">related</span>: []
+<span class="tok-comment">---</span></code></pre>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>항목</th>
+                <th>역할</th>
+                <th>사용 기준</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge badge-blue">type</span></td>
+                <td>노트 유형</td>
+                <td>일상 메모, 프로젝트, 참고 자료, 허브 노트를 구분합니다.</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-green">status</span></td>
+                <td>진행 상태</td>
+                <td>active, draft, archived처럼 운영 상태를 관리할 때 씁니다.</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-yellow">tags</span></td>
+                <td>넓은 범주</td>
+                <td>관계 표현보다 project, reference, idea 같은 큰 분류에 적합합니다.</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-blue">related</span></td>
+                <td>명시적 관련 노트</td>
+                <td>본문 링크와 별도로 관계를 더 분명히 관리하고 싶을 때 씁니다.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="workflow">
+        <div class="section-header">
+          <div class="section-num">3</div>
+          <div>
+            <h2>노트 역할에 따라 다르게 운영합니다</h2>
+            <p class="subtitle">모든 노트에 같은 속성을 강제하지 않는 것이 원문의 실전 조언입니다.</p>
+          </div>
+        </div>
+        <div class="tabs">
+          <nav class="tab-list" aria-label="노트 유형별 운영 방식">
+            <button class="tab-btn active" onclick="showTab(event,'fleeting')">짧은 메모</button>
+            <button class="tab-btn" onclick="showTab(event,'project')">프로젝트</button>
+            <button class="tab-btn" onclick="showTab(event,'reference')">참고 자료</button>
+            <button class="tab-btn" onclick="showTab(event,'moc')">허브 노트</button>
+          </nav>
+          <div class="tab-panel active" id="fleeting">
+            <p>일상 메모나 짧은 아이디어는 프론트매터를 최소화합니다. 핵심은 빨리 기록하는 것이므로 `type`과 `created` 정도면 충분합니다.</p>
+          </div>
+          <div class="tab-panel" id="project">
+            <p>프로젝트 노트는 `status`, `project`, `related`가 유용합니다. 진행 중인 작업과 관련 노트를 함께 묶어 추적할 수 있기 때문입니다.</p>
+          </div>
+          <div class="tab-panel" id="reference">
+            <p>참고 자료 노트는 `topic`, `source`, `created`처럼 출처와 주제를 확인할 수 있는 정보가 중요합니다.</p>
+          </div>
+          <div class="tab-panel" id="moc">
+            <p>MOC는 Map of Contents입니다. 프론트매터는 최소화하고, 본문 안에 관련 노트 링크를 목록으로 정리해 주제별 길잡이 역할을 하게 합니다.</p>
+          </div>
+        </div>
+        <ul class="checklist">
+          <li><strong>실제 관계는 링크로 연결합니다.</strong> 함께 읽어야 하는 노트는 본문에서 직접 이어줍니다.</li>
+          <li><strong>태그는 넓게 씁니다.</strong> 태그를 관계 표현 도구로 쓰면 금방 복잡해집니다.</li>
+          <li><strong>반복 입력은 템플릿으로 줄입니다.</strong> `created: {{date}}` 같은 값은 템플릿에 맡기는 편이 안정적입니다.</li>
+          <li><strong>노트가 많아지면 MOC를 만듭니다.</strong> 특정 주제의 중심 허브가 생기면 탐색 비용이 줄어듭니다.</li>
+        </ul>
+      </section>
+
+      <section id="plugins">
+        <div class="section-header">
+          <div class="section-num">4</div>
+          <div>
+            <h2>플러그인은 기본 구조 이후의 보조 도구입니다</h2>
+            <p class="subtitle">원문은 복잡한 플러그인보다 기본 링크 구조를 먼저 잡으라고 봅니다.</p>
+          </div>
+        </div>
+        <div class="card-grid">
+          <div class="card">
+            <div class="card-kicker">Templater</div>
+            <h3>동적 템플릿 자동화</h3>
+            <p>새 노트를 만들 때 날짜나 정해진 프론트매터를 자동으로 넣고 싶을 때 유용합니다.</p>
+          </div>
+          <div class="card">
+            <div class="card-kicker">Metadata Menu</div>
+            <h3>속성 관리</h3>
+            <p>프론트매터 필드가 많아졌을 때 여러 노트의 속성 값을 일관되게 관리하는 데 도움을 줍니다.</p>
+          </div>
+          <div class="card">
+            <div class="card-kicker">Dataview</div>
+            <h3>조회 가능한 데이터</h3>
+            <p>특정 상태의 프로젝트 노트만 모으거나 같은 태그 문서를 자동 목록화할 때 강력합니다.</p>
+          </div>
+          <div class="card">
+            <div class="card-kicker">MOC</div>
+            <h3>주제별 허브</h3>
+            <p>플러그인은 아니지만 관련 노트를 한곳에 묶어 탐색을 돕는 매우 실용적인 운영 방식입니다.</p>
+          </div>
+        </div>
+        <details>
+          <summary>이 글을 실제 옵시디언 운영 규칙으로 바꾸면</summary>
+          <ul>
+            <li>새 노트를 만들 때 먼저 관련 노트를 1개 이상 링크할 수 있는지 확인합니다.</li>
+            <li>태그는 `#project`, `#reference`, `#idea`, `#draft`처럼 적은 수로 유지합니다.</li>
+            <li>프론트매터 필드는 `type`, `status`, `created`, `related` 정도로 시작합니다.</li>
+            <li>반복되는 프론트매터는 기본 템플릿이나 Templater로 자동화합니다.</li>
+            <li>노트가 쌓이면 주제별 MOC 노트를 만들어 길잡이 역할을 맡깁니다.</li>
+          </ul>
+        </details>
+      </section>
+
+      <section>
+        <div class="final-note">
+          <h2>결론</h2>
+          <p>
+            이 글의 메시지는 단순합니다. 옵시디언을 오래 쓰려면 정교한 분류표를 먼저 만들기보다,
+            실제 생각의 흐름을 따라 노트를 연결해야 합니다. 프론트매터는 그 연결을 대체하는 도구가 아니라,
+            상태와 날짜처럼 구조화가 필요한 정보를 보조하는 장치입니다.
+          </p>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    원문 기준: uxdev.org, "옵시디언에서 노트 간 연결성 높이기, 프론트매터 작성법까지 한 번에 정리", 2026-04-15.
+  </footer>
+
+  <script>
+function copyToClipboard(text, btn) {
+  const label = btn.textContent;
+  const flash = ok => {
+    btn.textContent = ok ? 'Copied' : 'Failed';
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = label; btn.disabled = false; }, 1500);
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => flash(true)).catch(fallback);
+  } else { fallback(); }
+  function fallback() {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.cssText = 'position:fixed;opacity:0;';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { flash(document.execCommand('copy')); } catch { flash(false); }
+    document.body.removeChild(ta);
+  }
+}
+function copyCode(btn) {
+  const text = btn.closest('.code-block').querySelector('pre').innerText;
+  copyToClipboard(text, btn);
+}
+function showTab(event, panelId) {
+  const tabs = event.currentTarget.closest('.tabs');
+  tabs.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  tabs.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+}
+function updateProgress() {
+  const scrollTop = window.scrollY || document.documentElement.scrollTop;
+  const height = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = height > 0 ? (scrollTop / height) * 100 : 0;
+  document.getElementById('read-progress').style.width = pct + '%';
+}
+window.addEventListener('scroll', updateProgress, { passive: true });
+updateProgress();
+  </script>
+</body>
+</html>
