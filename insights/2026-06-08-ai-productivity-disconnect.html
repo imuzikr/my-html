@@ -225,98 +225,6 @@
         <p>2022년 말 ChatGPT가 출시된 이후, 생성형 AI는 직장에 놀라운 속도로 확산됐습니다. 2025년 기준으로 국내 근로자의 절반 이상(51.8%)이 업무에 AI를 활용하고 있으며, 이 속도는 1990년대 인터넷 보급보다 약 8배 빠릅니다.</p>
         <p>그러나 생산성 지표에서는 아직 변화가 보이지 않습니다. 아래 그래프처럼 ChatGPT 출시 이후에도 우리나라의 시간당 생산성 추세는 크게 달라지지 않았습니다. <strong>'기술 확산 속도'와 '생산성 개선 속도'의 차이</strong>가 이 연구의 출발점입니다.</p>
 
-        <div class="chart-row">
-          <!-- 그림 1: AI vs 인터넷 확산 -->
-          <div class="chart-box">
-            <div class="chart-title">그림 1 — 생성형 AI vs. 인터넷 활용률</div>
-            <svg viewBox="0 0 380 240" aria-label="AI와 인터넷 확산 속도 비교">
-              <!-- axes -->
-              <line x1="50" y1="200" x2="360" y2="200" stroke="#dedad2" stroke-width="1.5"/>
-              <line x1="50" y1="20" x2="50" y2="200" stroke="#dedad2" stroke-width="1.5"/>
-              <!-- Y labels -->
-              <text x="44" y="204" text-anchor="end" fill="#a09f97" font-size="10">0</text>
-              <text x="44" y="164" text-anchor="end" fill="#a09f97" font-size="10">20</text>
-              <text x="44" y="124" text-anchor="end" fill="#a09f97" font-size="10">40</text>
-              <text x="44" y="84" text-anchor="end" fill="#a09f97" font-size="10">60</text>
-              <text x="44" y="44" text-anchor="end" fill="#a09f97" font-size="10">80</text>
-              <!-- Y gridlines -->
-              <line x1="50" y1="200" x2="360" y2="200" stroke="#eceae4" stroke-width="1"/>
-              <line x1="50" y1="160" x2="360" y2="160" stroke="#eceae4" stroke-width="1"/>
-              <line x1="50" y1="120" x2="360" y2="120" stroke="#eceae4" stroke-width="1"/>
-              <line x1="50" y1="80" x2="360" y2="80" stroke="#eceae4" stroke-width="1"/>
-              <line x1="50" y1="40" x2="360" y2="40" stroke="#eceae4" stroke-width="1"/>
-              <!-- X labels: 0,5,10,15,20,25,30년 -->
-              <text x="50" y="215" text-anchor="middle" fill="#a09f97" font-size="10">0</text>
-              <text x="102" y="215" text-anchor="middle" fill="#a09f97" font-size="10">5</text>
-              <text x="154" y="215" text-anchor="middle" fill="#a09f97" font-size="10">10</text>
-              <text x="206" y="215" text-anchor="middle" fill="#a09f97" font-size="10">15</text>
-              <text x="258" y="215" text-anchor="middle" fill="#a09f97" font-size="10">20</text>
-              <text x="310" y="215" text-anchor="middle" fill="#a09f97" font-size="10">25</text>
-              <text x="205" y="230" text-anchor="middle" fill="#a09f97" font-size="10">상용화 이후 경과 연수</text>
-              <!-- Internet line (느린 S커브) -->
-              <polyline points="50,198 102,193 154,182 206,160 258,128 310,95 360,72"
-                stroke="#b8b5ac" stroke-width="2" fill="none" stroke-dasharray="5,3"/>
-              <!-- AI line (가파른 상승: 3년만에 51.8%) x=50→154 = 0→3년 -->
-              <polyline points="50,198 76,185 102,165 128,130 154,100 180,86 206,80"
-                stroke="#d95f2b" stroke-width="2.5" fill="none"/>
-              <!-- dots -->
-              <circle cx="154" cy="100" r="4" fill="#d95f2b"/>
-              <text x="158" y="95" fill="#d95f2b" font-size="10" font-weight="600">51.8%</text>
-              <!-- Legend -->
-              <line x1="58" y1="28" x2="80" y2="28" stroke="#d95f2b" stroke-width="2.5"/>
-              <circle cx="69" cy="28" r="3" fill="#d95f2b"/>
-              <text x="84" y="32" fill="#6b6a63" font-size="10">생성형 AI</text>
-              <line x1="145" y1="28" x2="167" y2="28" stroke="#b8b5ac" stroke-width="2" stroke-dasharray="4,2"/>
-              <text x="171" y="32" fill="#6b6a63" font-size="10">인터넷</text>
-            </svg>
-            <p class="chart-note">AI 확산 속도는 인터넷 대비 약 8배 빠름. 자료: ITU, 한국은행 가계조사</p>
-          </div>
-
-          <!-- 그림 2: 시간당 생산성 -->
-          <div class="chart-box">
-            <div class="chart-title">그림 2 — 시간당 생산성 추이</div>
-            <svg viewBox="0 0 380 240" aria-label="한국 시간당 생산성 추이">
-              <!-- axes -->
-              <line x1="50" y1="200" x2="360" y2="200" stroke="#dedad2" stroke-width="1.5"/>
-              <line x1="50" y1="20" x2="50" y2="200" stroke="#dedad2" stroke-width="1.5"/>
-              <!-- Y labels -->
-              <text x="44" y="204" text-anchor="end" fill="#a09f97" font-size="10">80</text>
-              <text x="44" y="164" text-anchor="end" fill="#a09f97" font-size="10">100</text>
-              <text x="44" y="124" text-anchor="end" fill="#a09f97" font-size="10">120</text>
-              <text x="44" y="84" text-anchor="end" fill="#a09f97" font-size="10">140</text>
-              <text x="44" y="44" text-anchor="end" fill="#a09f97" font-size="10">160</text>
-              <!-- gridlines -->
-              <line x1="50" y1="164" x2="360" y2="164" stroke="#eceae4" stroke-width="1"/>
-              <line x1="50" y1="124" x2="360" y2="124" stroke="#eceae4" stroke-width="1"/>
-              <line x1="50" y1="84" x2="360" y2="84" stroke="#eceae4" stroke-width="1"/>
-              <!-- X: 2010→2025, 15년=310px -->
-              <text x="50" y="215" text-anchor="middle" fill="#a09f97" font-size="10">'10</text>
-              <text x="112" y="215" text-anchor="middle" fill="#a09f97" font-size="10">'13</text>
-              <text x="174" y="215" text-anchor="middle" fill="#a09f97" font-size="10">'16</text>
-              <text x="236" y="215" text-anchor="middle" fill="#a09f97" font-size="10">'19</text>
-              <text x="298" y="215" text-anchor="middle" fill="#a09f97" font-size="10">'22</text>
-              <text x="350" y="215" text-anchor="middle" fill="#a09f97" font-size="10">'25</text>
-              <!-- 추세선 (2010~2022): 점선 -->
-              <line x1="50" y1="164" x2="298" y2="88" stroke="#b8b5ac" stroke-width="1.5" stroke-dasharray="6,3"/>
-              <!-- 실제 데이터 라인 (GDP/총근로시간 추이) -->
-              <polyline points="50,168 70,162 90,155 112,150 132,143 154,137 174,128 194,125 214,120 236,115 250,118 260,124 270,121 280,118 298,112 312,112 330,113 350,112"
-                stroke="#2d5a8e" stroke-width="2" fill="none"/>
-              <!-- COVID 표시 -->
-              <line x1="256" y1="30" x2="256" y2="200" stroke="#e8c4b0" stroke-width="1" stroke-dasharray="4,2"/>
-              <text x="258" y="42" fill="#d95f2b" font-size="9" font-weight="600">COVID</text>
-              <!-- ChatGPT 표시 -->
-              <line x1="298" y1="30" x2="298" y2="200" stroke="#b8d4c0" stroke-width="1" stroke-dasharray="4,2"/>
-              <text x="300" y="42" fill="#3a6b4a" font-size="9" font-weight="600">ChatGPT</text>
-              <text x="300" y="53" fill="#3a6b4a" font-size="9">출시</text>
-              <!-- Legend -->
-              <line x1="58" y1="230" x2="76" y2="230" stroke="#2d5a8e" stroke-width="2"/>
-              <text x="80" y="234" fill="#6b6a63" font-size="9">시간당 생산성</text>
-              <line x1="155" y1="230" x2="173" y2="230" stroke="#b8b5ac" stroke-width="1.5" stroke-dasharray="4,2"/>
-              <text x="177" y="234" fill="#6b6a63" font-size="9">추세선('10~'22)</text>
-            </svg>
-            <p class="chart-note">ChatGPT 출시 후 3년간 생산성 추세에 유의미한 변화 없음. 자료: 한국은행, 국가데이터처</p>
-          </div>
-        </div>
       </section>
 
       <!-- 2. 업무시간 단축 -->
@@ -329,9 +237,9 @@
         <p>이 절감 시간이 전부 생산으로 전환된다고 가정하면, 잠재적 생산성 향상 효과는 약 <strong>1.0%</strong>로 추정됩니다. 하지만 이 효과는 모든 직업·작업에서 균등하게 나타나지 않았습니다.</p>
 
         <div class="chart-row">
-          <!-- 그림 4: 직업별 절감률 -->
+          <!-- 그림 1: 직업별 절감률 -->
           <div class="chart-box">
-            <div class="chart-title">그림 4 — 직업별 업무시간 절감률</div>
+            <div class="chart-title">그림 1 — 직업별 업무시간 절감률</div>
             <svg viewBox="0 0 320 280" aria-label="직업별 업무시간 절감률 막대그래프">
               <!-- 직업 8개, 오른쪽 수평 막대 -->
               <!-- 전문직 2.8 -->
@@ -372,45 +280,60 @@
             <p class="chart-note">전문직·사무직·관리직에서 효과가 크고, 서비스직·기능직·단순노무직에서는 제한적</p>
           </div>
 
-          <!-- 그림 6: 회귀분석 결과 (단순화) -->
+          <!-- 그림 2: 작업별 업무시간 절감률 -->
           <div class="chart-box">
-            <div class="chart-title">그림 6 — 누가 더 많이 절감하나?</div>
-            <svg viewBox="0 0 320 280" aria-label="업무시간 절감률 회귀분석">
+            <div class="chart-title">그림 2 — 작업별 업무시간 절감률 (상위 항목)</div>
+            <svg viewBox="0 0 320 320" aria-label="작업별 업무시간 절감률 상위 항목">
               <!-- 기준선 -->
-              <line x1="50" y1="10" x2="50" y2="260" stroke="#dedad2" stroke-width="1.5"/>
-              <!-- 항목별 막대 (기준 대비 차이) -->
-              <!-- AI 사용시간 많음 +3.3 -->
-              <text x="46" y="36" text-anchor="end" fill="#1a1a18" font-size="10">AI 많이 사용</text>
-              <rect x="50" y="24" width="99" height="14" rx="3" fill="#3a6b4a"/>
-              <text x="153" y="36" fill="#3a6b4a" font-size="10" font-weight="700">+3.3%***</text>
-              <!-- 근속연수 짧음 (저숙련) +1.4 -->
-              <text x="46" y="64" text-anchor="end" fill="#1a1a18" font-size="10">저경력 근로자</text>
-              <rect x="50" y="52" width="42" height="14" rx="3" fill="#3a6b4a" opacity=".8"/>
-              <text x="96" y="64" fill="#3a6b4a" font-size="10" font-weight="700">+1.4%**</text>
-              <!-- 자영업자 +1.6 -->
-              <text x="46" y="92" text-anchor="end" fill="#1a1a18" font-size="10">자영업자</text>
-              <rect x="50" y="80" width="48" height="14" rx="3" fill="#2d5a8e"/>
-              <text x="102" y="92" fill="#2d5a8e" font-size="10" font-weight="700">+1.6%*</text>
-              <!-- 전문직 +1.0 -->
-              <text x="46" y="120" text-anchor="end" fill="#1a1a18" font-size="10">전문직</text>
-              <rect x="50" y="108" width="30" height="14" rx="3" fill="#2d5a8e" opacity=".8"/>
-              <text x="84" y="120" fill="#2d5a8e" font-size="10" font-weight="700">+1.0%**</text>
-              <!-- 15~29세 -1.5 (낮음) -->
-              <text x="46" y="150" text-anchor="end" fill="#1a1a18" font-size="10">청년(15~29세)</text>
-              <rect x="5" y="138" width="45" height="14" rx="3" fill="#b03a2e" opacity=".7"/>
-              <text x="3" y="150" text-anchor="end" fill="#b03a2e" font-size="10" font-weight="700">-1.5%</text>
-              <!-- 단순노무 -2.3 -->
-              <text x="46" y="178" text-anchor="end" fill="#1a1a18" font-size="10">단순노무직</text>
-              <rect x="5" y="166" width="45" height="14" rx="3" fill="#b03a2e" opacity=".6"/>
-              <text x="3" y="178" text-anchor="end" fill="#b03a2e" font-size="10" font-weight="700">-2.3%**</text>
+              <line x1="154" y1="8" x2="154" y2="298" stroke="#dedad2" stroke-width="1.5"/>
+              <!-- 작업명 텍스트와 막대 (좌측 텍스트, 우측 막대) -->
+              <!-- 1. 교육자료 개발 32.2% -->
+              <text x="150" y="30" text-anchor="end" fill="#1a1a18" font-size="9.5">교육과정·교육자료 개발</text>
+              <rect x="154" y="18" width="129" height="14" rx="3" fill="#2d5a8e"/>
+              <text x="287" y="30" fill="#2d5a8e" font-size="9.5" font-weight="700">32.2%</text>
+              <!-- 2. 통계분석·연구설계 24.6% -->
+              <text x="150" y="54" text-anchor="end" fill="#1a1a18" font-size="9.5">통계분석·연구설계</text>
+              <rect x="154" y="42" width="98" height="14" rx="3" fill="#2d5a8e" opacity=".88"/>
+              <text x="256" y="54" fill="#2d5a8e" font-size="9.5" font-weight="700">24.6%</text>
+              <!-- 3. 소프트웨어 개발 23.3% -->
+              <text x="150" y="78" text-anchor="end" fill="#1a1a18" font-size="9.5">소프트웨어 개발</text>
+              <rect x="154" y="66" width="93" height="14" rx="3" fill="#2d5a8e" opacity=".82"/>
+              <text x="251" y="78" fill="#2d5a8e" font-size="9.5" font-weight="700">23.3%</text>
+              <!-- 4. 교육훈련 프로그램 설계 17.2% -->
+              <text x="150" y="102" text-anchor="end" fill="#1a1a18" font-size="9.5">교육훈련 프로그램 설계</text>
+              <rect x="154" y="90" width="69" height="14" rx="3" fill="#3a6b4a"/>
+              <text x="227" y="102" fill="#3a6b4a" font-size="9.5" font-weight="700">17.2%</text>
+              <!-- 5. 그래픽 디자인 14.5% -->
+              <text x="150" y="126" text-anchor="end" fill="#1a1a18" font-size="9.5">그래픽 디자인·레이아웃</text>
+              <rect x="154" y="114" width="58" height="14" rx="3" fill="#3a6b4a" opacity=".88"/>
+              <text x="216" y="126" fill="#3a6b4a" font-size="9.5" font-weight="700">14.5%</text>
+              <!-- 6. 프로젝트 계획 관리 13.6% -->
+              <text x="150" y="150" text-anchor="end" fill="#1a1a18" font-size="9.5">프로젝트 계획·관리</text>
+              <rect x="154" y="138" width="54" height="14" rx="3" fill="#3a6b4a" opacity=".8"/>
+              <text x="212" y="150" fill="#3a6b4a" font-size="9.5" font-weight="700">13.6%</text>
+              <!-- 7. 학생 과제·시험 평가 13.5% -->
+              <text x="150" y="174" text-anchor="end" fill="#1a1a18" font-size="9.5">학생 과제·시험 평가</text>
+              <rect x="154" y="162" width="54" height="14" rx="3" fill="#3a6b4a" opacity=".74"/>
+              <text x="212" y="174" fill="#3a6b4a" font-size="9.5" font-weight="700">13.5%</text>
+              <!-- 8. 기술지원·문제해결 9.5% -->
+              <text x="150" y="198" text-anchor="end" fill="#1a1a18" font-size="9.5">기술지원·문제해결</text>
+              <rect x="154" y="186" width="38" height="14" rx="3" fill="#6b6a63" opacity=".65"/>
+              <text x="196" y="198" fill="#6b6a63" font-size="9.5" font-weight="700">9.5%</text>
+              <!-- 9. 학생 상담·지원 9.1% -->
+              <text x="150" y="222" text-anchor="end" fill="#1a1a18" font-size="9.5">학생 상담·지원</text>
+              <rect x="154" y="210" width="36" height="14" rx="3" fill="#6b6a63" opacity=".58"/>
+              <text x="194" y="222" fill="#6b6a63" font-size="9.5" font-weight="700">9.1%</text>
+              <!-- 10. 주방 직원 교육·감독 8.3% -->
+              <text x="150" y="246" text-anchor="end" fill="#1a1a18" font-size="9.5">주방·서비스 직원 교육</text>
+              <rect x="154" y="234" width="33" height="14" rx="3" fill="#6b6a63" opacity=".5"/>
+              <text x="191" y="246" fill="#6b6a63" font-size="9.5" font-weight="700">8.3%</text>
               <!-- 범례 -->
-              <rect x="54" y="210" width="12" height="10" rx="2" fill="#3a6b4a"/>
-              <text x="70" y="219" fill="#6b6a63" font-size="10">절감 효과 큼</text>
-              <rect x="54" y="228" width="12" height="10" rx="2" fill="#b03a2e" opacity=".7"/>
-              <text x="70" y="237" fill="#6b6a63" font-size="10">절감 효과 작음</text>
-              <text x="54" y="255" fill="#a09f97" font-size="9">*p&lt;10%, **p&lt;5%, ***p&lt;1%</text>
+              <rect x="156" y="268" width="10" height="10" rx="2" fill="#2d5a8e"/>
+              <text x="170" y="277" fill="#6b6a63" font-size="9">30%↑ 인지·비정형</text>
+              <rect x="156" y="284" width="10" height="10" rx="2" fill="#3a6b4a"/>
+              <text x="170" y="293" fill="#6b6a63" font-size="9">10~20% 중간</text>
             </svg>
-            <p class="chart-note">AI 사용량이 많고 경력이 짧을수록 업무시간 절감 효과가 두드러짐</p>
+            <p class="chart-note">응답자 50명 이상인 작업 중 절감률 상위 항목. 인지적·비정형 업무에서 효과 집중. 자료: 한국은행 가계조사</p>
           </div>
         </div>
 
@@ -432,7 +355,7 @@
         <p>핵심 발견입니다. 업무시간이 줄었다고 해서 업무처리량(산출)이 늘지는 않았습니다. 근로자별 업무시간 절감률과 업무처리량 증가율 사이의 <strong>상관계수는 0</strong>으로 나타났습니다. 수천 명의 데이터를 놓고 봐도 두 변수 사이에는 아무런 관계가 없다는 것입니다.</p>
 
         <div class="chart-box">
-          <div class="chart-title">그림 7 — 업무시간 절감 vs. 업무처리량 증가 (상관계수 = 0)</div>
+          <div class="chart-title">그림 3 — 업무시간 절감 vs. 업무처리량 증가 (상관계수 = 0)</div>
           <svg viewBox="0 0 620 280" aria-label="업무시간 절감률과 업무처리량 증가율 산점도">
             <!-- axes -->
             <line x1="60" y1="240" x2="580" y2="240" stroke="#dedad2" stroke-width="1.5"/>
@@ -497,48 +420,6 @@
 
         <p>단, 예외가 있습니다. <strong>자영업자, 전문직, AI 고강도 사용자</strong>에서는 시간 절감이 실제 생산 증가로 이어졌습니다. 이들의 공통점은 '성과가 바로 소득과 연결되거나, 업무 자율성이 높다'는 것입니다.</p>
 
-        <!-- 그림 8: 누가 생산성을 실현하나 -->
-        <div class="chart-box">
-          <div class="chart-title">그림 8 — 누가 시간 절감을 실제 생산 증가로 전환하나?</div>
-          <svg viewBox="0 0 620 200" aria-label="업무처리량 증가율 회귀분석 결과">
-            <!-- 기준선 (y=130) -->
-            <line x1="50" y1="130" x2="590" y2="130" stroke="#dedad2" stroke-width="1.5"/>
-            <!-- y축 -->
-            <line x1="50" y1="20" x2="50" y2="170" stroke="#dedad2" stroke-width="1.5"/>
-            <text x="44" y="134" text-anchor="end" fill="#a09f97" font-size="10">0</text>
-            <text x="44" y="100" text-anchor="end" fill="#a09f97" font-size="10">+0.5</text>
-            <text x="44" y="66" text-anchor="end" fill="#a09f97" font-size="10">+1.0</text>
-            <text x="44" y="34" text-anchor="end" fill="#a09f97" font-size="10">+1.5</text>
-            <!-- gridlines -->
-            <line x1="50" y1="100" x2="590" y2="100" stroke="#eceae4" stroke-width="1"/>
-            <line x1="50" y1="66" x2="590" y2="66" stroke="#eceae4" stroke-width="1"/>
-            <!-- 자영업자 +1.0 -->
-            <rect x="68" y="66" width="55" height="64" rx="3" fill="#d95f2b"/>
-            <text x="95" y="184" text-anchor="middle" fill="#6b6a63" font-size="10">자영업자</text>
-            <text x="95" y="60" text-anchor="middle" fill="#d95f2b" font-size="10" font-weight="700">+1.0**</text>
-            <!-- 청년(15~29) +0.6 -->
-            <rect x="148" y="94" width="55" height="36" rx="3" fill="#2d5a8e"/>
-            <text x="175" y="184" text-anchor="middle" fill="#6b6a63" font-size="10">청년층</text>
-            <text x="175" y="88" text-anchor="middle" fill="#2d5a8e" font-size="10" font-weight="700">+0.6*</text>
-            <!-- 전문직 +0.7 -->
-            <rect x="228" y="88" width="55" height="42" rx="3" fill="#3a6b4a"/>
-            <text x="255" y="184" text-anchor="middle" fill="#6b6a63" font-size="10">전문직</text>
-            <text x="255" y="82" text-anchor="middle" fill="#3a6b4a" font-size="10" font-weight="700">+0.7**</text>
-            <!-- AI 고강도 사용 +0.5 -->
-            <rect x="308" y="100" width="55" height="30" rx="3" fill="#5b3a7a"/>
-            <text x="335" y="184" text-anchor="middle" fill="#6b6a63" font-size="10">AI 고강도</text>
-            <text x="335" y="94" text-anchor="middle" fill="#5b3a7a" font-size="10" font-weight="700">+0.5*</text>
-            <!-- 단순노무직 -0.8 -->
-            <rect x="390" y="130" width="55" height="32" rx="3" fill="#b03a2e" opacity=".7"/>
-            <text x="417" y="184" text-anchor="middle" fill="#6b6a63" font-size="10">단순노무직</text>
-            <text x="417" y="178" text-anchor="middle" fill="#b03a2e" font-size="10" font-weight="700">-0.8**</text>
-            <!-- 판매직 -0.9 -->
-            <rect x="468" y="130" width="55" height="36" rx="3" fill="#b03a2e" opacity=".55"/>
-            <text x="495" y="184" text-anchor="middle" fill="#6b6a63" font-size="10">판매직</text>
-            <text x="495" y="182" text-anchor="middle" fill="#b03a2e" font-size="10" font-weight="700">-0.9</text>
-          </svg>
-          <p class="chart-note">1%p 업무시간 절감 시 임금근로자 대비 추가 업무처리량 증가율(%). 자영업자·전문직·AI 고강도 사용자에서만 실질적 생산 증가 관찰. *p&lt;10%, **p&lt;5%</p>
-        </div>
       </section>
 
       <!-- 4. 왜? -->
