@@ -58,7 +58,7 @@
 
     /* Source cite */
     .source-cite{display:inline-flex;align-items:center;gap:var(--space-2);font-size:var(--text-xs);color:rgba(255,255,255,.55);margin-top:var(--space-4);border:1px solid rgba(255,255,255,.14);padding:var(--space-2) var(--space-4);border-radius:var(--radius-full)}
-    .notebooklm-bar{display:flex;align-items:center;gap:var(--space-4);padding:var(--space-4) var(--space-5);background:#f8f9fa;border:1px solid #e2e8f0;border-radius:var(--radius-lg);text-decoration:none;color:#1a202c;font-size:var(--text-sm);font-weight:500;transition:background .15s,box-shadow .15s;margin-bottom:var(--space-10)}
+    .notebooklm-bar{display:flex;align-items:center;gap:var(--space-4);padding:var(--space-4) var(--space-5);background:#f8f9fa;border:1px solid #e2e8f0;border-radius:var(--radius-lg);text-decoration:none;color:#1a202c;font-size:var(--text-sm);font-weight:500;transition:background .15s,box-shadow .15s;margin-bottom:var(--space-12)}
     .notebooklm-bar:hover{background:#f0f4f8;box-shadow:0 2px 8px rgba(0,0,0,.08)}
     .notebooklm-logo{height:22px;flex-shrink:0}
     .notebooklm-info{flex:1}
@@ -195,14 +195,14 @@
   <main>
     <article>
       <a class="notebooklm-bar" href="https://notebooklm.google.com/notebook/ecebaea9-0fe4-4c1c-ad65-cbc78b077957" target="_blank" rel="noopener">
-        <!-- NotebookLM 로고 SVG (공식 로고 재현: 3개 아치 + NotebookLM 텍스트) -->
-        <svg class="notebooklm-logo" viewBox="0 0 220 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="NotebookLM">
-          <!-- 아치 아이콘 -->
-          <path d="M4 34 C4 18 10 8 20 4" stroke="#111" stroke-width="5.5" stroke-linecap="round" fill="none"/>
-          <path d="M4 34 C4 22 14 10 28 8" stroke="#111" stroke-width="5.5" stroke-linecap="round" fill="none"/>
-          <path d="M4 34 C6 26 18 16 36 14" stroke="#111" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+        <!-- NotebookLM 로고 SVG -->
+        <svg class="notebooklm-logo" viewBox="0 0 230 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="NotebookLM">
+          <!-- 3개 동심 원호: 좌하단 꼭짓점(3,41)에서 부채꼴로 퍼지는 quarter-arc -->
+          <path d="M 3,29 A 12,12 0 0,1 15,41" stroke="#111" stroke-width="5" stroke-linecap="round" fill="none"/>
+          <path d="M 3,19 A 22,22 0 0,1 25,41" stroke="#111" stroke-width="5" stroke-linecap="round" fill="none"/>
+          <path d="M 3,9  A 32,32 0 0,1 35,41" stroke="#111" stroke-width="5" stroke-linecap="round" fill="none"/>
           <!-- NotebookLM 텍스트 -->
-          <text x="48" y="30" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="22" font-weight="700" fill="#111" letter-spacing="-0.5">NotebookLM</text>
+          <text x="50" y="33" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif" font-size="23" font-weight="700" fill="#111" letter-spacing="-0.3">NotebookLM</text>
         </svg>
         <div class="notebooklm-info">
           <div class="notebooklm-label">Google · AI 노트</div>
