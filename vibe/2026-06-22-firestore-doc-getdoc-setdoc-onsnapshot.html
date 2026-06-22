@@ -1,1079 +1,493 @@
 <!DOCTYPE html>
-
 <html lang="ko">
-
 <head>
-
-<meta charset="UTF-8" />
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-<meta name="description" content="Firestore SDK의 doc, getDoc, setDoc, onSnapshot 함수를 좌석 신청 앱 예시로 상세히 설명하는 문서. 주소표 만들기부터 읽기·쓰기·실시간 구독까지." />
-
-<title>Firestore 핵심 함수 4가지 — doc · getDoc · setDoc · onSnapshot</title>
-
-<style>
-
-:root {
-
-  --color-bg:#f5f2ed; --color-bg-alt:#eceae4; --color-bg-card:#ffffff;
-
-  --color-text:#1a1a18; --color-text-muted:#6b6a63; --color-text-faint:#a09f97;
-
-  --color-border:#dedad2; --color-accent:#d95f2b; --color-accent-hover:#c2521f;
-
-  --color-accent-soft:#faeee7;
-
-  --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
-
-  --font-mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
-
-  --text-sm:0.875rem; --text-base:1rem; --text-lg:1.125rem;
-
-  --text-2xl:1.5rem; --text-3xl:1.875rem;
-
-  --weight-medium:500; --weight-semibold:600; --weight-bold:700;
-
-  --space-1:0.25rem; --space-2:0.5rem; --space-3:0.75rem; --space-4:1rem;
-
-  --space-6:1.5rem; --space-8:2rem; --space-12:3rem;
-
-  --radius-md:8px; --radius-lg:12px;
-
-  --shadow-sm:0 1px 3px rgba(0,0,0,0.07); --shadow-md:0 4px 12px rgba(0,0,0,0.08);
-
-  --leading-tight:1.3; --leading-normal:1.7;
-
-}
-
-*{box-sizing:border-box;margin:0;padding:0;}
-
-body{
-
-  font-family:var(--font-sans);background:var(--color-bg);color:var(--color-text);
-
-  line-height:var(--leading-normal);font-size:var(--text-base);
-
-}
-
-/* 사이트 nav */
-
-#read-progress{position:fixed;top:0;left:0;width:0;height:3px;background:var(--color-accent);z-index:1000;transition:width 80ms linear}
-
-.site-nav{position:sticky;top:0;z-index:500;background:rgba(245,242,237,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--color-border)}
-
-.nav-inner{max-width:860px;margin:0 auto;padding:.75rem 1rem;display:flex;align-items:center;gap:1rem}
-
-.nav-brand{color:var(--color-accent);font-weight:700;text-decoration:none;font-size:var(--text-sm);white-space:nowrap}
-
-.wrap{max-width:860px;margin:0 auto;padding:var(--space-8) var(--space-4) var(--space-12);}
-
-
-
-/* 히어로 */
-
-.hero{
-
-  background:var(--color-bg-card);border:1px solid var(--color-border);
-
-  border-radius:var(--radius-lg);padding:var(--space-8);margin-bottom:var(--space-8);
-
-  box-shadow:var(--shadow-sm);
-
-}
-
-.hero .kicker{
-
-  color:var(--color-accent);font-size:var(--text-sm);font-weight:var(--weight-semibold);
-
-  letter-spacing:.04em;text-transform:uppercase;margin-bottom:var(--space-3);
-
-}
-
-.hero h1{font-size:var(--text-3xl);line-height:var(--leading-tight);margin-bottom:var(--space-4);}
-
-.hero p{color:var(--color-text-muted);font-size:var(--text-lg);}
-
-
-
-/* 개요 카드 */
-
-.overview{
-
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
-
-  gap:var(--space-4);margin-bottom:var(--space-8);
-
-}
-
-.ov-card{
-
-  background:var(--color-bg-card);border:1px solid var(--color-border);
-
-  border-radius:var(--radius-md);padding:var(--space-6);box-shadow:var(--shadow-sm);
-
-}
-
-.ov-card .icon{
-
-  width:38px;height:38px;border-radius:var(--radius-md);background:var(--color-accent-soft);
-
-  display:flex;align-items:center;justify-content:center;margin-bottom:var(--space-3);
-
-}
-
-.ov-card h3{font-size:var(--text-lg);margin-bottom:var(--space-2);}
-
-.ov-card code{
-
-  font-family:var(--font-mono);font-size:var(--text-sm);color:var(--color-accent);
-
-  background:var(--color-accent-soft);padding:1px 6px;border-radius:4px;
-
-}
-
-.ov-card p{color:var(--color-text-muted);font-size:var(--text-sm);margin-top:var(--space-2);}
-
-
-
-/* 탭 */
-
-.tabs{display:flex;gap:var(--space-2);margin-bottom:var(--space-6);flex-wrap:wrap;}
-
-.tab-btn{
-
-  font-family:var(--font-sans);font-size:var(--text-sm);font-weight:var(--weight-medium);
-
-  padding:var(--space-3) var(--space-4);min-height:44px;border:1px solid var(--color-border);
-
-  background:var(--color-bg-card);color:var(--color-text-muted);border-radius:var(--radius-md);
-
-  cursor:pointer;transition:all 180ms ease;
-
-}
-
-.tab-btn:hover{border-color:var(--color-accent);color:var(--color-text);}
-
-.tab-btn.active{background:var(--color-accent);color:#fff;border-color:var(--color-accent);}
-
-.tab-panel{display:none;}
-
-.tab-panel.active{display:block;}
-
-
-
-/* 섹션 카드 */
-
-.section{
-
-  background:var(--color-bg-card);border:1px solid var(--color-border);
-
-  border-radius:var(--radius-lg);padding:var(--space-8);margin-bottom:var(--space-6);
-
-  box-shadow:var(--shadow-sm);
-
-}
-
-.section h2{font-size:var(--text-2xl);margin-bottom:var(--space-4);display:flex;align-items:center;gap:var(--space-3);}
-
-.section h2 .badge{
-
-  font-family:var(--font-mono);font-size:var(--text-sm);font-weight:var(--weight-semibold);
-
-  color:var(--color-accent);background:var(--color-accent-soft);padding:2px 10px;border-radius:6px;
-
-}
-
-.section h3{font-size:var(--text-lg);margin:var(--space-6) 0 var(--space-3);}
-
-.section p{color:var(--color-text);margin-bottom:var(--space-4);}
-
-.section p.muted{color:var(--color-text-muted);}
-
-.section ul{margin:0 0 var(--space-4) var(--space-6);color:var(--color-text);}
-
-.section li{margin-bottom:var(--space-2);}
-
-.kv{color:var(--color-accent);font-weight:var(--weight-semibold);}
-
-
-
-/* 단계 표시 */
-
-.step{display:flex;gap:var(--space-4);margin-bottom:var(--space-6);}
-
-.step-num{
-
-  flex:none;width:32px;height:32px;border-radius:50%;background:var(--color-accent);
-
-  color:#fff;font-weight:var(--weight-bold);display:flex;align-items:center;justify-content:center;
-
-  font-size:var(--text-sm);
-
-}
-
-.step-body{flex:1;min-width:0;}
-
-.step-body h3{margin-top:0;}
-
-
-
-/* 코드 블록 */
-
-.code-block{
-
-  background:#1e1d1a;border-radius:var(--radius-md);overflow:hidden;
-
-  margin:var(--space-4) 0;border:1px solid #2c2b27;
-
-}
-
-.code-head{
-
-  display:flex;justify-content:space-between;align-items:center;
-
-  padding:var(--space-2) var(--space-4);background:#252420;border-bottom:1px solid #34322d;
-
-}
-
-.code-lang{font-family:var(--font-mono);font-size:var(--text-sm);color:#a09f97;}
-
-.copy-btn{
-
-  font-family:var(--font-sans);font-size:var(--text-sm);color:#d8d6cf;
-
-  background:#34322d;border:1px solid #44423b;border-radius:6px;
-
-  padding:3px 12px;cursor:pointer;transition:all 180ms ease;
-
-}
-
-.copy-btn:hover{background:#44423b;}
-
-.code-block pre{margin:0;padding:var(--space-4);overflow-x:auto;}
-
-.code-block code{
-
-  font-family:var(--font-mono);font-size:var(--text-sm);line-height:1.65;color:#e6e4dd;
-
-  white-space:pre;
-
-}
-
-.tok-keyword{color:#e0884f;}
-
-.tok-string{color:#9ec98a;}
-
-.tok-comment{color:#7d7a70;font-style:italic;}
-
-.tok-number{color:#d8a657;}
-
-.tok-function{color:#7daea3;}
-
-
-
-/* 알림 박스 */
-
-.note{
-
-  border-radius:var(--radius-md);padding:var(--space-4) var(--space-6);
-
-  margin:var(--space-4) 0;border-left:4px solid;font-size:var(--text-base);
-
-}
-
-.note .note-title{font-weight:var(--weight-semibold);margin-bottom:var(--space-1);display:block;}
-
-.note.info{background:#eef4fb;border-color:#3b82c4;}
-
-.note.warn{background:#fdf6e7;border-color:#d8a637;}
-
-.note.err{background:#fbeeec;border-color:#c0492f;}
-
-.note p{margin:0;color:var(--color-text);}
-
-
-
-/* 비유 카드 */
-
-.analogy{
-
-  background:var(--color-accent-soft);border-radius:var(--radius-md);
-
-  padding:var(--space-6);margin:var(--space-4) 0;border:1px solid #f1ddd0;
-
-}
-
-.analogy .label{
-
-  font-size:var(--text-sm);font-weight:var(--weight-semibold);color:var(--color-accent);
-
-  text-transform:uppercase;letter-spacing:.04em;margin-bottom:var(--space-2);display:block;
-
-}
-
-.analogy p{margin:0;color:var(--color-text);}
-
-
-
-/* SVG 흐름도 */
-
-.diagram{
-
-  background:var(--color-bg-card);border:1px solid var(--color-border);
-
-  border-radius:var(--radius-md);padding:var(--space-6);margin:var(--space-4) 0;
-
-}
-
-.diagram svg{width:100%;height:auto;display:block;}
-
-
-
-/* 비교 표 */
-
-.table-wrap{overflow-x:auto;margin:var(--space-4) 0;}
-
-table{border-collapse:collapse;width:100%;font-size:var(--text-sm);}
-
-th,td{border:1px solid var(--color-border);padding:var(--space-3);text-align:left;vertical-align:top;}
-
-th{background:var(--color-bg-alt);font-weight:var(--weight-semibold);}
-
-td code{font-family:var(--font-mono);color:var(--color-accent);font-size:0.82rem;}
-
-
-
-/* 푸터 */
-
-.footer{
-
-  text-align:center;color:var(--color-text-faint);font-size:var(--text-sm);
-
-  margin-top:var(--space-8);padding-top:var(--space-6);border-top:1px solid var(--color-border);
-
-}
-
-
-
-@media(max-width:880px){
-
-  .wrap{padding:var(--space-6) var(--space-3) var(--space-12);}
-
-  .hero{padding:var(--space-6);}
-
-  .section{padding:var(--space-6);}
-
-}
-
-</style>
-
-
-<style id="mobile-font-scale">
-@media(max-width:700px){
-  :root{
-    --text-sm:1rem;
-    --text-base:1.15rem;
-    --text-lg:1.35rem;
-    --text-xl:1.55rem;
-    --text-2xl:1.85rem;
-    --text-3xl:2.25rem;
-  }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firestore 핵심 함수 4가지 — doc · getDoc · setDoc · onSnapshot</title>
+  <meta name="description" content="Firestore SDK의 doc, getDoc, setDoc, onSnapshot 함수를 좌석 신청 앱 예시로 상세히 설명. 주소표 만들기부터 읽기·쓰기·실시간 구독까지.">
+  <meta property="og:title" content="Firestore 핵심 함수 4가지 — doc · getDoc · setDoc · onSnapshot">
+  <meta property="og:description" content="doc은 주소표, getDoc은 한 번 읽기, setDoc은 쓰기, onSnapshot은 실시간 구독. 좌석 앱 예시로 네 함수를 차근차근 풀어봅니다.">
+  <style>
+    :root {
+      --color-bg:#f5f2ed; --color-bg-alt:#eceae4; --color-bg-card:#ffffff;
+      --color-text:#1a1a18; --color-text-muted:#6b6a63; --color-text-faint:#a09f97;
+      --color-border:#dedad2;
+      --color-accent:#d95f2b; --color-accent-hover:#c2521f; --color-accent-soft:#faeee7;
+      --color-blue:#2d5a8e; --color-blue-soft:#e5eef7;
+      --color-green:#3a6b4a; --color-green-soft:#e6f0e9;
+      --color-purple:#5b3a7a; --color-purple-soft:#ece4f5;
+      --color-yellow:#8a6a00; --color-yellow-soft:#fdf5d9;
+      --color-red:#a8322a; --color-red-soft:#fbe8e6;
+      --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR","Apple SD Gothic Neo",Helvetica,Arial,sans-serif;
+      --font-mono:"SF Mono","Fira Code","Cascadia Code",Consolas,"Liberation Mono",monospace;
+      --text-xs:0.75rem; --text-sm:0.875rem; --text-base:1rem; --text-lg:1.125rem;
+      --text-xl:1.25rem; --text-2xl:1.5rem; --text-3xl:1.875rem;
+      --weight-medium:500; --weight-semibold:600; --weight-bold:700;
+      --leading-tight:1.25; --leading-normal:1.6; --leading-loose:1.8;
+      --space-1:0.25rem; --space-2:0.5rem; --space-3:0.75rem; --space-4:1rem;
+      --space-5:1.25rem; --space-6:1.5rem; --space-8:2rem; --space-12:3rem;
+      --radius-md:8px; --radius-lg:12px; --radius-full:9999px;
+      --shadow-sm:0 1px 3px rgba(0,0,0,0.07); --shadow-md:0 6px 18px rgba(0,0,0,0.08);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--font-sans);background:var(--color-bg);color:var(--color-text);line-height:var(--leading-normal);word-break:keep-all}
+    #read-progress{position:fixed;top:0;left:0;width:0;height:3px;background:var(--color-accent);z-index:1000;transition:width 80ms linear}
+    .site-nav{position:sticky;top:0;z-index:500;background:rgba(245,242,237,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--color-border)}
+    .nav-inner{max-width:900px;margin:0 auto;padding:var(--space-3) var(--space-6);display:flex;justify-content:space-between;align-items:center;gap:var(--space-4)}
+    .nav-brand{color:var(--color-accent);font-weight:var(--weight-bold);text-decoration:none;font-size:var(--text-sm);white-space:nowrap}
+    .nav-links{display:flex;gap:var(--space-1);list-style:none;overflow-x:auto;scrollbar-width:none}
+    .nav-links::-webkit-scrollbar{display:none}
+    .nav-links a{display:block;color:var(--color-text-muted);text-decoration:none;font-size:var(--text-sm);padding:var(--space-1) var(--space-3);border-radius:var(--radius-full);white-space:nowrap;transition:all 180ms ease}
+    .nav-links a:hover{background:var(--color-bg-alt);color:var(--color-text)}
+    .hero{background:linear-gradient(140deg,#071524 0%,#0f2238 40%,#180e28 70%,#221206 100%);padding:calc(var(--space-12)*1.4) var(--space-6) var(--space-12);position:relative;overflow:hidden}
+    .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 15% 35%,rgba(217,95,43,.22),transparent 44%),radial-gradient(circle at 82% 20%,rgba(45,90,142,.28),transparent 44%);pointer-events:none}
+    .hero::after{content:"";position:absolute;right:5%;bottom:8%;width:280px;height:280px;border-radius:50%;border:1px solid rgba(255,255,255,.04);box-shadow:0 0 0 64px rgba(255,255,255,.015);pointer-events:none}
+    .hero-inner{max-width:900px;margin:0 auto;position:relative}
+    .eyebrow{display:inline-flex;align-items:center;gap:var(--space-2);color:#f0c8a8;border:1px solid rgba(240,200,168,.3);background:rgba(255,255,255,.07);border-radius:var(--radius-full);padding:var(--space-1) var(--space-4);font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.10em;text-transform:uppercase;margin-bottom:var(--space-6)}
+    .eyebrow-dot{width:6px;height:6px;border-radius:50%;background:#e8966a;display:inline-block}
+    h1{font-size:clamp(1.9rem,5vw,3.2rem);line-height:var(--leading-tight);letter-spacing:-.03em;color:#fff;margin-bottom:var(--space-5);font-weight:var(--weight-bold)}
+    h1 .hl{background:linear-gradient(90deg,#ffd4b0,#ffb87a 50%,#ffd4b0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero-lead{font-size:var(--text-lg);color:rgba(255,255,255,.78);max-width:760px;line-height:var(--leading-loose);margin-bottom:var(--space-6)}
+    .hero-meta{display:flex;flex-wrap:wrap;gap:var(--space-2);align-items:center}
+    .hero-tag{font-size:var(--text-xs);color:rgba(255,255,255,.78);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);padding:var(--space-1) var(--space-3);border-radius:var(--radius-full)}
+    main{max-width:900px;margin:0 auto;padding:var(--space-12) var(--space-6)}
+    .summary{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-8);margin-bottom:var(--space-12);position:relative;overflow:hidden}
+    .summary::before{content:"";position:absolute;top:0;left:0;width:6px;height:100%;background:linear-gradient(180deg,var(--color-accent),var(--color-blue))}
+    .summary-label{font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.10em;text-transform:uppercase;color:var(--color-accent);margin-bottom:var(--space-3)}
+    .summary p{font-size:var(--text-base);line-height:var(--leading-loose);color:var(--color-text)}
+    section{margin-bottom:var(--space-12);scroll-margin-top:80px}
+    .section-header{display:flex;gap:var(--space-4);align-items:flex-start;margin-bottom:var(--space-6)}
+    .section-num{width:42px;height:42px;border-radius:var(--radius-full);background:linear-gradient(135deg,var(--color-accent),var(--color-blue));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:var(--weight-bold);flex-shrink:0;font-size:var(--text-lg);box-shadow:var(--shadow-sm)}
+    h2{font-size:var(--text-2xl);line-height:var(--leading-tight);letter-spacing:-.02em;margin-bottom:var(--space-2)}
+    h3{font-size:var(--text-xl);margin:var(--space-6) 0 var(--space-3);line-height:var(--leading-tight)}
+    p{color:var(--color-text-muted);margin-bottom:var(--space-4);line-height:var(--leading-loose)}
+    strong{color:var(--color-text);font-weight:var(--weight-semibold)}
+    ul,ol{padding-left:var(--space-6);margin-bottom:var(--space-4)}
+    li{color:var(--color-text-muted);margin-bottom:var(--space-2);line-height:var(--leading-loose)}
+    code{font-family:var(--font-mono);font-size:.88em;background:var(--color-bg-alt);border:1px solid var(--color-border);border-radius:4px;padding:1px 6px;color:var(--color-text)}
+    .callout{display:flex;gap:var(--space-4);border-radius:var(--radius-md);padding:var(--space-5) var(--space-6);margin:var(--space-6) 0;align-items:flex-start}
+    .callout-icon{font-size:1.4rem;flex-shrink:0;line-height:1;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-label{font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.08em;text-transform:uppercase;margin-bottom:var(--space-2)}
+    .callout-body p{font-size:var(--text-base);margin-bottom:0;line-height:var(--leading-loose)}
+    .callout.info{background:var(--color-blue-soft);border:1px solid #c0d4eb;border-left:4px solid var(--color-blue)}
+    .callout.info .callout-label{color:var(--color-blue)}
+    .callout.info .callout-body p{color:#1e3a5f}
+    .callout.warn{background:var(--color-yellow-soft);border:1px solid #e8d8a0;border-left:4px solid var(--color-yellow)}
+    .callout.warn .callout-label{color:var(--color-yellow)}
+    .callout.warn .callout-body p{color:#5a4500}
+    .callout.err{background:var(--color-red-soft);border:1px solid #e8c0bc;border-left:4px solid var(--color-red)}
+    .callout.err .callout-label{color:var(--color-red)}
+    .callout.err .callout-body p{color:#5c1f1a}
+    .callout.analogy{background:var(--color-purple-soft);border:1px solid #d0c4e8;border-left:4px solid var(--color-purple)}
+    .callout.analogy .callout-label{color:var(--color-purple)}
+    .callout.analogy .callout-body p{color:#3d2856}
+    .overview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--space-4);margin:var(--space-6) 0}
+    .ov-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+    .ov-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px}
+    .ov-card.c-doc::before{background:var(--color-accent)}
+    .ov-card.c-get::before{background:var(--color-blue)}
+    .ov-card.c-set::before{background:var(--color-green)}
+    .ov-card.c-snap::before{background:var(--color-purple)}
+    .ov-icon{width:40px;height:40px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;margin-bottom:var(--space-3);font-size:1.2rem}
+    .ov-card.c-doc .ov-icon{background:var(--color-accent-soft)}
+    .ov-card.c-get .ov-icon{background:var(--color-blue-soft)}
+    .ov-card.c-set .ov-icon{background:var(--color-green-soft)}
+    .ov-card.c-snap .ov-icon{background:var(--color-purple-soft)}
+    .ov-name{font-family:var(--font-mono);font-size:var(--text-lg);font-weight:var(--weight-bold);margin-bottom:var(--space-2);color:var(--color-text)}
+    .ov-desc{font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-loose);margin:0}
+    .tabs{display:flex;gap:var(--space-2);margin-bottom:var(--space-6);flex-wrap:wrap}
+    .tab-btn{font-family:var(--font-sans);font-size:var(--text-sm);font-weight:var(--weight-semibold);padding:var(--space-2) var(--space-5);border:1.5px solid var(--color-border);background:var(--color-bg-card);color:var(--color-text-muted);border-radius:var(--radius-full);cursor:pointer;transition:all 180ms ease;white-space:nowrap}
+    .tab-btn:hover{border-color:var(--color-accent);color:var(--color-text)}
+    .tab-btn.active{background:var(--color-accent);color:#fff;border-color:var(--color-accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .code-block{background:#1e1d1a;border-radius:var(--radius-md);overflow:hidden;margin:var(--space-5) 0;border:1px solid #2c2b27}
+    .code-head{display:flex;justify-content:space-between;align-items:center;padding:var(--space-2) var(--space-4);background:#252420;border-bottom:1px solid #34322d}
+    .code-lang{font-family:var(--font-mono);font-size:var(--text-sm);color:#a09f97}
+    .copy-btn{font-family:var(--font-sans);font-size:var(--text-sm);color:#d8d6cf;background:#34322d;border:1px solid #44423b;border-radius:6px;padding:3px 12px;cursor:pointer;transition:all 180ms ease}
+    .copy-btn:hover{background:#44423b}
+    .code-block pre{margin:0;padding:var(--space-5);overflow-x:auto}
+    .code-block code{font-family:var(--font-mono);font-size:var(--text-sm);line-height:1.7;color:#e6e4dd;white-space:pre;background:none;border:none;padding:0;border-radius:0}
+    .tok-keyword{color:#e0884f}
+    .tok-string{color:#9ec98a}
+    .tok-comment{color:#7d7a70;font-style:italic}
+    .tok-fn{color:#7daea3}
+    .diagram-wrap{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-6) 0;box-shadow:var(--shadow-sm)}
+    .diagram-wrap svg{width:100%;height:auto;display:block}
+    .diagram-caption{font-size:var(--text-sm);color:var(--color-text-faint);margin-top:var(--space-3);margin-bottom:0;text-align:center}
+    .table-wrap{overflow-x:auto;margin:var(--space-5) 0}
+    table{border-collapse:collapse;width:100%;font-size:var(--text-sm)}
+    th,td{border:1px solid var(--color-border);padding:var(--space-3) var(--space-4);text-align:left;vertical-align:top;line-height:var(--leading-loose)}
+    th{background:var(--color-bg-alt);font-weight:var(--weight-semibold);color:var(--color-text)}
+    td code{font-family:var(--font-mono);color:var(--color-accent);font-size:0.85em;background:var(--color-accent-soft);border-color:transparent}
+    .pull-quote{border-left:4px solid var(--color-accent);background:var(--color-accent-soft);padding:var(--space-5) var(--space-6);border-radius:0 var(--radius-lg) var(--radius-lg) 0;color:#5b2b18;margin:var(--space-6) 0;font-weight:var(--weight-medium);font-size:var(--text-lg);line-height:var(--leading-loose)}
+    .footer{text-align:center;color:var(--color-text-faint);font-size:var(--text-sm);margin-top:var(--space-8);padding-top:var(--space-6);border-top:1px solid var(--color-border)}
+    @media(max-width:640px){
+      main{padding:var(--space-8) var(--space-4)}
+      h1{font-size:1.75rem}
+      .hero{padding:var(--space-8) var(--space-4)}
+      .overview-grid{grid-template-columns:1fr 1fr}
+    }
+  </style>
 </head>
-
 <body>
 
 <div id="read-progress" aria-hidden="true"></div>
+
 <nav class="site-nav" aria-label="사이트 내비게이션">
   <div class="nav-inner">
     <a class="nav-brand" href="index.html">← Vibe</a>
+    <ul class="nav-links">
+      <li><a href="#overview">개요</a></li>
+      <li><a href="#functions">함수별 설명</a></li>
+      <li><a href="#summary">한 장 요약</a></li>
+    </ul>
   </div>
 </nav>
 
-<div class="wrap">
+<header class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow"><span class="eyebrow-dot"></span>Firestore 기초</div>
+    <h1>Firestore 핵심 함수<br><span class="hl">doc · getDoc · setDoc · onSnapshot</span></h1>
+    <p class="hero-lead">좌석 신청 앱 예시로 "주소표 만들기"부터 "읽기·쓰기·실시간 구독"까지 — 네 함수의 역할과 차이를 차근차근 풀어봅니다.</p>
+    <div class="hero-meta">
+      <span class="hero-tag">Firestore SDK v10</span>
+      <span class="hero-tag">JavaScript</span>
+      <span class="hero-tag">실시간 DB</span>
+      <span class="hero-tag">2026-06-22</span>
+    </div>
+  </div>
+</header>
 
+<main>
 
-
-  <div class="hero">
-
-    <div class="kicker">explain · Firestore 기초</div>
-
-    <h1>Firestore 핵심 함수 4가지</h1>
-
-    <p><code>doc</code> · <code>getDoc</code> · <code>setDoc</code> · <code>onSnapshot</code> — 좌석 신청 앱 예시로 "주소표 만들기"부터 "읽기·쓰기·실시간 구독"까지 차근차근 풀어봅니다.</p>
-
+  <div class="summary">
+    <div class="summary-label">핵심 요약</div>
+    <p><strong>doc</strong>은 어느 문서를 가리킬지 주소표(참조)를 만들고, <strong>getDoc</strong>은 그 주소로 가서 데이터를 한 번 읽어옵니다. <strong>setDoc</strong>은 그 주소에 데이터를 저장하고, <strong>onSnapshot</strong>은 그 문서를 계속 구독하다가 바뀔 때마다 알려줍니다. 핵심은 "어디(주소)"와 "무엇을 할지(읽기·쓰기·구독)"가 분리되어 있다는 점입니다.</p>
   </div>
 
-
-
-  <!-- 개요 카드 -->
-
-  <div class="overview">
-
-    <div class="ov-card">
-
-      <div class="icon">
-
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.5-7-10a7 7 0 0114 0c0 5.5-7 10-7 10z" stroke="#d95f2b" stroke-width="1.6"/><circle cx="12" cy="11" r="2.4" stroke="#d95f2b" stroke-width="1.6"/></svg>
-
+  <section id="overview">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>네 함수, 한눈에</h2>
+        <p>이 네 함수는 역할이 분명히 나뉩니다. 먼저 어디를 가리킬지 정하고(doc), 그 위치에서 읽거나 쓰거나 지켜봅니다.</p>
       </div>
-
-      <h3><code>doc</code></h3>
-
-      <p>문서를 <b>가리키는 주소표(참조)</b>를 만든다. 데이터는 아직 건드리지 않음.</p>
-
     </div>
 
-    <div class="ov-card">
-
-      <div class="icon">
-
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 7v10a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H6a2 2 0 00-2 2z" stroke="#d95f2b" stroke-width="1.6"/><path d="M9 13h6" stroke="#d95f2b" stroke-width="1.6"/></svg>
-
+    <div class="overview-grid">
+      <div class="ov-card c-doc">
+        <div class="ov-icon">📌</div>
+        <div class="ov-name">doc</div>
+        <p class="ov-desc">문서를 <strong>가리키는 주소표</strong>를 만든다. 데이터는 아직 건드리지 않음.</p>
       </div>
-
-      <h3><code>getDoc</code></h3>
-
-      <p>그 주소로 가서 내용을 <b>한 번 읽어온다</b>.</p>
-
-    </div>
-
-    <div class="ov-card">
-
-      <div class="icon">
-
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 5h11l3 3v11a1 1 0 01-1 1H6a1 1 0 01-1-1z" stroke="#d95f2b" stroke-width="1.6"/><path d="M8 5v4h6V5" stroke="#d95f2b" stroke-width="1.6"/></svg>
-
+      <div class="ov-card c-get">
+        <div class="ov-icon">📖</div>
+        <div class="ov-name">getDoc</div>
+        <p class="ov-desc">그 주소로 가서 내용을 <strong>한 번 읽어온다</strong>.</p>
       </div>
-
-      <h3><code>setDoc</code></h3>
-
-      <p>그 주소에 데이터를 <b>저장(쓰기)</b>한다.</p>
-
-    </div>
-
-    <div class="ov-card">
-
-      <div class="icon">
-
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="#d95f2b" stroke-width="1.6"/><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="#d95f2b" stroke-width="1.6"/></svg>
-
+      <div class="ov-card c-set">
+        <div class="ov-icon">💾</div>
+        <div class="ov-name">setDoc</div>
+        <p class="ov-desc">그 주소에 데이터를 <strong>저장(쓰기)</strong>한다.</p>
       </div>
-
-      <h3><code>onSnapshot</code></h3>
-
-      <p>그 문서를 <b>계속 지켜보다가</b> 바뀔 때마다 알려준다(실시간 구독).</p>
-
+      <div class="ov-card c-snap">
+        <div class="ov-icon">👀</div>
+        <div class="ov-name">onSnapshot</div>
+        <p class="ov-desc">그 문서를 <strong>계속 지켜보다가</strong> 바뀔 때마다 알려준다.</p>
+      </div>
     </div>
 
-  </div>
-
-
-
-  <!-- 핵심 비유 + 흐름도 -->
-
-  <div class="section">
-
-    <h2>한눈에 보는 전체 그림</h2>
-
-    <p>이 네 함수는 역할이 분명히 나뉩니다. 핵심은 <span class="kv">"주소를 만드는 단계"</span>와 <span class="kv">"그 주소로 실제 일을 하는 단계"</span>가 따로라는 점이에요.</p>
-
-
-
-    <div class="analogy">
-
-      <span class="label">택배에 비유하면</span>
-
-      <p><code style="color:var(--color-accent)">doc</code>은 <b>주소가 적힌 송장</b>을 만드는 일이에요. 송장을 만들었다고 물건이 오가는 건 아니죠. <code style="color:var(--color-accent)">getDoc</code>은 그 주소에서 물건을 <b>가져오는</b> 기사, <code style="color:var(--color-accent)">setDoc</code>은 그 주소로 물건을 <b>보내는</b> 기사예요. <code style="color:var(--color-accent)">onSnapshot</code>은 그 집 앞에 <b>상주하며 변화를 알려주는</b> 사람이고요.</p>
-
+    <div class="callout analogy">
+      <div class="callout-icon">🚚</div>
+      <div class="callout-body">
+        <div class="callout-label">택배로 비유하면</div>
+        <p><code>doc</code>은 <strong>주소가 적힌 송장</strong>을 만드는 일입니다. 송장을 만들었다고 물건이 오가는 건 아니에요. <code>getDoc</code>은 그 주소에서 물건을 <strong>가져오는</strong> 기사, <code>setDoc</code>은 그 주소로 물건을 <strong>보내는</strong> 기사예요. <code>onSnapshot</code>은 그 집 앞에 <strong>상주하며 변화를 알려주는</strong> 사람이고요.</p>
+      </div>
     </div>
 
-
-
-    <div class="diagram">
-
-      <svg viewBox="0 0 640 260" xmlns="http://www.w3.org/2000/svg">
-
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 660 270" xmlns="http://www.w3.org/2000/svg">
         <defs>
-
-          <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-
+          <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0,10 3.5,0 7" fill="#6b6a63"/>
-
           </marker>
-
-          <marker id="arrow-dash" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-
+          <marker id="arr-dash" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0,10 3.5,0 7" fill="#a09f97"/>
-
           </marker>
-
         </defs>
-
-        <!-- doc 박스 -->
-
         <rect x="20" y="100" width="150" height="60" rx="8" fill="#faeee7" stroke="#d95f2b" stroke-width="1.5"/>
-
         <text x="95" y="126" text-anchor="middle" font-family="monospace" font-size="15" fill="#c2521f" font-weight="bold">doc()</text>
-
         <text x="95" y="146" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#6b6a63">주소표(참조)</text>
-
-
-
-        <!-- 화살표 doc -> 함수들 -->
-
-        <line x1="170" y1="130" x2="250" y2="60" stroke="#6b6a63" stroke-width="1.5" marker-end="url(#arrow)"/>
-
-        <line x1="170" y1="130" x2="250" y2="130" stroke="#6b6a63" stroke-width="1.5" marker-end="url(#arrow)"/>
-
-        <line x1="170" y1="130" x2="250" y2="200" stroke="#a09f97" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arrow-dash)"/>
-
-
-
-        <!-- getDoc -->
-
-        <rect x="255" y="30" width="160" height="56" rx="8" fill="#fff" stroke="#dedad2" stroke-width="1.5"/>
-
-        <text x="335" y="54" text-anchor="middle" font-family="monospace" font-size="14" fill="#1a1a18">getDoc(주소)</text>
-
-        <text x="335" y="72" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#6b6a63">한 번 읽기</text>
-
-        <!-- setDoc -->
-
-        <rect x="255" y="102" width="160" height="56" rx="8" fill="#fff" stroke="#dedad2" stroke-width="1.5"/>
-
-        <text x="335" y="126" text-anchor="middle" font-family="monospace" font-size="14" fill="#1a1a18">setDoc(주소,값)</text>
-
-        <text x="335" y="144" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#6b6a63">쓰기(저장)</text>
-
-        <!-- onSnapshot -->
-
-        <rect x="255" y="174" width="160" height="56" rx="8" fill="#fff" stroke="#dedad2" stroke-width="1.5"/>
-
-        <text x="335" y="198" text-anchor="middle" font-family="monospace" font-size="13" fill="#1a1a18">onSnapshot(주소)</text>
-
-        <text x="335" y="216" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#6b6a63">실시간 구독</text>
-
-
-
-        <!-- 서버 -->
-
-        <line x1="415" y1="58" x2="500" y2="120" stroke="#6b6a63" stroke-width="1.5" marker-end="url(#arrow)"/>
-
-        <line x1="415" y1="130" x2="500" y2="130" stroke="#6b6a63" stroke-width="1.5" marker-end="url(#arrow)"/>
-
-        <line x1="415" y1="202" x2="500" y2="140" stroke="#a09f97" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arrow-dash)"/>
-
-        <rect x="505" y="100" width="115" height="60" rx="8" fill="#eceae4" stroke="#a09f97" stroke-width="1.5"/>
-
-        <text x="562" y="126" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#1a1a18" font-weight="bold">Firestore</text>
-
-        <text x="562" y="145" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#6b6a63">서버(DB)</text>
-
+        <line x1="170" y1="130" x2="248" y2="60" stroke="#6b6a63" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="170" y1="130" x2="248" y2="130" stroke="#6b6a63" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="170" y1="130" x2="248" y2="200" stroke="#a09f97" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arr-dash)"/>
+        <rect x="253" y="30" width="160" height="56" rx="8" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.5"/>
+        <text x="333" y="55" text-anchor="middle" font-family="monospace" font-size="13" fill="#1a3a5c" font-weight="bold">getDoc(주소)</text>
+        <text x="333" y="73" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#4a6a8e">한 번 읽기</text>
+        <rect x="253" y="102" width="160" height="56" rx="8" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="1.5"/>
+        <text x="333" y="127" text-anchor="middle" font-family="monospace" font-size="12" fill="#1e4228" font-weight="bold">setDoc(주소, 값)</text>
+        <text x="333" y="145" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#3a6b4a">쓰기(저장)</text>
+        <rect x="253" y="174" width="160" height="56" rx="8" fill="#ece4f5" stroke="#5b3a7a" stroke-width="1.5"/>
+        <text x="333" y="199" text-anchor="middle" font-family="monospace" font-size="12" fill="#3d2256" font-weight="bold">onSnapshot(주소)</text>
+        <text x="333" y="217" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#5b3a7a">실시간 구독</text>
+        <line x1="413" y1="58" x2="498" y2="120" stroke="#6b6a63" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="413" y1="130" x2="498" y2="130" stroke="#6b6a63" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="413" y1="202" x2="498" y2="142" stroke="#a09f97" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arr-dash)"/>
+        <rect x="503" y="100" width="130" height="60" rx="8" fill="#eceae4" stroke="#a09f97" stroke-width="1.5"/>
+        <text x="568" y="126" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#1a1a18" font-weight="bold">Firestore</text>
+        <text x="568" y="145" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#6b6a63">서버(DB)</text>
       </svg>
+      <p class="diagram-caption">실선 = 한 번 오가는 요청 &nbsp;|&nbsp; 점선 = 계속 이어진 실시간 연결</p>
+    </div>
+  </section>
 
+  <section id="functions">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>함수별 상세 설명</h2>
+        <p>탭을 클릭해 각 함수를 자세히 살펴보세요.</p>
+      </div>
     </div>
 
-    <p class="muted" style="font-size:var(--text-sm)">실선 = 한 번 오가는 요청, 점선 = 계속 이어진 실시간 연결</p>
+    <div class="tabs" role="tablist">
+      <button class="tab-btn active" data-tab="doc">📌 doc</button>
+      <button class="tab-btn" data-tab="get">📖 getDoc</button>
+      <button class="tab-btn" data-tab="set">💾 setDoc</button>
+      <button class="tab-btn" data-tab="snap">👀 onSnapshot</button>
+    </div>
 
-  </div>
-
-
-
-  <!-- 탭 네비게이션 -->
-
-  <div class="tabs" role="tablist">
-
-    <button class="tab-btn active" data-tab="doc">① doc</button>
-
-    <button class="tab-btn" data-tab="get">② getDoc</button>
-
-    <button class="tab-btn" data-tab="set">③ setDoc</button>
-
-    <button class="tab-btn" data-tab="snap">④ onSnapshot</button>
-
-  </div>
-
-
-
-  <!-- ① doc -->
-
-  <div class="tab-panel active" data-panel="doc">
-
-    <div class="section">
-
-      <h2><span class="badge">doc</span> 문서를 가리키는 주소표 만들기</h2>
-
-      <p><code>doc</code>은 Firestore의 어떤 문서를 <b>가리키는 참조(reference)</b>를 만드는 함수입니다. 중요한 점은, 이 순간에는 <b>데이터를 읽지도 쓰지도 않는다</b>는 거예요. 서버에 접속조차 하지 않습니다. 그냥 "이 문서를 가리키는 표지판" 하나를 손에 쥐는 것뿐이에요.</p>
-
-
-
+    <div class="tab-panel active" data-panel="doc">
+      <h3>doc — 문서를 가리키는 주소표 만들기</h3>
+      <p><code>doc</code>은 Firestore의 어떤 문서를 <strong>가리키는 참조(reference)</strong>를 만드는 함수입니다. 중요한 점은, 이 순간에는 <strong>데이터를 읽지도 쓰지도 않는다</strong>는 거예요. 서버에 접속조차 하지 않습니다. 그냥 "이 문서를 가리키는 표지판" 하나를 손에 쥐는 것뿐이에요.</p>
       <div class="code-block">
-
         <div class="code-head"><span class="code-lang">javascript</span><button class="copy-btn">Copy</button></div>
-
-<pre><code><span class="tok-keyword">const</span> ref = <span class="tok-function">doc</span>(db, <span class="tok-string">"config"</span>, <span class="tok-string">"main"</span>);
-
+<pre><code><span class="tok-keyword">const</span> ref = <span class="tok-fn">doc</span>(db, <span class="tok-string">"config"</span>, <span class="tok-string">"main"</span>);
 <span class="tok-comment">// db = 어느 데이터베이스, "config" = 컬렉션(폴더), "main" = 문서(파일)</span></code></pre>
-
       </div>
-
-
-
       <h3>매개변수의 의미</h3>
-
-      <p>괄호 안의 값들은 "어느 문서를 가리킬지"를 알려주는 <b>경로</b>예요. Firestore는 폴더(컬렉션)와 파일(문서) 구조라서, 슬래시 경로처럼 단계를 나눠 적습니다.</p>
-
+      <p>괄호 안의 값들은 "어느 문서를 가리킬지"를 알려주는 <strong>경로</strong>예요. Firestore는 폴더(컬렉션)와 파일(문서) 구조라서, 단계를 나눠 적습니다.</p>
       <ul>
-
         <li><code>db</code> — 어느 데이터베이스인지</li>
-
         <li><code>"config"</code> — 컬렉션(폴더) 이름</li>
-
         <li><code>"main"</code> — 그 안의 문서(파일) 이름</li>
-
       </ul>
-
-      <p>그래서 위 코드는 <span class="kv">config/main</span> 문서를 가리키게 됩니다.</p>
-
-
-
-      <div class="analogy">
-
-        <span class="label">비유</span>
-
-        <p><code style="color:var(--color-accent)">doc(...)</code>은 어떤 집의 <b>주소를 적은 쪽지</b>를 만드는 일이에요. 주소를 적었다고 그 집에 들어가거나 안을 본 건 아니죠. 주소만 손에 든 상태입니다.</p>
-
+      <p>위 코드는 <strong>config/main</strong> 문서를 가리키게 됩니다.</p>
+      <div class="callout analogy">
+        <div class="callout-icon">🏠</div>
+        <div class="callout-body">
+          <div class="callout-label">비유</div>
+          <p><code>doc(...)</code>은 어떤 집의 <strong>주소를 적은 쪽지</strong>를 만드는 일이에요. 주소를 적었다고 그 집에 들어가거나 안을 본 건 아니죠. 주소만 손에 든 상태입니다.</p>
+        </div>
       </div>
-
-
-
       <h3>왜 따로 떼어 놓았을까</h3>
-
-      <p>읽기·쓰기·구독을 안 하고 "가리키기"만 분리해 둔 이유는, 같은 주소표 하나를 만들어 두고 여러 동작에 <b>재사용</b>하기 위해서예요. 실제 앱에서는 이 <code>doc</code>을 작은 함수로 감싸서 반복을 줄입니다.</p>
-
-
-
+      <p>읽기·쓰기·구독을 안 하고 "가리키기"만 분리해 둔 이유는, 같은 주소표 하나를 만들어 두고 여러 동작에 <strong>재사용</strong>하기 위해서예요.</p>
       <div class="code-block">
-
         <div class="code-head"><span class="code-lang">javascript</span><button class="copy-btn">Copy</button></div>
-
 <pre><code><span class="tok-comment">// 자주 쓰는 주소를 함수로 묶어 단축 표현 만들기</span>
-
-<span class="tok-keyword">const</span> cfgRef = () =&gt; <span class="tok-function">doc</span>(db, <span class="tok-string">"config"</span>, <span class="tok-string">"main"</span>);
-
-
+<span class="tok-keyword">const</span> cfgRef  = () =&gt; <span class="tok-fn">doc</span>(db, <span class="tok-string">"config"</span>, <span class="tok-string">"main"</span>);
 
 <span class="tok-comment">// 좌석·학생 문서도 같은 방식</span>
-
-<span class="tok-keyword">const</span> seatRef = (n) =&gt; <span class="tok-function">doc</span>(db, <span class="tok-string">"weeks"</span>, weekId, <span class="tok-string">"seats"</span>, <span class="tok-function">String</span>(n));
-
-<span class="tok-keyword">const</span> stuRef  = (sid) =&gt; <span class="tok-function">doc</span>(db, <span class="tok-string">"weeks"</span>, weekId, <span class="tok-string">"students"</span>, sid);</code></pre>
-
+<span class="tok-keyword">const</span> seatRef = (n)   =&gt; <span class="tok-fn">doc</span>(db, <span class="tok-string">"weeks"</span>, weekId, <span class="tok-string">"seats"</span>,    <span class="tok-fn">String</span>(n));
+<span class="tok-keyword">const</span> stuRef  = (sid) =&gt; <span class="tok-fn">doc</span>(db, <span class="tok-string">"weeks"</span>, weekId, <span class="tok-string">"students"</span>, sid);</code></pre>
       </div>
-
-
-
-      <div class="note warn">
-
-        <span class="note-title">자주 하는 실수 · 괄호 빠뜨리기</span>
-
-        <p><code>cfgRef</code>는 <b>함수</b>입니다. 실제 주소표를 얻으려면 <code>cfgRef()</code>처럼 괄호를 붙여 <b>호출</b>해야 해요. 괄호 없이 <code>setDoc(cfgRef, ...)</code>로 쓰면 "함수 자체"를 넘기게 되어 오류가 납니다. 올바른 형태는 <code>setDoc(cfgRef(), ...)</code>.</p>
-
+      <div class="callout warn">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">
+          <div class="callout-label">자주 하는 실수 · 괄호 빠뜨리기</div>
+          <p><code>cfgRef</code>는 <strong>함수</strong>입니다. 실제 주소표를 얻으려면 <code>cfgRef()</code>처럼 괄호를 붙여 <strong>호출</strong>해야 해요. 괄호 없이 <code>setDoc(cfgRef, ...)</code>로 쓰면 "함수 자체"를 넘기게 되어 오류가 납니다. 올바른 형태: <code>setDoc(cfgRef(), ...)</code>.</p>
+        </div>
       </div>
-
     </div>
 
-  </div>
-
-
-
-  <!-- ② getDoc -->
-
-  <div class="tab-panel" data-panel="get">
-
-    <div class="section">
-
-      <h2><span class="badge">getDoc</span> 그 주소에서 한 번 읽어오기</h2>
-
-      <p><code>getDoc</code>은 <code>doc</code>이 만든 주소표를 받아서, 그 문서의 내용을 <b>딱 한 번 읽어오는</b> 함수입니다. 여기서 비로소 서버와 통신이 일어나요.</p>
-
-
-
+    <div class="tab-panel" data-panel="get">
+      <h3>getDoc — 그 주소에서 한 번 읽어오기</h3>
+      <p><code>getDoc</code>은 <code>doc</code>이 만든 주소표를 받아서, 그 문서의 내용을 <strong>딱 한 번 읽어오는</strong> 함수입니다. 여기서 비로소 서버와 통신이 일어나요.</p>
       <div class="code-block">
-
         <div class="code-head"><span class="code-lang">javascript</span><button class="copy-btn">Copy</button></div>
+<pre><code><span class="tok-keyword">const</span> ref  = <span class="tok-fn">doc</span>(db, <span class="tok-string">"config"</span>, <span class="tok-string">"main"</span>);  <span class="tok-comment">// ① 주소표 만들기 (통신 없음)</span>
+<span class="tok-keyword">const</span> snap = <span class="tok-keyword">await</span> <span class="tok-fn">getDoc</span>(ref);          <span class="tok-comment">// ② 서버에서 실제로 읽어오기</span>
 
-<pre><code><span class="tok-keyword">const</span> ref  = <span class="tok-function">doc</span>(db, <span class="tok-string">"config"</span>, <span class="tok-string">"main"</span>);  <span class="tok-comment">// ① 주소표 만들기 (통신 없음)</span>
-
-<span class="tok-keyword">const</span> snap = <span class="tok-keyword">await</span> <span class="tok-function">getDoc</span>(ref);          <span class="tok-comment">// ② 서버에서 실제로 읽어오기</span>
-
-
-
-<span class="tok-keyword">if</span> (snap.<span class="tok-function">exists</span>()) {
-
-  <span class="tok-function">console</span>.<span class="tok-function">log</span>(snap.<span class="tok-function">data</span>());  <span class="tok-comment">// 예: { openOverride: false }</span>
-
+<span class="tok-keyword">if</span> (snap.<span class="tok-fn">exists</span>()) {
+  console.<span class="tok-fn">log</span>(snap.<span class="tok-fn">data</span>());  <span class="tok-comment">// 예: { openOverride: false }</span>
 }</code></pre>
-
       </div>
-
-
-
       <h3>반환값 다루기 — snapshot</h3>
-
-      <p><code>getDoc</code>이 돌려주는 건 데이터 자체가 아니라 <b>스냅샷(snapshot)</b>이라는 포장지예요. 그 안에서 값을 꺼내려면 메서드를 씁니다.</p>
-
+      <p><code>getDoc</code>이 돌려주는 건 데이터 자체가 아니라 <strong>스냅샷(snapshot)</strong>이라는 포장지예요. 그 안에서 값을 꺼내려면 메서드를 씁니다.</p>
       <ul>
-
-        <li><code>snap.exists()</code> — 그 문서가 실제로 있는지 확인(true/false)</li>
-
-        <li><code>snap.data()</code> — 문서의 실제 내용을 꺼냄(없으면 <code>undefined</code>)</li>
-
+        <li><code>snap.exists()</code> — 그 문서가 실제로 있는지 확인 (true/false)</li>
+        <li><code>snap.data()</code> — 문서의 실제 내용을 꺼냄 (없으면 <code>undefined</code>)</li>
       </ul>
-
-
-
-      <div class="note info">
-
-        <span class="note-title">await가 붙는 이유</span>
-
-        <p>읽기는 서버를 다녀오는 일이라 시간이 걸려요. <code>await</code>는 "읽기가 끝날 때까지 기다렸다가 다음 줄로 가라"는 뜻입니다. 그래야 받아온 데이터를 다음 줄에서 안전하게 쓸 수 있어요.</p>
-
+      <div class="callout info">
+        <div class="callout-icon">ℹ️</div>
+        <div class="callout-body">
+          <div class="callout-label">await가 붙는 이유</div>
+          <p>읽기는 서버를 다녀오는 일이라 시간이 걸려요. <code>await</code>는 "읽기가 끝날 때까지 기다렸다가 다음 줄로 가라"는 뜻입니다. 그래야 받아온 데이터를 다음 줄에서 안전하게 쓸 수 있어요.</p>
+        </div>
       </div>
-
-
-
-      <div class="analogy">
-
-        <span class="label">핵심 차이</span>
-
-        <p><code style="color:var(--color-accent)">getDoc</code>은 <b>그 순간의 값을 한 번만</b> 가져옵니다. 가져온 뒤 서버에서 값이 바뀌어도 다시 알려주지 않아요. "지금 상태가 궁금할 때 한 번 물어보는" 용도예요. 계속 지켜봐야 한다면 ④의 <code style="color:var(--color-accent)">onSnapshot</code>을 씁니다.</p>
-
+      <div class="callout analogy">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">
+          <div class="callout-label">getDoc vs onSnapshot</div>
+          <p><code>getDoc</code>은 <strong>그 순간의 값을 한 번만</strong> 가져옵니다. 가져온 뒤 서버에서 값이 바뀌어도 다시 알려주지 않아요. "지금 상태가 궁금할 때 한 번 물어보는" 용도예요. 계속 지켜봐야 한다면 <code>onSnapshot</code>을 씁니다.</p>
+        </div>
       </div>
-
     </div>
 
-  </div>
-
-
-
-  <!-- ③ setDoc -->
-
-  <div class="tab-panel" data-panel="set">
-
-    <div class="section">
-
-      <h2><span class="badge">setDoc</span> 그 주소에 데이터 저장하기</h2>
-
-      <p><code>setDoc</code>은 지정한 문서에 데이터를 <b>저장(쓰기)</b>하는 함수입니다. 좌석 신청 앱에서는 신청 상태나 좌석 상태를 저장할 때 쓰여요.</p>
-
-
-
+    <div class="tab-panel" data-panel="set">
+      <h3>setDoc — 그 주소에 데이터 저장하기</h3>
+      <p><code>setDoc</code>은 지정한 문서에 데이터를 <strong>저장(쓰기)</strong>하는 함수입니다. 좌석 신청 앱에서는 신청 상태나 좌석 상태를 저장할 때 씁니다.</p>
       <div class="code-block">
-
         <div class="code-head"><span class="code-lang">javascript</span><button class="copy-btn">Copy</button></div>
-
 <pre><code><span class="tok-comment">// config/main 문서에 openOverride: false 저장</span>
-
-<span class="tok-keyword">await</span> <span class="tok-function">setDoc</span>(<span class="tok-function">cfgRef</span>(), { openOverride: <span class="tok-keyword">false</span> }, { merge: <span class="tok-keyword">true</span> });
-
+<span class="tok-keyword">await</span> <span class="tok-fn">setDoc</span>(<span class="tok-fn">cfgRef</span>(), { openOverride: <span class="tok-keyword">false</span> }, { merge: <span class="tok-keyword">true</span> });
 <span class="tok-comment">//            ↑ 저장 위치        ↑ 저장 내용              ↑ 저장 방식 옵션</span></code></pre>
-
       </div>
-
-
-
       <h3>가장 중요한 것 — merge 옵션</h3>
-
-      <p><code>setDoc</code>에서 제일 헷갈리는 게 <code>merge</code> 옵션이에요. 이게 있고 없고에 따라 동작이 크게 달라집니다.</p>
-
-
-
+      <p><code>setDoc</code>에서 제일 헷갈리는 게 <code>merge</code> 옵션이에요. 있고 없고에 따라 동작이 크게 달라집니다.</p>
       <div class="table-wrap">
-
         <table>
-
           <thead><tr><th>형태</th><th>동작</th><th>비유</th></tr></thead>
-
           <tbody>
-
             <tr>
-
-              <td><code>setDoc(ref, {a:1})</code><br>(merge 없음)</td>
-
-              <td>문서를 <b>통째로 덮어씀</b>. 기존의 다른 값(b, c…)은 전부 사라짐</td>
-
+              <td><code>setDoc(ref, {a:1})</code><br><small>merge 없음</small></td>
+              <td>문서를 <strong>통째로 덮어씀</strong>. 기존의 다른 값은 전부 사라짐</td>
               <td>종이를 새 종이로 갈아 끼우기</td>
-
             </tr>
-
             <tr>
-
               <td><code>setDoc(ref, {a:1}, {merge:true})</code></td>
-
-              <td>기존 내용은 두고 <b>지정한 값만 갱신·추가</b></td>
-
+              <td>기존 내용은 두고 <strong>지정한 값만 갱신·추가</strong></td>
               <td>기존 종이에서 한 줄만 고쳐 쓰기</td>
-
             </tr>
-
           </tbody>
-
         </table>
-
       </div>
-
-
-
       <h3>비슷한 쓰기 함수와의 차이</h3>
-
       <ul>
-
-        <li><code>setDoc</code> — 이 문서를 이 내용으로 만들기(없으면 새로, 있으면 덮거나 병합)</li>
-
-        <li><code>updateDoc</code> — 이미 있는 문서의 일부만 수정(문서가 없으면 오류)</li>
-
+        <li><code>setDoc</code> — 이 문서를 이 내용으로 만들기 (없으면 새로, 있으면 덮거나 병합)</li>
+        <li><code>updateDoc</code> — 이미 있는 문서의 일부만 수정 (문서가 없으면 오류)</li>
         <li><code>addDoc</code> — 문서 이름을 자동으로 정해 새로 추가</li>
-
       </ul>
-
-      <p class="muted">좌석 앱은 <span class="kv">config/main</span>처럼 이름이 정해진 문서를 다루고, 없으면 만들고 있으면 일부만 고치고 싶어서 <code>setDoc</code> + <code>merge:true</code> 조합을 씁니다.</p>
-
-
-
-      <div class="note err">
-
-        <span class="note-title">보안 한 가지 · 쓰기 성공은 규칙이 정한다</span>
-
-        <p><code>setDoc</code>은 누구나 SDK에서 꺼내 쓸 수 있는 공개 도구입니다. 따라서 이 함수로 무엇을 저장할 수 있는지는 클라이언트 코드가 아니라 <b>서버의 보안 규칙</b>이 결정해요. <code>setDoc</code>은 "저장 시도"일 뿐이고, 실제 저장 여부는 규칙이 허락해야 이뤄집니다.</p>
-
+      <p>좌석 앱은 <strong>config/main</strong>처럼 이름이 정해진 문서를 다루고, 없으면 만들고 있으면 일부만 고치고 싶어서 <code>setDoc</code> + <code>merge:true</code> 조합을 씁니다.</p>
+      <div class="callout err">
+        <div class="callout-icon">🔒</div>
+        <div class="callout-body">
+          <div class="callout-label">보안 한 가지 · 쓰기 성공은 규칙이 정한다</div>
+          <p><code>setDoc</code>은 누구나 SDK에서 꺼내 쓸 수 있는 공개 도구입니다. 따라서 무엇을 저장할 수 있는지는 클라이언트 코드가 아니라 <strong>서버의 보안 규칙</strong>이 결정해요. <code>setDoc</code>은 "저장 시도"일 뿐이고, 실제 저장 여부는 규칙이 허락해야 이뤄집니다.</p>
+        </div>
       </div>
-
     </div>
 
-  </div>
-
-
-
-  <!-- ④ onSnapshot -->
-
-  <div class="tab-panel" data-panel="snap">
-
-    <div class="section">
-
-      <h2><span class="badge">onSnapshot</span> 실시간으로 지켜보기</h2>
-
-      <p><code>onSnapshot</code>은 문서(또는 컬렉션)를 <b>계속 구독</b>합니다. 한 번 읽고 끝나는 <code>getDoc</code>과 달리, 그 데이터가 <b>바뀔 때마다 자동으로 다시 알려줘요</b>.</p>
-
-
-
-      <div class="analogy">
-
-        <span class="label">비유</span>
-
-        <p>유튜브 채널을 <b>구독</b>해 두면 새 영상이 올라올 때마다 알림이 오죠. <code style="color:var(--color-accent)">onSnapshot</code>도 똑같아요. 한 번 걸어두면, 그 문서가 바뀔 때마다 알림처럼 새 데이터가 자동으로 들어옵니다.</p>
-
+    <div class="tab-panel" data-panel="snap">
+      <h3>onSnapshot — 실시간으로 지켜보기</h3>
+      <p><code>onSnapshot</code>은 문서(또는 컬렉션)를 <strong>계속 구독</strong>합니다. 한 번 읽고 끝나는 <code>getDoc</code>과 달리, 그 데이터가 <strong>바뀔 때마다 자동으로 다시 알려줘요</strong>.</p>
+      <div class="callout analogy">
+        <div class="callout-icon">🔔</div>
+        <div class="callout-body">
+          <div class="callout-label">비유</div>
+          <p>유튜브 채널을 <strong>구독</strong>해 두면 새 영상이 올라올 때마다 알림이 오죠. <code>onSnapshot</code>도 똑같아요. 한 번 걸어두면, 그 문서가 바뀔 때마다 알림처럼 새 데이터가 자동으로 들어옵니다.</p>
+        </div>
       </div>
-
-
-
       <div class="code-block">
-
         <div class="code-head"><span class="code-lang">javascript</span><button class="copy-btn">Copy</button></div>
-
-<pre><code><span class="tok-function">onSnapshot</span>(<span class="tok-function">cfgRef</span>(), (snap) =&gt; {
-
-  <span class="tok-keyword">const</span> c = snap.<span class="tok-function">data</span>() || {};       <span class="tok-comment">// 문서가 비어도 안전하게</span>
-
+<pre><code><span class="tok-fn">onSnapshot</span>(<span class="tok-fn">cfgRef</span>(), (snap) =&gt; {
+  <span class="tok-keyword">const</span> c = snap.<span class="tok-fn">data</span>() || {};        <span class="tok-comment">// 문서가 비어도 안전하게</span>
   configOpenOverride =
-
     (<span class="tok-keyword">typeof</span> c.openOverride === <span class="tok-string">"boolean"</span>) ? c.openOverride : <span class="tok-keyword">null</span>;
-
-  <span class="tok-function">refreshLockView</span>();                  <span class="tok-comment">// 값에 맞춰 화면 다시 그리기</span>
-
+  <span class="tok-fn">refreshLockView</span>();                   <span class="tok-comment">// 값에 맞춰 화면 다시 그리기</span>
 });</code></pre>
-
       </div>
-
-
-
       <h3>두 가지 인자</h3>
-
       <ul>
-
-        <li><b>지켜볼 대상</b> — <code>cfgRef()</code>가 가리키는 문서</li>
-
-        <li><b>변화가 올 때 실행할 함수</b> — <code>(snap) =&gt; { ... }</code>. Firebase가 변화를 감지할 때마다 이 함수를 대신 실행하고, <code>snap</code>에 그 순간의 데이터를 담아 넣어줍니다.</li>
-
+        <li><strong>지켜볼 대상</strong> — <code>cfgRef()</code>가 가리키는 문서</li>
+        <li><strong>변화가 올 때 실행할 함수</strong> — <code>(snap) =&gt; { ... }</code>. Firebase가 변화를 감지할 때마다 이 함수를 대신 실행하고, <code>snap</code>에 그 순간의 데이터를 담아 넣어줍니다.</li>
       </ul>
-
-      <p class="muted"><code>(snap) =&gt; { ... }</code> 모양을 화살표 함수라고 해요. "재료(snap)를 받아 중괄호 안의 일을 하는 작은 함수"라는 뜻입니다.</p>
-
-
-
       <h3>왜 좌석 앱에 꼭 필요할까</h3>
-
-      <p>좌석 신청은 여러 학생이 <b>동시에</b> 같은 화면을 봅니다. 누군가 한 자리를 차지하면 다른 모든 학생 화면에서도 그 자리가 즉시 "신청완료"로 바뀌어야 하죠. <code>onSnapshot</code>이 좌석 문서들을 구독하고 있어서, 변화가 생기는 순간 모두의 화면이 새로고침 없이 갱신됩니다. 관리자가 신청을 열고 닫는 <code>config/main</code> 스위치도 같은 방식으로 전체에 실시간 전파돼요.</p>
-
-
-
-      <div class="note info">
-
-        <span class="note-title">getDoc과 한 줄 비교</span>
-
-        <p><code>getDoc</code> = "지금 값 한 번 알려줘"(스냅샷 1장). <code>onSnapshot</code> = "앞으로 바뀔 때마다 계속 알려줘"(연속 구독). 실시간 화면에는 <code>onSnapshot</code>, 한 번만 확인하면 될 때는 <code>getDoc</code>.</p>
-
+      <p>좌석 신청은 여러 학생이 <strong>동시에</strong> 같은 화면을 봅니다. 누군가 한 자리를 차지하면 다른 모든 학생 화면에서도 그 자리가 즉시 "신청완료"로 바뀌어야 하죠. <code>onSnapshot</code>이 좌석 문서들을 구독하고 있어서, 변화가 생기는 순간 모두의 화면이 새로고침 없이 갱신됩니다.</p>
+      <div class="callout info">
+        <div class="callout-icon">📊</div>
+        <div class="callout-body">
+          <div class="callout-label">getDoc과 한 줄 비교</div>
+          <p><code>getDoc</code> = "지금 값 한 번 알려줘" (스냅샷 1장). <code>onSnapshot</code> = "앞으로 바뀔 때마다 계속 알려줘" (연속 구독). 실시간 화면에는 <code>onSnapshot</code>, 한 번만 확인하면 될 때는 <code>getDoc</code>.</p>
+        </div>
       </div>
-
     </div>
+  </section>
 
-  </div>
-
-
-
-  <!-- 종합 비교 -->
-
-  <div class="section">
-
-    <h2>네 함수 한 장 요약</h2>
-
+  <section id="summary">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>네 함수 한 장 요약</h2>
+        <p>기억할 한 가지: <strong>doc</strong>은 "어디"를 정하고, 나머지 셋은 그 "어디"에 대해 각각 읽기·쓰기·지켜보기를 합니다.</p>
+      </div>
+    </div>
     <div class="table-wrap">
-
       <table>
-
-        <thead><tr><th>함수</th><th>역할</th><th>서버 통신</th><th>반복성</th></tr></thead>
-
+        <thead>
+          <tr><th>함수</th><th>역할</th><th>서버 통신</th><th>반복성</th><th>주요 용도</th></tr>
+        </thead>
         <tbody>
-
-          <tr><td><code>doc</code></td><td>주소표(참조) 만들기</td><td>없음</td><td>—</td></tr>
-
-          <tr><td><code>getDoc</code></td><td>한 번 읽기</td><td>1회</td><td>일회성</td></tr>
-
-          <tr><td><code>setDoc</code></td><td>저장(쓰기)</td><td>1회</td><td>일회성</td></tr>
-
-          <tr><td><code>onSnapshot</code></td><td>실시간 구독</td><td>지속 연결</td><td>바뀔 때마다 반복</td></tr>
-
+          <tr><td><code>doc</code></td><td>주소표(참조) 만들기</td><td>없음</td><td>—</td><td>읽기·쓰기·구독 전 준비</td></tr>
+          <tr><td><code>getDoc</code></td><td>한 번 읽기</td><td>1회</td><td>일회성</td><td>초기 설정값 로드 등</td></tr>
+          <tr><td><code>setDoc</code></td><td>저장(쓰기)</td><td>1회</td><td>일회성</td><td>좌석 신청, 상태 변경</td></tr>
+          <tr><td><code>onSnapshot</code></td><td>실시간 구독</td><td>지속 연결</td><td>바뀔 때마다</td><td>화면 실시간 동기화</td></tr>
         </tbody>
-
       </table>
-
     </div>
-
-    <p class="muted" style="margin-bottom:0">기억할 한 가지: <span class="kv">doc</span>은 "어디"를 정하고, 나머지 셋은 그 "어디"에 대해 각각 읽기·쓰기·지켜보기를 합니다.</p>
-
-  </div>
-
-
+    <div class="pull-quote">
+      doc은 주소를 만들고, getDoc·setDoc은 그 주소에서 한 번 오가며, onSnapshot은 그 주소를 계속 지켜본다.
+    </div>
+  </section>
 
   <div class="footer">
-
-    관련 파일: index.html (좌석 신청 앱) · Firestore SDK v10 기준<br>
-
-    브라우저에서 직접 열어 확인하세요.
-
+    Firestore SDK v10 기준 &nbsp;·&nbsp; 관련 파일: 좌석 신청 앱 index.html
   </div>
 
-
-
-</div>
-
-
+</main>
 
 <script>
-
-// 탭 전환
-
 document.querySelectorAll('.tab-btn').forEach(btn => {
-
   btn.addEventListener('click', () => {
-
     const tab = btn.dataset.tab;
-
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
-
     document.querySelectorAll('.tab-panel').forEach(p =>
-
       p.classList.toggle('active', p.dataset.panel === tab));
-
-    window.scrollTo({ top: document.querySelector('.tabs').offsetTop - 16, behavior: 'smooth' });
-
+    window.scrollTo({ top: document.querySelector('.tabs').offsetTop - 72, behavior: 'smooth' });
   });
-
 });
-
-
-
-// 코드 복사 (폴백 포함)
 
 document.querySelectorAll('.copy-btn').forEach(btn => {
-
   btn.addEventListener('click', () => {
-
     const code = btn.closest('.code-block').querySelector('code').innerText;
-
     const label = btn.textContent;
-
     const flash = ok => {
-
       btn.textContent = ok ? 'Copied ✓' : 'Failed';
-
       btn.disabled = true;
-
       setTimeout(() => { btn.textContent = label; btn.disabled = false; }, 1500);
-
     };
-
     if (navigator.clipboard && window.isSecureContext) {
-
       navigator.clipboard.writeText(code).then(() => flash(true)).catch(fallback);
-
     } else { fallback(); }
-
     function fallback() {
-
       const ta = document.createElement('textarea');
-
       ta.value = code; ta.style.cssText = 'position:fixed;opacity:0;';
-
       document.body.appendChild(ta); ta.focus(); ta.select();
-
       try { flash(document.execCommand('copy')); } catch { flash(false); }
-
       document.body.removeChild(ta);
-
     }
-
   });
-
 });
 
-// 읽기 진행 바
-
 const bar = document.getElementById('read-progress');
-
 addEventListener('scroll', () => {
-
   const h = document.documentElement;
-
   const max = h.scrollHeight - h.clientHeight;
-
   bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
-
 }, { passive: true });
-
 </script>
-
-
-<!-- Back to index -->
-<a id="back-to-index" href="index.html" aria-label="목록으로 돌아가기" title="목록으로"><svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M8.5 15L3 10l5.5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10h14" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></a>
-<style>
-#back-to-index{position:fixed;bottom:1.5rem;left:1.5rem;width:44px;height:44px;background:#6b6a63;color:#fff;border-radius:9999px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.18);transition:background .15s,transform .15s;z-index:800;}
-#back-to-index:hover{background:#d95f2b;transform:translateX(-2px);}
-@media(max-width:600px){#back-to-index{bottom:1rem;left:1rem;}}
-</style>
 </body>
-
 </html>
