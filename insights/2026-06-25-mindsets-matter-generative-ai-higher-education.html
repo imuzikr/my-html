@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>마인드셋이 결정한다 — 생성형 AI 사용을 예측하는 기술 성장 마인드셋</title>
+  <meta name="description" content="중국 대학생 500명을 대상으로 한 매개분석 연구. 기술 성장 마인드셋이 성능기대·노력기대·기술불안을 통해 생성형 AI 사용을 예측한다는 것을 밝혔다.">
+  <meta property="og:title" content="마인드셋이 결정한다 — 생성형 AI 사용을 예측하는 기술 성장 마인드셋">
+  <meta property="og:description" content="기술적 능력은 개발될 수 있다고 믿는 학생이 생성형 AI를 더 잘 활용한다. UTAUT 매개분석 연구(Education Sciences, 2025).">
+  <style>
+    :root {
+      --color-bg:#f5f2ed; --color-bg-alt:#eceae4; --color-bg-card:#ffffff;
+      --color-text:#1a1a18; --color-text-muted:#6b6a63; --color-text-faint:#a09f97;
+      --color-border:#dedad2;
+      --color-accent:#d95f2b; --color-accent-hover:#c2521f; --color-accent-soft:#faeee7;
+      --color-blue:#2d5a8e; --color-blue-soft:#e5eef7;
+      --color-green:#3a6b4a; --color-green-soft:#e6f0e9;
+      --color-purple:#5b3a7a; --color-purple-soft:#ece4f5;
+      --color-yellow:#8a6a00; --color-yellow-soft:#fdf5d9;
+      --color-red:#b03a2e; --color-red-soft:#fdecea;
+      --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR","Apple SD Gothic Neo",Helvetica,Arial,sans-serif;
+      --font-mono:"SF Mono","Fira Code",Consolas,monospace;
+      --text-xs:0.75rem; --text-sm:0.875rem; --text-base:1rem; --text-lg:1.125rem;
+      --text-xl:1.25rem; --text-2xl:1.5rem; --text-3xl:1.875rem;
+      --weight-medium:500; --weight-semibold:600; --weight-bold:700;
+      --leading-tight:1.25; --leading-normal:1.6; --leading-loose:1.8;
+      --space-1:.25rem; --space-2:.5rem; --space-3:.75rem; --space-4:1rem;
+      --space-5:1.25rem; --space-6:1.5rem; --space-8:2rem; --space-12:3rem;
+      --radius-md:8px; --radius-lg:12px; --radius-full:9999px;
+      --shadow-sm:0 1px 3px rgba(0,0,0,.07); --shadow-md:0 6px 18px rgba(0,0,0,.08);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--font-sans);background:var(--color-bg);color:var(--color-text);line-height:var(--leading-normal);word-break:keep-all}
+    #read-progress{position:fixed;top:0;left:0;width:0;height:3px;background:var(--color-accent);z-index:1000;transition:width 80ms linear}
+
+    .site-nav{position:sticky;top:0;z-index:500;background:rgba(245,242,237,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--color-border)}
+    .nav-inner{max-width:900px;margin:0 auto;padding:var(--space-3) var(--space-6);display:flex;justify-content:space-between;align-items:center;gap:var(--space-4)}
+    .nav-brand{color:var(--color-accent);font-weight:var(--weight-bold);text-decoration:none;font-size:var(--text-sm);white-space:nowrap}
+    .nav-links{display:flex;gap:var(--space-1);list-style:none;overflow-x:auto;scrollbar-width:none}
+    .nav-links::-webkit-scrollbar{display:none}
+    .nav-links a{display:block;color:var(--color-text-muted);text-decoration:none;font-size:var(--text-sm);padding:var(--space-1) var(--space-3);border-radius:var(--radius-full);white-space:nowrap;transition:all 180ms ease}
+    .nav-links a:hover{background:var(--color-bg-alt);color:var(--color-text)}
+
+    .hero{background:linear-gradient(140deg,#0a1628 0%,#162540 35%,#1e1035 65%,#2a1506 100%);padding:calc(var(--space-12)*1.4) var(--space-6) var(--space-12);position:relative;overflow:hidden}
+    .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 12% 28%,rgba(91,58,122,.4),transparent 42%),radial-gradient(circle at 88% 25%,rgba(217,95,43,.25),transparent 40%);pointer-events:none}
+    .hero::after{content:"";position:absolute;right:5%;bottom:8%;width:320px;height:320px;border-radius:50%;border:1px solid rgba(255,255,255,.05);box-shadow:0 0 0 80px rgba(255,255,255,.018);pointer-events:none}
+    .hero-inner{max-width:900px;margin:0 auto;position:relative}
+    .eyebrow{display:inline-flex;align-items:center;gap:var(--space-2);color:#d4c0f0;border:1px solid rgba(212,192,240,.3);background:rgba(255,255,255,.07);border-radius:var(--radius-full);padding:var(--space-1) var(--space-4);font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.10em;text-transform:uppercase;margin-bottom:var(--space-6)}
+    .eyebrow-dot{width:6px;height:6px;border-radius:50%;background:#b090e0;display:inline-block}
+    h1{font-size:clamp(2rem,5.5vw,3.4rem);line-height:var(--leading-tight);letter-spacing:-.04em;color:#fff;margin-bottom:var(--space-5);font-weight:var(--weight-bold)}
+    h1 .hl{background:linear-gradient(90deg,#e8d0ff,#c8a8ff 50%,#ffd6c5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero-lead{font-size:var(--text-lg);color:rgba(255,255,255,.78);max-width:780px;line-height:var(--leading-loose);margin-bottom:var(--space-6)}
+    .hero-meta{display:flex;flex-wrap:wrap;gap:var(--space-2);align-items:center}
+    .hero-tag{font-size:var(--text-xs);color:rgba(255,255,255,.78);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);padding:var(--space-1) var(--space-3);border-radius:var(--radius-full)}
+    .source-cite{display:inline-flex;align-items:center;gap:var(--space-2);font-size:var(--text-xs);color:rgba(255,255,255,.55);margin-top:var(--space-4);border:1px solid rgba(255,255,255,.14);padding:var(--space-2) var(--space-4);border-radius:var(--radius-full)}
+
+    main{max-width:900px;margin:0 auto;padding:var(--space-12) var(--space-6)}
+
+    .summary{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-8);margin-bottom:var(--space-12);position:relative;overflow:hidden}
+    .summary::before{content:"";position:absolute;top:0;left:0;width:6px;height:100%;background:linear-gradient(180deg,var(--color-purple),var(--color-accent))}
+    .summary-label{font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.10em;text-transform:uppercase;color:var(--color-purple);margin-bottom:var(--space-3)}
+    .summary p{font-size:var(--text-base);line-height:var(--leading-loose);color:var(--color-text)}
+
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:var(--space-4);margin:var(--space-8) 0}
+    .kpi-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);text-align:center;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+    .kpi-card::before{content:"";position:absolute;top:0;left:0;right:0;height:4px}
+    .kpi-card.purple::before{background:linear-gradient(90deg,var(--color-purple),#8b58c4)}
+    .kpi-card.orange::before{background:linear-gradient(90deg,var(--color-accent),#e8832a)}
+    .kpi-card.blue::before{background:linear-gradient(90deg,var(--color-blue),#4a7fc4)}
+    .kpi-card.green::before{background:linear-gradient(90deg,var(--color-green),#5a9a6a)}
+    .kpi-num{font-size:2.2rem;font-weight:var(--weight-bold);line-height:1;margin-bottom:var(--space-2)}
+    .kpi-card.purple .kpi-num{color:var(--color-purple)}
+    .kpi-card.orange .kpi-num{color:var(--color-accent)}
+    .kpi-card.blue .kpi-num{color:var(--color-blue)}
+    .kpi-card.green .kpi-num{color:var(--color-green)}
+    .kpi-label{font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-normal)}
+
+    section{margin-bottom:var(--space-12);scroll-margin-top:80px}
+    .section-header{display:flex;gap:var(--space-4);align-items:flex-start;margin-bottom:var(--space-6)}
+    .section-num{width:42px;height:42px;border-radius:var(--radius-full);background:linear-gradient(135deg,var(--color-purple),var(--color-accent));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:var(--weight-bold);flex-shrink:0;font-size:var(--text-lg);box-shadow:var(--shadow-sm)}
+    h2{font-size:var(--text-2xl);line-height:var(--leading-tight);letter-spacing:-.02em;margin-bottom:var(--space-2)}
+    h3{font-size:var(--text-xl);margin:var(--space-6) 0 var(--space-3);line-height:var(--leading-tight)}
+    p{color:var(--color-text-muted);margin-bottom:var(--space-4);line-height:var(--leading-loose)}
+    strong{color:var(--color-text);font-weight:var(--weight-semibold)}
+    ul,ol{padding-left:var(--space-6);margin-bottom:var(--space-4)}
+    li{color:var(--color-text-muted);margin-bottom:var(--space-2);line-height:var(--leading-loose)}
+
+    .callout{display:flex;gap:var(--space-4);border-radius:var(--radius-md);padding:var(--space-5) var(--space-6);margin:var(--space-6) 0;align-items:flex-start}
+    .callout-icon{font-size:1.4rem;flex-shrink:0;line-height:1;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-label{font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.08em;text-transform:uppercase;margin-bottom:var(--space-2)}
+    .callout-body p{font-size:var(--text-base);margin-bottom:0;line-height:var(--leading-loose)}
+    .callout.info{background:var(--color-blue-soft);border:1px solid #c0d4eb;border-left:4px solid var(--color-blue)}
+    .callout.info .callout-label{color:var(--color-blue)}
+    .callout.info .callout-body p{color:#1e3a5f}
+    .callout.purple{background:var(--color-purple-soft);border:1px solid #d0c4e8;border-left:4px solid var(--color-purple)}
+    .callout.purple .callout-label{color:var(--color-purple)}
+    .callout.purple .callout-body p{color:#3d2856}
+    .callout.green{background:var(--color-green-soft);border:1px solid #bcd8c4;border-left:4px solid var(--color-green)}
+    .callout.green .callout-label{color:var(--color-green)}
+    .callout.green .callout-body p{color:#23402d}
+    .callout.warn{background:var(--color-yellow-soft);border:1px solid #e8d8a0;border-left:4px solid var(--color-yellow)}
+    .callout.warn .callout-label{color:var(--color-yellow)}
+    .callout.warn .callout-body p{color:#5a4500}
+
+    /* 모델 다이어그램 */
+    .model-diagram{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-6) 0;box-shadow:var(--shadow-sm)}
+    .model-diagram svg{width:100%;height:auto;display:block}
+    .diagram-caption{font-size:var(--text-sm);color:var(--color-text-faint);margin-top:var(--space-3);margin-bottom:0;text-align:center}
+
+    /* 매개 경로 카드 */
+    .path-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-6) 0}
+    .path-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+    .path-card::before{content:"";position:absolute;top:0;left:0;right:0;height:4px}
+    .path-card.p1::before{background:var(--color-blue)}
+    .path-card.p2::before{background:var(--color-green)}
+    .path-card.p3::before{background:var(--color-red)}
+    .path-num{font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.08em;text-transform:uppercase;margin-bottom:var(--space-2)}
+    .path-card.p1 .path-num{color:var(--color-blue)}
+    .path-card.p2 .path-num{color:var(--color-green)}
+    .path-card.p3 .path-num{color:var(--color-red)}
+    .path-title{font-size:var(--text-base);font-weight:var(--weight-bold);color:var(--color-text);margin-bottom:var(--space-3)}
+    .path-arrow{font-size:var(--text-lg);text-align:center;margin:var(--space-3) 0;color:var(--color-text-faint)}
+    .path-desc{font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-loose);margin:0}
+
+    /* 시사점 카드 */
+    .implication-list{display:flex;flex-direction:column;gap:var(--space-4);margin:var(--space-6) 0}
+    .impl-item{display:flex;gap:var(--space-4);background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);box-shadow:var(--shadow-sm)}
+    .impl-icon{font-size:1.5rem;flex-shrink:0;line-height:1;margin-top:2px}
+    .impl-body h3{font-size:var(--text-base);font-weight:var(--weight-bold);color:var(--color-text);margin:0 0 var(--space-2)}
+    .impl-body p{font-size:var(--text-sm);color:var(--color-text-muted);margin:0;line-height:var(--leading-loose)}
+
+    .pull-quote{border-left:4px solid var(--color-purple);background:var(--color-purple-soft);padding:var(--space-5) var(--space-6);border-radius:0 var(--radius-lg) var(--radius-lg) 0;color:#3d2856;margin:var(--space-6) 0;font-weight:var(--weight-medium);font-size:var(--text-lg);line-height:var(--leading-loose)}
+
+    .table-wrap{overflow-x:auto;margin:var(--space-5) 0}
+    table{border-collapse:collapse;width:100%;font-size:var(--text-sm)}
+    th,td{border:1px solid var(--color-border);padding:var(--space-3) var(--space-4);text-align:left;vertical-align:top;line-height:var(--leading-loose)}
+    th{background:var(--color-bg-alt);font-weight:var(--weight-semibold);color:var(--color-text)}
+
+    .footer{text-align:center;color:var(--color-text-faint);font-size:var(--text-sm);margin-top:var(--space-8);padding-top:var(--space-6);border-top:1px solid var(--color-border)}
+    .footer a{color:var(--color-text-faint);text-decoration:underline}
+
+    @media(max-width:640px){
+      main{padding:var(--space-8) var(--space-4)}
+      h1{font-size:1.85rem}
+      .hero{padding:var(--space-8) var(--space-4)}
+      .kpi-grid{grid-template-columns:1fr 1fr}
+    }
+  </style>
+</head>
+<body>
+
+<div id="read-progress" aria-hidden="true"></div>
+
+<nav class="site-nav" aria-label="사이트 내비게이션">
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">← Insights</a>
+    <ul class="nav-links">
+      <li><a href="#background">배경</a></li>
+      <li><a href="#method">연구 방법</a></li>
+      <li><a href="#findings">주요 결과</a></li>
+      <li><a href="#implications">시사점</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow"><span class="eyebrow-dot"></span>논문 리뷰 · AI 교육</div>
+    <h1>마인드셋이 결정한다<br><span class="hl">생성형 AI 사용을 예측하는<br>기술 성장 마인드셋</span></h1>
+    <p class="hero-lead">기술적 능력은 노력으로 개발될 수 있다고 믿는 학생이 생성형 AI를 더 잘 활용한다. 500명의 중국 대학생을 대상으로 한 매개분석이 밝혀낸 심리적 준비도의 힘.</p>
+    <div class="hero-meta">
+      <span class="hero-tag">Education Sciences 2025</span>
+      <span class="hero-tag">생성형 AI</span>
+      <span class="hero-tag">성장 마인드셋</span>
+      <span class="hero-tag">UTAUT</span>
+      <span class="hero-tag">고등교육</span>
+    </div>
+    <div class="source-cite">📄 Educ. Sci. 2025, 15(3), 310 &nbsp;·&nbsp; DOI: 10.3390/educsci15030310 &nbsp;·&nbsp; Published March 2025</div>
+  </div>
+</header>
+
+<main>
+
+  <div class="summary">
+    <div class="summary-label">핵심 요약</div>
+    <p>이 연구는 중국 대학생 500명을 대상으로 <strong>기술 성장 마인드셋(Technological Growth Mindset, TGM)</strong>이 생성형 AI(GAI) 사용에 미치는 영향을 분석했습니다. UTAUT 이론을 기반으로 성능기대(Performance Expectancy), 노력기대(Effort Expectancy), 기술불안(Technology Anxiety)이 매개 역할을 한다는 것을 검증했습니다. 외부 자원 인식과 성별을 통제한 상태에서도 TGM은 세 가지 심리적 경로를 통해 GAI 사용을 유의미하게 예측했습니다. 기술 도입에 있어 <strong>심리적 준비도</strong>가 기술적 역량만큼 중요하다는 것을 시사합니다.</p>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card purple">
+      <div class="kpi-num">500</div>
+      <div class="kpi-label">연구 참여<br>중국 대학생</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-num">71.8%</div>
+      <div class="kpi-label">여성 비율<br>(남성 28.0%)</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-num">3가지</div>
+      <div class="kpi-label">매개 경로<br>(PE · EE · TA)</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-num">UTAUT</div>
+      <div class="kpi-label">기반 이론<br>통합기술수용모형</div>
+    </div>
+  </div>
+
+  <!-- 연구 배경 -->
+  <section id="background">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>연구 배경 — 왜 마인드셋인가</h2>
+        <p>ChatGPT를 비롯한 생성형 AI가 고등교육 환경에 급속히 확산되고 있지만, 같은 도구에 접근할 수 있음에도 학생마다 활용 수준에 큰 차이가 있습니다. 기존 연구는 주로 기술적 접근성이나 사용 편의성에 초점을 맞췄지만, 이 연구는 더 근본적인 물음을 던집니다.</p>
+      </div>
+    </div>
+
+    <div class="pull-quote">
+      "도구가 있어도 쓰지 못하는 이유는 기술의 문제가 아니라 마음의 문제일 수 있다."
+    </div>
+
+    <h3>드웩의 성장 마인드셋, AI로 확장하다</h3>
+    <p>Carol Dweck의 마인드셋 이론에 따르면, 사람은 능력에 대한 암묵적 믿음에 따라 <strong>고정 마인드셋</strong>(능력은 타고난 것)과 <strong>성장 마인드셋</strong>(능력은 노력으로 개발 가능)으로 나뉩니다. 이 연구는 그 개념을 기술 영역으로 특화하여 <strong>기술 성장 마인드셋(TGM)</strong>을 정의합니다.</p>
+
+    <div class="callout purple">
+      <div class="callout-icon">🧠</div>
+      <div class="callout-body">
+        <div class="callout-label">기술 성장 마인드셋(TGM) 정의</div>
+        <p><strong>"기술적 능력은 노력과 연습을 통해 개발될 수 있다"</strong>는 믿음. 단순히 AI를 긍정적으로 보는 태도와는 다르며, 자신의 기술 역량이 성장 가능하다는 자기 인식(self-conception)에 관한 것입니다.</p>
+      </div>
+    </div>
+
+    <h3>UTAUT: 기술 수용을 설명하는 이론 틀</h3>
+    <p>연구는 Venkatesh 등(2003)이 제안한 <strong>통합기술수용이용이론(UTAUT)</strong>을 이론적 기반으로 삼습니다. UTAUT는 새로운 기술의 수용·사용 행동을 설명하는 가장 포괄적인 모형 중 하나로, 이 연구는 TGM이 UTAUT의 핵심 구성요소들을 통해 GAI 사용에 영향을 미친다고 가정합니다.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>UTAUT 구성요소</th><th>정의</th><th>TGM과의 관계</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>성능기대 (PE)</strong><br>Performance Expectancy</td>
+            <td>기술을 사용하면 성과가 향상될 것이라는 기대</td>
+            <td>TGM이 높을수록 GAI로 더 많은 것을 할 수 있다고 기대 → 사용 증가</td>
+          </tr>
+          <tr>
+            <td><strong>노력기대 (EE)</strong><br>Effort Expectancy</td>
+            <td>기술을 배우고 사용하는 것이 어렵지 않을 것이라는 기대</td>
+            <td>TGM이 높을수록 어렵더라도 배울 수 있다고 믿어 시도 의지 증가</td>
+          </tr>
+          <tr>
+            <td><strong>기술불안 (TA)</strong><br>Technology Anxiety</td>
+            <td>새로운 기술 사용에 대한 불안·두려움</td>
+            <td>TGM이 높을수록 불안이 낮아지고, 낮은 불안이 사용을 촉진</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 연구 방법 -->
+  <section id="method">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>연구 방법</h2>
+        <p>온라인 설문을 통해 수집한 데이터로 매개분석(mediation analysis)을 실시했습니다.</p>
+      </div>
+    </div>
+
+    <h3>연구 참여자</h3>
+    <ul>
+      <li>중국 대학생 <strong>500명</strong> 대상 온라인 설문</li>
+      <li>여성 359명(71.8%), 남성 140명(28.0%), 기타 1명(0.2%)</li>
+      <li>ChatGPT 등 생성형 AI 도구를 경험한 대학생</li>
+    </ul>
+
+    <h3>측정 도구 및 변수</h3>
+    <ul>
+      <li><strong>독립변수:</strong> 기술 성장 마인드셋(TGM) — 리커트 척도 자기보고</li>
+      <li><strong>매개변수:</strong> 성능기대(PE), 노력기대(EE), 기술불안(TA)</li>
+      <li><strong>종속변수:</strong> 생성형 AI 사용 행동(GAI Usage)</li>
+      <li><strong>통제변수:</strong> 외부 자원 인식(Perceived External Resources), 성별</li>
+    </ul>
+
+    <h3>분석 방법</h3>
+    <p>PROCESS macro를 활용한 <strong>병렬 매개분석(parallel mediation analysis)</strong>을 실시하여, TGM → 매개변수 → GAI 사용의 간접 경로를 부트스트래핑(bootstrapping)으로 검증했습니다. 외부 자원 인식과 성별을 통제 변수로 포함해 혼재 변수의 영향을 제거했습니다.</p>
+
+    <div class="callout info">
+      <div class="callout-icon">📐</div>
+      <div class="callout-body">
+        <div class="callout-label">매개분석이란</div>
+        <p>독립변수(TGM)가 종속변수(GAI 사용)에 직접 영향을 미치는 것이 아니라, 매개변수(PE·EE·TA)를 <strong>거쳐서</strong> 영향을 미치는 경로를 검증하는 통계 기법입니다. "왜 TGM이 높으면 GAI를 더 많이 쓰는가?"에 대한 메커니즘을 밝힙니다.</p>
+      </div>
+    </div>
+
+    <!-- 모델 다이어그램 -->
+    <div class="model-diagram">
+      <svg viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0,10 3.5,0 7" fill="#2d5a8e"/>
+          </marker>
+          <marker id="arr-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0,10 3.5,0 7" fill="#3a6b4a"/>
+          </marker>
+          <marker id="arr-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0,10 3.5,0 7" fill="#a8322a"/>
+          </marker>
+          <marker id="arr-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0,10 3.5,0 7" fill="#5b3a7a"/>
+          </marker>
+          <marker id="arr-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0,10 3.5,0 7" fill="#a09f97"/>
+          </marker>
+        </defs>
+
+        <!-- TGM 박스 -->
+        <rect x="20" y="110" width="140" height="70" rx="10" fill="#ece4f5" stroke="#5b3a7a" stroke-width="2"/>
+        <text x="90" y="142" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#3d2256" font-weight="bold">기술 성장</text>
+        <text x="90" y="158" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#3d2256" font-weight="bold">마인드셋 (TGM)</text>
+        <text x="90" y="172" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#7d5aa8">독립변수</text>
+
+        <!-- 매개변수들 -->
+        <!-- PE -->
+        <rect x="270" y="20" width="160" height="60" rx="8" fill="#e5eef7" stroke="#2d5a8e" stroke-width="1.5"/>
+        <text x="350" y="46" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#1a3a5c" font-weight="bold">성능기대 (PE)</text>
+        <text x="350" y="64" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#4a6a8e">Performance Expectancy</text>
+
+        <!-- EE -->
+        <rect x="270" y="115" width="160" height="60" rx="8" fill="#e6f0e9" stroke="#3a6b4a" stroke-width="1.5"/>
+        <text x="350" y="141" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#1e4228" font-weight="bold">노력기대 (EE)</text>
+        <text x="350" y="159" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#3a6b4a">Effort Expectancy</text>
+
+        <!-- TA -->
+        <rect x="270" y="210" width="160" height="60" rx="8" fill="#fdecea" stroke="#a8322a" stroke-width="1.5"/>
+        <text x="350" y="236" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5c1f1a" font-weight="bold">기술불안 (TA)</text>
+        <text x="350" y="254" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#a8322a">Technology Anxiety</text>
+
+        <!-- GAI Usage 박스 -->
+        <rect x="540" y="110" width="140" height="70" rx="10" fill="#faeee7" stroke="#d95f2b" stroke-width="2"/>
+        <text x="610" y="142" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#7a2808" font-weight="bold">GAI 사용</text>
+        <text x="610" y="158" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#7a2808" font-weight="bold">(Usage)</text>
+        <text x="610" y="172" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#d95f2b">종속변수</text>
+
+        <!-- TGM → PE -->
+        <line x1="160" y1="130" x2="268" y2="62" stroke="#2d5a8e" stroke-width="1.8" marker-end="url(#arr-blue)"/>
+        <!-- TGM → EE -->
+        <line x1="160" y1="145" x2="268" y2="145" stroke="#3a6b4a" stroke-width="1.8" marker-end="url(#arr-green)"/>
+        <!-- TGM → TA -->
+        <line x1="160" y1="160" x2="268" y2="228" stroke="#a8322a" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#arr-red)"/>
+
+        <!-- PE → GAI -->
+        <line x1="430" y1="62" x2="538" y2="130" stroke="#2d5a8e" stroke-width="1.8" marker-end="url(#arr-blue)"/>
+        <!-- EE → GAI -->
+        <line x1="430" y1="145" x2="538" y2="145" stroke="#3a6b4a" stroke-width="1.8" marker-end="url(#arr-green)"/>
+        <!-- TA → GAI (negative) -->
+        <line x1="430" y1="228" x2="538" y2="160" stroke="#a8322a" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#arr-red)"/>
+
+        <!-- 직접 경로 (통제 후) -->
+        <path d="M 90 110 Q 350 -10 610 110" stroke="#a09f97" stroke-width="1.2" stroke-dasharray="6,4" fill="none" marker-end="url(#arr-gray)"/>
+        <text x="350" y="8" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#a09f97">직접 경로 (통제 변수 포함)</text>
+
+        <!-- 음수 관계 표시 -->
+        <text x="200" y="215" font-family="sans-serif" font-size="10" fill="#a8322a">(−)</text>
+        <text x="490" y="215" font-family="sans-serif" font-size="10" fill="#a8322a">(−)</text>
+      </svg>
+      <p class="diagram-caption">점선 = 부적(−) 관계 &nbsp;|&nbsp; 실선 = 정적(+) 관계 &nbsp;|&nbsp; 통제변수: 외부 자원 인식, 성별</p>
+    </div>
+  </section>
+
+  <!-- 주요 결과 -->
+  <section id="findings">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>주요 결과</h2>
+        <p>세 가지 매개 경로 모두 통계적으로 유의미했으며, 이는 외부 자원 접근성과 성별을 통제한 후에도 일관되게 나타났습니다.</p>
+      </div>
+    </div>
+
+    <div class="callout purple">
+      <div class="callout-icon">✅</div>
+      <div class="callout-body">
+        <div class="callout-label">핵심 발견</div>
+        <p>기술 성장 마인드셋(TGM)은 성능기대, 노력기대, 기술불안을 통해 생성형 AI 사용을 유의미하게 예측했습니다. 이는 외부 자원 인식과 성별을 통계적으로 통제한 상태에서도 동일하게 확인되었습니다.</p>
+      </div>
+    </div>
+
+    <div class="path-grid">
+      <div class="path-card p1">
+        <div class="path-num">매개 경로 1</div>
+        <div class="path-title">TGM → 성능기대(PE) → GAI 사용</div>
+        <div class="path-arrow">TGM ↑ &nbsp;→&nbsp; "AI로 더 많은 걸 할 수 있다" ↑</div>
+        <p class="path-desc">기술 성장 마인드셋이 높을수록 생성형 AI가 학습·과제 성과를 향상시킬 것이라는 기대가 높아지고, 이 기대가 실제 사용으로 이어집니다. <strong>긍정적 매개.</strong></p>
+      </div>
+      <div class="path-card p2">
+        <div class="path-num">매개 경로 2</div>
+        <div class="path-title">TGM → 노력기대(EE) → GAI 사용</div>
+        <div class="path-arrow">TGM ↑ &nbsp;→&nbsp; "어려워도 배울 수 있다" ↑</div>
+        <p class="path-desc">성장 마인드셋을 가진 학생은 AI 도구 학습에 드는 노력을 두려워하지 않고, 오히려 배울 수 있다는 자신감으로 사용 의도가 높아집니다. <strong>긍정적 매개.</strong></p>
+      </div>
+      <div class="path-card p3">
+        <div class="path-num">매개 경로 3</div>
+        <div class="path-title">TGM → 기술불안(TA) → GAI 사용</div>
+        <div class="path-arrow">TGM ↑ &nbsp;→&nbsp; 기술불안 ↓ &nbsp;→&nbsp; 사용 ↑</div>
+        <p class="path-desc">TGM은 기술불안을 <strong>낮추는</strong> 방향으로 작용합니다. "AI를 잘 못 다루는 건 아직 배우지 않아서"라는 인식이 불안을 완화하고, 이것이 사용을 촉진합니다. <strong>부적 매개(불안 감소).</strong></p>
+      </div>
+    </div>
+
+    <h3>통제 변수의 효과</h3>
+    <p>외부 자원 인식(컴퓨터·인터넷 등 기기 접근성)과 성별을 통제 변수로 포함했음에도, TGM의 GAI 사용에 대한 예측력은 세 가지 경로 모두에서 <strong>유의미하게 유지</strong>되었습니다. 이는 물리적 접근 조건이 동일하게 갖춰진 환경에서도 마인드셋 자체가 독립적인 영향력을 발휘한다는 것을 의미합니다.</p>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <div class="callout-label">연구의 한계</div>
+        <p>중국 대학생을 대상으로 한 단면 연구로, 문화적 맥락이나 인과관계의 방향성에 대한 해석에는 주의가 필요합니다. 또한 자기보고 방식이 사용된 만큼 사회적 바람직성 편향(social desirability bias)이 개입할 수 있습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 교육적 시사점 -->
+  <section id="implications">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>교육적 시사점</h2>
+        <p>이 연구는 AI 도입 교육에서 기술 인프라 확충만큼이나 학습자의 심리적 준비도 계발이 중요함을 시사합니다.</p>
+      </div>
+    </div>
+
+    <div class="implication-list">
+      <div class="impl-item">
+        <div class="impl-icon">🌱</div>
+        <div class="impl-body">
+          <h3>성장 마인드셋 함양을 교육과정에 통합</h3>
+          <p>AI 도구 사용 교육을 설계할 때 기술 조작법 훈련뿐 아니라, <strong>"기술 능력은 개발될 수 있다"는 믿음을 키우는 활동</strong>을 병행해야 합니다. 실패를 학습의 일부로 재정의하는 수업 분위기, 점진적 도전 과제 설계 등이 이에 해당합니다.</p>
+        </div>
+      </div>
+      <div class="impl-item">
+        <div class="impl-icon">😰</div>
+        <div class="impl-body">
+          <h3>기술불안 완화 프로그램 운영</h3>
+          <p>생성형 AI에 대한 불안과 두려움이 활용의 주요 장벽입니다. 기술불안이 높은 학생을 위한 <strong>심리적 안전감 확보</strong>—소그룹 실습, 저위험 시험 환경, 동료 지원 체계—가 GAI 도입 효과를 높이는 데 기여합니다.</p>
+        </div>
+      </div>
+      <div class="impl-item">
+        <div class="impl-icon">🎯</div>
+        <div class="impl-body">
+          <h3>성능기대 형성: 구체적인 효용 경험 제공</h3>
+          <p>"생성형 AI로 무엇을 할 수 있는가"에 대한 구체적 경험이 성능기대를 높입니다. 실제 학습 과제에서 GAI를 사용해 성과를 경험하게 하는 <strong>체험 중심 교육(hands-on learning)</strong>이 효과적입니다.</p>
+        </div>
+      </div>
+      <div class="impl-item">
+        <div class="impl-icon">🏗️</div>
+        <div class="impl-body">
+          <h3>인프라만으로는 부족하다 — 심리적 준비도 병행 투자</h3>
+          <p>컴퓨터, 인터넷, AI 도구 접근성을 아무리 잘 갖춰도 학습자의 마인드셋과 심리적 준비도가 뒷받침되지 않으면 사용으로 이어지기 어렵습니다. 교육기관은 <strong>기술 환경 구축과 심리 역량 교육</strong>을 동시에 추진해야 합니다.</p>
+        </div>
+      </div>
+      <div class="impl-item">
+        <div class="impl-icon">📊</div>
+        <div class="impl-body">
+          <h3>교수자 개발: AI에 대한 성장 마인드셋 모델링</h3>
+          <p>학생만큼이나 교수자 자신의 TGM이 중요합니다. 교수자가 AI 도구를 학습하고 실험하는 과정을 보여주는 것 자체가, 학생의 기술 성장 마인드셋에 긍정적 모델이 됩니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="pull-quote">
+      생성형 AI 교육의 성패는 도구의 성능이 아니라, 그것을 배울 수 있다고 믿는 학습자의 마인드셋에 달려 있다.
+    </div>
+
+    <div class="callout green">
+      <div class="callout-icon">🔗</div>
+      <div class="callout-body">
+        <div class="callout-label">다른 연구와의 연결</div>
+        <p>이 결과는 <strong>AI 자기효능감(AI self-efficacy)</strong> 연구들과 맥을 같이 합니다. AI를 잘 다룰 수 있다는 자신감이 사용을 높인다는 연구들이 축적되고 있으며, 이 논문은 그 선행 요인이 바로 성장 마인드셋임을 매개분석으로 정교하게 밝혀냈습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 결론 -->
+  <section>
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <h2>결론 및 정리</h2>
+        <p>이 연구가 고등교육 AI 도입 논의에 기여하는 핵심 메시지입니다.</p>
+      </div>
+    </div>
+
+    <p>중국 대학생 500명을 대상으로 한 이 연구는, 생성형 AI 활용의 심리적 메커니즘을 체계적으로 규명했습니다. 기술 성장 마인드셋(TGM)은 단순한 낙관적 태도가 아니라, <strong>성능기대를 높이고, 노력에 대한 두려움을 낮추며, 기술불안을 완화</strong>하는 방식으로 GAI 사용에 실질적으로 기여합니다.</p>
+
+    <p>특히 외부 자원 접근성(디바이스, 인터넷 등)이 통제된 상황에서도 TGM의 효과가 유의미하게 나타난다는 점은, 단순한 인프라 격차 해소를 넘어 <strong>학습자의 내면적 역량 개발</strong>이 AI 교육의 핵심 과제임을 분명히 합니다.</p>
+
+    <div class="callout info">
+      <div class="callout-icon">📚</div>
+      <div class="callout-body">
+        <div class="callout-label">원문 정보</div>
+        <p><strong>Mindsets Matter: A Mediation Analysis of the Role of a Technological Growth Mindset in Generative Artificial Intelligence Usage in Higher Education</strong><br>
+        <em>Education Sciences</em>, 2025, 15(3), 310.<br>
+        DOI: <a href="https://doi.org/10.3390/educsci15030310" style="color:var(--color-blue)">10.3390/educsci15030310</a></p>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">
+    논문 원문: <a href="https://doi.org/10.3390/educsci15030310" target="_blank" rel="noopener">doi.org/10.3390/educsci15030310</a>
+    &nbsp;·&nbsp; Education Sciences, MDPI, 2025
+  </div>
+
+</main>
+
+<script>
+const bar = document.getElementById('read-progress');
+addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const max = h.scrollHeight - h.clientHeight;
+  bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+}, { passive: true });
+</script>
+</body>
+</html>
