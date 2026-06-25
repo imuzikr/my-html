@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>실행 능력에서 판단 능력으로 — WEF 인간-기계 협업 보고서 2026</title>
-  <meta name="description" content="WEF Human-Machine Collaboration in Industrial Operations: Activation Playbook 핵심 정리. 자동화가 실행을 흡수할수록 인간의 역할은 판단·감독·책임으로 이동한다.">
-  <meta property="og:title" content="실행 능력에서 판단 능력으로 — WEF 인간-기계 협업 보고서 2026">
-  <meta property="og:description" content="102개 역량 중 42개가 신규·부상. 인프라보다 업무 재설계와 인력 준비도가 병목. WEF Activation Playbook 핵심 분석.">
+  <title>실행에서 판단으로 — WEF 인간-기계 협업 활성화 플레이북 2026</title>
+  <meta name="description" content="WEF Human-Machine Collaboration in Industrial Operations: Activation Playbook (June 2026) 원문 분석. 자동화가 실행을 흡수할수록 인간의 역할은 판단·감독·책임으로 이동한다.">
+  <meta property="og:title" content="실행에서 판단으로 — WEF 인간-기계 협업 활성화 플레이북 2026">
+  <meta property="og:description" content="102개 스킬, 31개 신규·부상, +11% vs +4% 생산성 격차. WEF Activation Playbook 원문 전체 분석.">
   <style>
     :root {
       --color-bg:#f5f2ed; --color-bg-alt:#eceae4; --color-bg-card:#ffffff;
@@ -48,132 +48,145 @@
     .hero-inner{max-width:900px;margin:0 auto;position:relative}
     .eyebrow{display:inline-flex;align-items:center;gap:var(--space-2);color:#c8d8f8;border:1px solid rgba(200,216,248,.3);background:rgba(255,255,255,.07);border-radius:var(--radius-full);padding:var(--space-1) var(--space-4);font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.10em;text-transform:uppercase;margin-bottom:var(--space-6)}
     .eyebrow-dot{width:6px;height:6px;border-radius:50%;background:#7aa8e8;display:inline-block}
-    h1{font-size:clamp(2rem,5.5vw,3.4rem);line-height:var(--leading-tight);letter-spacing:-.04em;color:#fff;margin-bottom:var(--space-5);font-weight:var(--weight-bold)}
-    h1 .hl{background:linear-gradient(90deg,#c8d8ff,#a0beff 50%,#ffd6c0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-    .hero-lead{font-size:var(--text-lg);color:rgba(255,255,255,.78);max-width:780px;line-height:var(--leading-loose);margin-bottom:var(--space-6)}
-    .hero-meta{display:flex;flex-wrap:wrap;gap:var(--space-2);align-items:center}
-    .hero-tag{font-size:var(--text-xs);color:rgba(255,255,255,.78);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);padding:var(--space-1) var(--space-3);border-radius:var(--radius-full)}
-    .source-cite{display:inline-flex;align-items:center;gap:var(--space-2);font-size:var(--text-xs);color:rgba(255,255,255,.55);margin-top:var(--space-4);border:1px solid rgba(255,255,255,.14);padding:var(--space-2) var(--space-4);border-radius:var(--radius-full)}
+    .hero h1{font-size:clamp(1.75rem,4vw,2.8rem);font-weight:var(--weight-bold);color:#ffffff;line-height:var(--leading-tight);margin-bottom:var(--space-6);letter-spacing:-.02em}
+    .hero-sub{font-size:var(--text-lg);color:rgba(255,255,255,.62);line-height:var(--leading-loose);max-width:650px;margin-bottom:var(--space-8)}
+    .hero-cite{display:inline-flex;align-items:center;gap:var(--space-2);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);font-size:var(--text-xs);color:rgba(255,255,255,.55);font-family:var(--font-mono)}
 
-    main{max-width:900px;margin:0 auto;padding:var(--space-12) var(--space-6)}
+    .kpi-strip{background:var(--color-bg-alt);border-bottom:1px solid var(--color-border)}
+    .kpi-inner{max-width:900px;margin:0 auto;padding:var(--space-8) var(--space-6);display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:var(--space-4)}
+    .kpi-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);position:relative;overflow:hidden}
+    .kpi-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px}
+    .kpi-card.c-blue::before{background:var(--color-blue)}
+    .kpi-card.c-accent::before{background:var(--color-accent)}
+    .kpi-card.c-green::before{background:var(--color-green)}
+    .kpi-card.c-purple::before{background:var(--color-purple)}
+    .kpi-val{font-size:2rem;font-weight:var(--weight-bold);line-height:1;margin-bottom:var(--space-2)}
+    .kpi-card.c-blue .kpi-val{color:var(--color-blue)}
+    .kpi-card.c-accent .kpi-val{color:var(--color-accent)}
+    .kpi-card.c-green .kpi-val{color:var(--color-green)}
+    .kpi-card.c-purple .kpi-val{color:var(--color-purple)}
+    .kpi-label{font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.4}
+    .kpi-note{font-size:var(--text-xs);color:var(--color-text-faint);margin-top:var(--space-2)}
 
-    .summary{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-8);margin-bottom:var(--space-12);position:relative;overflow:hidden}
-    .summary::before{content:"";position:absolute;top:0;left:0;width:6px;height:100%;background:linear-gradient(180deg,var(--color-blue),var(--color-accent))}
-    .summary-label{font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.10em;text-transform:uppercase;color:var(--color-blue);margin-bottom:var(--space-3)}
-    .summary p{font-size:var(--text-base);line-height:var(--leading-loose);color:var(--color-text)}
+    .article-body{max-width:900px;margin:0 auto;padding:var(--space-12) var(--space-6)}
+    .section-header{display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-8)}
+    .section-num{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:var(--text-sm);font-weight:var(--weight-bold);color:#fff;flex-shrink:0}
+    .section-num.blue{background:var(--color-blue)}
+    .section-num.accent{background:var(--color-accent)}
+    .section-num.green{background:var(--color-green)}
+    .section-num.purple{background:var(--color-purple)}
+    .section-num.red{background:var(--color-red)}
+    .section-num.yellow{background:var(--color-yellow)}
+    .section-title{font-size:var(--text-2xl);font-weight:var(--weight-bold);color:var(--color-text)}
+    section+section{margin-top:var(--space-12)}
 
-    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:var(--space-4);margin:var(--space-8) 0}
-    .kpi-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);text-align:center;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
-    .kpi-card::before{content:"";position:absolute;top:0;left:0;right:0;height:4px}
-    .kpi-card.blue::before{background:linear-gradient(90deg,var(--color-blue),#4a82c8)}
-    .kpi-card.orange::before{background:linear-gradient(90deg,var(--color-accent),#e8832a)}
-    .kpi-card.green::before{background:linear-gradient(90deg,var(--color-green),#5a9a6a)}
-    .kpi-card.red::before{background:linear-gradient(90deg,var(--color-red),#d0604a)}
-    .kpi-num{font-size:2.2rem;font-weight:var(--weight-bold);line-height:1;margin-bottom:var(--space-2)}
-    .kpi-card.blue .kpi-num{color:var(--color-blue)}
-    .kpi-card.orange .kpi-num{color:var(--color-accent)}
-    .kpi-card.green .kpi-num{color:var(--color-green)}
-    .kpi-card.red .kpi-num{color:var(--color-red)}
-    .kpi-label{font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-normal)}
-    .kpi-sub{font-size:var(--text-xs);color:var(--color-text-faint);margin-top:var(--space-1)}
+    p{color:var(--color-text);line-height:var(--leading-loose);margin-bottom:var(--space-4)}
+    p:last-child{margin-bottom:0}
 
-    section{margin-bottom:var(--space-12);scroll-margin-top:80px}
-    .section-header{display:flex;gap:var(--space-4);align-items:flex-start;margin-bottom:var(--space-6)}
-    .section-num{width:42px;height:42px;border-radius:var(--radius-full);background:linear-gradient(135deg,var(--color-blue),var(--color-accent));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:var(--weight-bold);flex-shrink:0;font-size:var(--text-lg);box-shadow:var(--shadow-sm)}
-    h2{font-size:var(--text-2xl);line-height:var(--leading-tight);letter-spacing:-.02em;margin-bottom:var(--space-2)}
-    h3{font-size:var(--text-xl);margin:var(--space-6) 0 var(--space-3);line-height:var(--leading-tight)}
-    p{color:var(--color-text-muted);margin-bottom:var(--space-4);line-height:var(--leading-loose)}
-    strong{color:var(--color-text);font-weight:var(--weight-semibold)}
-    ul,ol{padding-left:var(--space-6);margin-bottom:var(--space-4)}
-    li{color:var(--color-text-muted);margin-bottom:var(--space-2);line-height:var(--leading-loose)}
-
-    .callout{display:flex;gap:var(--space-4);border-radius:var(--radius-md);padding:var(--space-5) var(--space-6);margin:var(--space-6) 0;align-items:flex-start}
-    .callout-icon{font-size:1.4rem;flex-shrink:0;line-height:1;margin-top:2px}
+    .callout{border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);margin:var(--space-6) 0;display:flex;gap:var(--space-4);align-items:flex-start}
+    .callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:2px}
     .callout-body{flex:1}
-    .callout-label{font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.08em;text-transform:uppercase;margin-bottom:var(--space-2)}
-    .callout-body p{font-size:var(--text-base);margin-bottom:0;line-height:var(--leading-loose)}
-    .callout.info{background:var(--color-blue-soft);border:1px solid #c0d4eb;border-left:4px solid var(--color-blue)}
-    .callout.info .callout-label{color:var(--color-blue)}
-    .callout.info .callout-body p{color:#1e3a5f}
-    .callout.green{background:var(--color-green-soft);border:1px solid #bcd8c4;border-left:4px solid var(--color-green)}
-    .callout.green .callout-label{color:var(--color-green)}
-    .callout.green .callout-body p{color:#1a3a26}
-    .callout.warn{background:var(--color-yellow-soft);border:1px solid #e8d8a0;border-left:4px solid var(--color-yellow)}
-    .callout.warn .callout-label{color:var(--color-yellow)}
-    .callout.warn .callout-body p{color:#5a4500}
-    .callout.accent{background:var(--color-accent-soft);border:1px solid #f1ddd0;border-left:4px solid var(--color-accent)}
-    .callout.accent .callout-label{color:var(--color-accent)}
-    .callout.accent .callout-body p{color:#5b2b18}
+    .callout-body strong{display:block;margin-bottom:var(--space-1);font-weight:var(--weight-semibold)}
+    .callout-body p{margin:0;font-size:var(--text-sm)}
+    .callout.info{background:var(--color-blue-soft);border-left:3px solid var(--color-blue)}
+    .callout.warn{background:var(--color-yellow-soft);border-left:3px solid var(--color-yellow)}
+    .callout.green{background:var(--color-green-soft);border-left:3px solid var(--color-green)}
+    .callout.accent{background:var(--color-accent-soft);border-left:3px solid var(--color-accent)}
+    .callout.purple{background:var(--color-purple-soft);border-left:3px solid var(--color-purple)}
 
-    .pull-quote{border-left:4px solid var(--color-blue);background:var(--color-blue-soft);padding:var(--space-5) var(--space-6);border-radius:0 var(--radius-lg) var(--radius-lg) 0;color:#1a3a5f;margin:var(--space-6) 0;font-weight:var(--weight-medium);font-size:var(--text-lg);line-height:var(--leading-loose)}
+    .pull-quote{border-left:4px solid var(--color-accent);padding:var(--space-5) var(--space-6);margin:var(--space-8) 0;background:var(--color-accent-soft);border-radius:0 var(--radius-lg) var(--radius-lg) 0}
+    .pull-quote p{font-size:var(--text-lg);font-style:italic;color:var(--color-text);line-height:1.65;margin:0 0 var(--space-2)}
+    .pull-quote cite{font-size:var(--text-xs);color:var(--color-text-muted);font-style:normal}
 
-    /* 운영 기능 7개 그리드 */
-    .ops-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:var(--space-3);margin:var(--space-6) 0}
-    .ops-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);box-shadow:var(--shadow-sm)}
-    .ops-icon{font-size:1.5rem;margin-bottom:var(--space-2);display:block}
-    .ops-title{font-size:var(--text-sm);font-weight:var(--weight-bold);color:var(--color-text);margin-bottom:var(--space-1)}
-    .ops-change{font-size:var(--text-xs);color:var(--color-text-muted);line-height:var(--leading-normal)}
+    .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--space-4);margin:var(--space-6) 0}
+    .grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:var(--space-4);margin:var(--space-6) 0}
+    .grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:var(--space-4);margin:var(--space-6) 0}
 
-    /* 이동 방향 카드 */
-    .shift-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:var(--space-4);margin:var(--space-6) 0}
-    .shift-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);box-shadow:var(--shadow-sm)}
-    .shift-from{font-size:var(--text-sm);color:var(--color-text-faint);margin-bottom:var(--space-2)}
-    .shift-arrow{font-size:1.4rem;color:var(--color-accent);margin:var(--space-2) 0;display:block}
-    .shift-to{font-size:var(--text-base);font-weight:var(--weight-bold);color:var(--color-text);margin-bottom:var(--space-3)}
-    .shift-desc{font-size:var(--text-sm);color:var(--color-text-muted);margin:0;line-height:var(--leading-loose)}
+    .card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5)}
+    .card-icon{font-size:1.5rem;margin-bottom:var(--space-3)}
+    .card h3{font-size:var(--text-base);font-weight:var(--weight-semibold);margin-bottom:var(--space-2)}
+    .card p{font-size:var(--text-sm);color:var(--color-text-muted);margin:0;line-height:1.55}
 
-    /* 역량 카드 */
-    .skill-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:var(--space-4);margin:var(--space-6) 0}
-    .skill-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
-    .skill-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--color-blue),var(--color-accent))}
-    .skill-tag{display:inline-block;font-size:var(--text-xs);font-weight:var(--weight-bold);background:var(--color-blue-soft);color:var(--color-blue);border-radius:var(--radius-full);padding:2px 10px;margin-bottom:var(--space-3);letter-spacing:.04em}
-    .skill-name{font-size:var(--text-base);font-weight:var(--weight-bold);color:var(--color-text);margin-bottom:var(--space-2)}
-    .skill-desc{font-size:var(--text-sm);color:var(--color-text-muted);margin:0;line-height:var(--leading-loose)}
+    .shift-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);position:relative;overflow:hidden}
+    .shift-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--color-blue),var(--color-accent))}
+    .shift-arrow{font-size:1.2rem;color:var(--color-accent);margin:var(--space-3) 0}
+    .shift-from{font-size:var(--text-sm);color:var(--color-text-muted);padding:var(--space-2) var(--space-3);background:var(--color-bg-alt);border-radius:var(--radius-md);margin-bottom:var(--space-1)}
+    .shift-to{font-size:var(--text-sm);font-weight:var(--weight-semibold);color:var(--color-blue);padding:var(--space-2) var(--space-3);background:var(--color-blue-soft);border-radius:var(--radius-md)}
+    .shift-label{font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-faint);margin-bottom:var(--space-3)}
 
-    /* 생산성 비교 */
-    .prod-compare{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin:var(--space-6) 0}
-    .prod-bar{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);box-shadow:var(--shadow-sm);text-align:center}
-    .prod-pct{font-size:3rem;font-weight:var(--weight-bold);line-height:1;margin-bottom:var(--space-2)}
-    .prod-bar.high .prod-pct{color:var(--color-green)}
-    .prod-bar.low .prod-pct{color:var(--color-red)}
-    .prod-label{font-size:var(--text-sm);font-weight:var(--weight-semibold);color:var(--color-text);margin-bottom:var(--space-1)}
-    .prod-desc{font-size:var(--text-xs);color:var(--color-text-muted)}
-    .prod-track{height:8px;border-radius:4px;margin-top:var(--space-4);background:var(--color-bg-alt)}
-    .prod-fill{height:100%;border-radius:4px}
-    .prod-bar.high .prod-fill{background:var(--color-green);width:100%}
-    .prod-bar.low .prod-fill{background:var(--color-red);width:36%}
+    .trust-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);display:flex;gap:var(--space-4)}
+    .trust-num{font-size:2rem;font-weight:var(--weight-bold);color:var(--color-accent);line-height:1;flex-shrink:0}
+    .trust-body h3{font-size:var(--text-base);font-weight:var(--weight-semibold);margin-bottom:var(--space-2)}
+    .trust-body p{font-size:var(--text-sm);color:var(--color-text-muted);margin:0}
+    .trust-stat{display:inline-block;background:var(--color-accent-soft);border-radius:var(--radius-md);padding:var(--space-1) var(--space-3);font-size:var(--text-xs);font-weight:var(--weight-bold);color:var(--color-accent);margin-top:var(--space-2)}
 
-    /* 신규 직무 */
-    .job-grid{display:flex;flex-direction:column;gap:var(--space-3);margin:var(--space-6) 0}
-    .job-row{display:flex;gap:var(--space-4);background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-4) var(--space-5);box-shadow:var(--shadow-sm);align-items:flex-start}
-    .job-icon{font-size:1.3rem;flex-shrink:0;margin-top:2px}
-    .job-body h3{font-size:var(--text-sm);font-weight:var(--weight-bold);color:var(--color-text);margin:0 0 4px}
-    .job-body p{font-size:var(--text-sm);color:var(--color-text-muted);margin:0;line-height:var(--leading-loose)}
+    .job-type-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--space-4);margin:var(--space-6) 0}
+    .job-type-card{border-radius:var(--radius-lg);padding:var(--space-5);border:1px solid transparent}
+    .job-type-card.elevated{background:var(--color-accent-soft);border-color:rgba(217,95,43,.2)}
+    .job-type-card.expanded{background:var(--color-blue-soft);border-color:rgba(45,90,142,.2)}
+    .job-type-card.emerging{background:var(--color-green-soft);border-color:rgba(58,107,74,.2)}
+    .job-type-card.consolidated{background:var(--color-bg-alt);border-color:var(--color-border)}
+    .job-tag{display:inline-block;font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:var(--radius-full);margin-bottom:var(--space-3)}
+    .elevated .job-tag{background:var(--color-accent);color:#fff}
+    .expanded .job-tag{background:var(--color-blue);color:#fff}
+    .emerging .job-tag{background:var(--color-green);color:#fff}
+    .consolidated .job-tag{background:var(--color-text-muted);color:#fff}
+    .job-type-card h3{font-size:var(--text-sm);font-weight:var(--weight-semibold);margin-bottom:var(--space-2)}
+    .job-type-card p{font-size:var(--text-xs);color:var(--color-text-muted);margin:0;line-height:1.5}
 
-    /* skills matrix bar */
-    .matrix-bar{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-8);margin:var(--space-6) 0;box-shadow:var(--shadow-sm)}
-    .matrix-row{display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-5)}
-    .matrix-row:last-child{margin-bottom:0}
-    .matrix-label{font-size:var(--text-sm);font-weight:var(--weight-semibold);color:var(--color-text);width:140px;flex-shrink:0}
-    .matrix-track{flex:1;height:28px;background:var(--color-bg-alt);border-radius:4px;overflow:hidden;position:relative}
-    .matrix-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:var(--space-3)}
-    .matrix-fill span{font-size:var(--text-xs);font-weight:var(--weight-bold);color:#fff}
-    .matrix-count{font-size:var(--text-sm);color:var(--color-text-faint);width:60px;text-align:right;flex-shrink:0}
+    .skills-breakdown{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-6) 0}
+    .skills-title{font-size:var(--text-base);font-weight:var(--weight-semibold);margin-bottom:var(--space-5)}
+    .skill-bar-row{display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-3)}
+    .skill-bar-label{font-size:var(--text-sm);color:var(--color-text-muted);width:180px;flex-shrink:0;text-align:right}
+    .skill-bar-track{flex:1;height:10px;background:var(--color-bg-alt);border-radius:var(--radius-full);overflow:hidden}
+    .skill-bar-fill{height:100%;border-radius:var(--radius-full);transition:width 0.6s ease}
+    .skill-bar-val{font-size:var(--text-xs);font-weight:var(--weight-bold);color:var(--color-text-muted);width:30px;flex-shrink:0}
 
-    .table-wrap{overflow-x:auto;margin:var(--space-5) 0}
-    table{border-collapse:collapse;width:100%;font-size:var(--text-sm)}
-    th,td{border:1px solid var(--color-border);padding:var(--space-3) var(--space-4);text-align:left;vertical-align:top;line-height:var(--leading-loose)}
-    th{background:var(--color-bg-alt);font-weight:var(--weight-semibold);color:var(--color-text)}
+    .case-study{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-6) 0}
+    .case-header{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-4);margin-bottom:var(--space-4);flex-wrap:wrap}
+    .case-company{font-size:var(--text-base);font-weight:var(--weight-bold)}
+    .case-location{font-size:var(--text-xs);color:var(--color-text-muted);margin-top:2px}
+    .case-badge{font-size:var(--text-xs);background:var(--color-blue-soft);color:var(--color-blue);border-radius:var(--radius-full);padding:3px 10px;font-weight:var(--weight-semibold);white-space:nowrap}
+    .case-desc{font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-4);line-height:1.6}
+    .case-metrics{display:flex;flex-wrap:wrap;gap:var(--space-3)}
+    .case-metric{background:var(--color-bg-alt);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);text-align:center}
+    .metric-val{font-size:var(--text-lg);font-weight:var(--weight-bold);color:var(--color-green);display:block}
+    .metric-val.neg{color:var(--color-accent)}
+    .metric-label{font-size:var(--text-xs);color:var(--color-text-muted)}
 
-    .footer{text-align:center;color:var(--color-text-faint);font-size:var(--text-sm);margin-top:var(--space-8);padding-top:var(--space-6);border-top:1px solid var(--color-border)}
-    .footer a{color:var(--color-text-faint);text-decoration:underline}
+    .action-table{width:100%;border-collapse:collapse;margin:var(--space-6) 0;font-size:var(--text-sm)}
+    .action-table th{background:var(--color-bg-alt);padding:var(--space-3) var(--space-4);text-align:left;font-weight:var(--weight-semibold);border-bottom:2px solid var(--color-border)}
+    .action-table td{padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--color-border);vertical-align:top;line-height:1.55}
+    .action-table tr:last-child td{border-bottom:none}
+    .action-table tr:hover td{background:var(--color-bg-alt)}
+    .level-badge{display:inline-block;font-size:var(--text-xs);font-weight:var(--weight-bold);border-radius:var(--radius-full);padding:2px 8px}
+    .level-site{background:#e5eef7;color:var(--color-blue)}
+    .level-ent{background:var(--color-accent-soft);color:var(--color-accent)}
+    .level-eco{background:var(--color-green-soft);color:var(--color-green)}
+
+    .productivity-compare{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin:var(--space-6) 0;background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6)}
+    .prod-item{text-align:center}
+    .prod-bar-wrap{height:140px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:var(--space-3)}
+    .prod-bar{width:70px;border-radius:var(--radius-md) var(--radius-md) 0 0}
+    .prod-val{font-size:var(--text-2xl);font-weight:var(--weight-bold);margin-bottom:var(--space-1)}
+    .prod-desc{font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.4}
+    .prod-divider{width:1px;background:var(--color-border)}
+
+    .function-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:var(--space-4);margin:var(--space-6) 0}
+    .function-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);border-top:3px solid var(--color-blue)}
+    .function-card h3{font-size:var(--text-sm);font-weight:var(--weight-semibold);margin-bottom:var(--space-2)}
+    .function-card p{font-size:var(--text-xs);color:var(--color-text-muted);margin:0;line-height:1.5}
+
+    .summary-banner{background:linear-gradient(135deg,var(--color-blue-soft),var(--color-accent-soft));border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-8);margin-top:var(--space-12);text-align:center}
+    .summary-banner h2{font-size:var(--text-xl);font-weight:var(--weight-bold);margin-bottom:var(--space-4)}
+    .summary-banner p{color:var(--color-text-muted);max-width:580px;margin:0 auto}
 
     @media(max-width:640px){
-      main{padding:var(--space-8) var(--space-4)}
-      h1{font-size:1.85rem}
-      .hero{padding:var(--space-8) var(--space-4)}
-      .kpi-grid{grid-template-columns:1fr 1fr}
-      .prod-compare{grid-template-columns:1fr}
+      .hero{padding:var(--space-12) var(--space-4)}
+      .kpi-inner,.article-body{padding-left:var(--space-4);padding-right:var(--space-4)}
+      .productivity-compare{grid-template-columns:1fr}
+      .prod-divider{display:none}
+      .skill-bar-label{width:120px;font-size:var(--text-xs)}
     }
   </style>
 
@@ -191,430 +204,506 @@
 </style>
 </head>
 <body>
+<div id="read-progress"></div>
 
-<div id="read-progress" aria-hidden="true"></div>
-
-<nav class="site-nav" aria-label="사이트 내비게이션">
+<nav class="site-nav">
   <div class="nav-inner">
-    <a class="nav-brand" href="index.html">← Insights</a>
+    <a href="../insights/index.html" class="nav-brand">← Insights</a>
     <ul class="nav-links">
-      <li><a href="#context">배경</a></li>
-      <li><a href="#shift">일의 변화</a></li>
-      <li><a href="#skills">역량 구조</a></li>
-      <li><a href="#jobs">신규 직무</a></li>
-      <li><a href="#action">실천 방향</a></li>
+      <li><a href="#overview">개요</a></li>
+      <li><a href="#shift">업무 변화</a></li>
+      <li><a href="#trust">신뢰</a></li>
+      <li><a href="#jobs">직무 전환</a></li>
+      <li><a href="#skills">스킬 매트릭스</a></li>
+      <li><a href="#cases">사례</a></li>
+      <li><a href="#action">실행 전략</a></li>
     </ul>
   </div>
 </nav>
 
 <header class="hero">
   <div class="hero-inner">
-    <div class="eyebrow"><span class="eyebrow-dot"></span>보고서 분석 · WEF 2026</div>
-    <h1>실행 능력에서<br><span class="hl">판단·감독·책임으로</span></h1>
-    <p class="hero-lead">자동화가 실행을 흡수할수록, 인간의 차별성은 실행 능력이 아니라 AI를 어떻게 감독하고 판단하며 책임지는가로 이동한다. WEF 인간-기계 협업 보고서 2026 핵심 분석.</p>
-    <div class="hero-meta">
-      <span class="hero-tag">WEF 2026</span>
-      <span class="hero-tag">인간-기계 협업</span>
-      <span class="hero-tag">산업 운영</span>
-      <span class="hero-tag">미래 역량</span>
-      <span class="hero-tag">Accenture 공동</span>
-    </div>
-    <div class="source-cite">📄 Human-Machine Collaboration in Industrial Operations: Activation Playbook &nbsp;·&nbsp; World Economic Forum, June 2026</div>
+    <div class="eyebrow"><span class="eyebrow-dot"></span>WEF Report Analysis · June 2026</div>
+    <h1>실행에서 판단으로<br>인간-기계 협업 활성화 플레이북</h1>
+    <p class="hero-sub">자율 시스템이 실행을 흡수할수록, 경쟁 우위는 기술 투자가 아닌 판단 설계로 이동한다. WEF·Accenture가 제시하는 제조·공급망 전환의 세 조건.</p>
+    <div class="hero-cite">Human-Machine Collaboration in Industrial Operations: Activation Playbook · World Economic Forum &amp; Accenture, June 2026</div>
   </div>
 </header>
 
-<main>
-
-  <div class="summary">
-    <div class="summary-label">핵심 요약</div>
-    <p>WEF는 이 보고서에서 산업 현장의 경쟁력이 <strong>'기술 보유'에서 '인간이 기계를 어떻게 감독하고 판단하고 책임지는가'</strong>로 이동한다고 주장합니다. 자동차·전자·반도체 등에서 자율·로봇 시스템이 전체 워크플로의 상당 부분을 흡수하고 있지만, 병목은 기술이 아니라 <strong>업무 재설계와 인력 준비도</strong>입니다. 기술과 함께 사람에게 투자한 조직은 생산성 향상이 11% 이상이지만, 인간 요소를 주변화한 조직은 4% 수준에 그칩니다. 102개 역량 중 42개(41%)가 신규·부상 역량으로, 3/4의 산업 직무가 진화할 것으로 전망됩니다.</p>
-  </div>
-
-  <div class="kpi-grid">
-    <div class="kpi-card blue">
-      <div class="kpi-num">3/4</div>
-      <div class="kpi-label">산업 직무가<br>진화 예상</div>
-      <div class="kpi-sub">전체 워크플로 재설계</div>
+<div class="kpi-strip">
+  <div class="kpi-inner">
+    <div class="kpi-card c-accent">
+      <div class="kpi-val">+11%</div>
+      <div class="kpi-label">인력 병행 투자 기업의 생산성 향상</div>
+      <div class="kpi-note">인력 요소를 제외한 기업은 +4%에 그침</div>
     </div>
-    <div class="kpi-card orange">
-      <div class="kpi-num">42/102</div>
-      <div class="kpi-label">역량이 신규·부상<br>(Future Skills Matrix)</div>
-      <div class="kpi-sub">41% 새롭게 요구됨</div>
+    <div class="kpi-card c-blue">
+      <div class="kpi-val">63%</div>
+      <div class="kpi-label">스킬 격차를 최대 장벽으로 꼽는 고용주 비율</div>
+      <div class="kpi-note">WEF Future of Jobs Report 2025</div>
     </div>
-    <div class="kpi-card green">
-      <div class="kpi-num">+11%</div>
-      <div class="kpi-label">생산성 향상<br>인간 투자 조직</div>
-      <div class="kpi-sub">vs. 인간 주변화 시 4%</div>
+    <div class="kpi-card c-green">
+      <div class="kpi-val">102</div>
+      <div class="kpi-label">HMC Future Skills Matrix 총 스킬 수</div>
+      <div class="kpi-note">40개 역량군 / 7대 산업운영 기능</div>
     </div>
-    <div class="kpi-card red">
-      <div class="kpi-num">63%</div>
-      <div class="kpi-label">기업이 기술 격차를<br>최대 변환 장벽으로 꼽음</div>
-      <div class="kpi-sub">86%는 AI가 2030년까지 사업 변혁 예상</div>
+    <div class="kpi-card c-purple">
+      <div class="kpi-val">86%</div>
+      <div class="kpi-label">AI가 2030년까지 사업을 변혁할 것으로 예상하는 고용주</div>
+      <div class="kpi-note">제조·공급망 부문 기준</div>
     </div>
   </div>
+</div>
 
-  <!-- 배경 -->
-  <section id="context">
+<div class="article-body">
+
+  <section id="overview">
     <div class="section-header">
-      <div class="section-num">1</div>
-      <div>
-        <h2>보고서 구조와 맥락</h2>
-        <p>이 보고서는 WEF의 인간-기계 협업 이니셔티브의 두 번째 결과물입니다. Accenture와 공동으로 작성됐으며, 제조·공급망 전반의 업무·직무·역량 변화를 체계적으로 제시합니다.</p>
+      <div class="section-num blue">1</div>
+      <h2 class="section-title">왜 지금 인간-기계 협업인가</h2>
+    </div>
+
+    <p>WEF의 <em>Intelligent Industrial Operations Outlook 2026</em>은 AI와 프론티어 기술이 제조·공급망을 정적이고 효율 지향적인 시스템에서 조건을 감지하고, 혼란을 예측하며, 워크플로를 거의 실시간으로 조정하는 <strong>인텔리전트 운영</strong>으로 전환할 것이라고 분석한다. 이 전환은 이미 진행 중이다. 그러나 전환을 성과로 바꾸는 것은 기술 그 자체가 아니라 인간과 기계를 어떻게 설계하느냐에 달려 있다.</p>
+
+    <div class="pull-quote">
+      <p>"기술이 실행을 상품화하면서, 경쟁 우위는 더 많은 장비를 소유하거나 더 빠르게 규모를 키우는 것에서 판단의 질로 이동한다."</p>
+      <cite>— WEF HMC Activation Playbook, 2026</cite>
+    </div>
+
+    <p>보고서는 7대 산업운영 기능에 걸쳐 기계가 속도·규모·패턴 인식이 요구되는 작업을 흡수하고, 인간의 기여는 <strong>전략적 의도 설정, 경쟁 우선순위 중재, 자율 시스템 거버넌스</strong>로 집중된다고 진단한다.</p>
+
+    <div class="function-grid">
+      <div class="function-card">
+        <h3>제품 개발</h3>
+        <p>개념 구상부터 생산 준비 사양까지 신제품을 설계·엔지니어링</p>
+      </div>
+      <div class="function-card">
+        <h3>계획 수립</h3>
+        <p>수요 예측 및 생산 일정·재고·자원 조정</p>
+      </div>
+      <div class="function-card">
+        <h3>생산</h3>
+        <p>원자재와 부품을 완제품으로 물리적 전환하는 공정 감독</p>
+      </div>
+      <div class="function-card">
+        <h3>유지보수</h3>
+        <p>플랜트 장비와 기계류의 운영 및 안전 유지</p>
+      </div>
+      <div class="function-card">
+        <h3>물류</h3>
+        <p>생산 네트워크에서 상품의 이동·보관·배송 관리</p>
+      </div>
+      <div class="function-card">
+        <h3>품질</h3>
+        <p>최종 사용 및 규제 사양 충족을 위한 표준 수립·이행</p>
+      </div>
+      <div class="function-card">
+        <h3>공급망 관리</h3>
+        <p>공급업체에서 고객까지 자재·정보·가치의 엔드투엔드 흐름 조정</p>
       </div>
     </div>
 
     <div class="callout info">
-      <div class="callout-icon">📚</div>
+      <div class="callout-icon">📊</div>
       <div class="callout-body">
-        <div class="callout-label">보고서 구성</div>
-        <p>두 개의 문서가 짝을 이룹니다. <strong>Resource Hub</strong>는 미래 워크플로, 직무 프로필, Skills Matrix를 제공하는 "What" 자료이며, <strong>Activation Playbook</strong>은 조직·현장·정책 차원에서 실제 어떻게 적용할지 설명하는 "Why/How" 자료입니다. 별도 엑셀 Skills Matrix에는 WEF·O*NET·ESCO 분류 체계와의 교차 매핑이 포함됩니다.</p>
+        <strong>채택 격차의 현실</strong>
+        <p>제조업체 중 10분의 1 미만, 공급망 기업 중 4분의 1 미만이 완전 자율 운영으로의 전환을 의미 있게 시작했다. 대부분의 조직과 미래 운영 방향 사이의 간극이 상당한 경쟁 가치를 창출할 것으로 보고서는 평가한다.</p>
       </div>
     </div>
-
-    <h3>다루는 7가지 산업 운영 기능</h3>
-    <p>보고서는 제조 현장의 전체 가치사슬을 7개 핵심 기능으로 구분하며, 각 기능이 어떻게 변모하는지를 분석합니다.</p>
-
-    <div class="ops-grid">
-      <div class="ops-card">
-        <span class="ops-icon">🔬</span>
-        <div class="ops-title">Product Development</div>
-        <div class="ops-change">AI가 설계 시뮬레이션·파라미터 탐색 수행, 인간은 요구사항 정의·최종 판단</div>
-      </div>
-      <div class="ops-card">
-        <span class="ops-icon">📋</span>
-        <div class="ops-title">Planning</div>
-        <div class="ops-change">수요 예측·생산계획 자동화, 인간은 시나리오 검토와 제약 조건 거버넌스</div>
-      </div>
-      <div class="ops-card">
-        <span class="ops-icon">🏭</span>
-        <div class="ops-title">Production</div>
-        <div class="ops-change">자율 로봇·AI가 루틴 공정 수행, 인간은 예외 처리·안전 감독·공정 최적화</div>
-      </div>
-      <div class="ops-card">
-        <span class="ops-icon">🔧</span>
-        <div class="ops-title">Maintenance</div>
-        <div class="ops-change">예지보전(Predictive Maintenance)으로 전환, 인간은 개입 우선순위 결정·복잡 수리</div>
-      </div>
-      <div class="ops-card">
-        <span class="ops-icon">🚚</span>
-        <div class="ops-title">Logistics</div>
-        <div class="ops-change">자율 물류·WMS 자동화, 인간은 예외 경우·루트 최적화 판단·협력사 조율</div>
-      </div>
-      <div class="ops-card">
-        <span class="ops-icon">✅</span>
-        <div class="ops-title">Quality</div>
-        <div class="ops-change">AI 비전·센서로 품질 검사 자동화, 인간은 기준 설정·이상 판정·규제 책임</div>
-      </div>
-      <div class="ops-card">
-        <span class="ops-icon">🌐</span>
-        <div class="ops-title">Supply Chain Mgmt</div>
-        <div class="ops-change">공급망 가시성·리스크 자동 탐지, 인간은 전략적 판단·협력사 관계·회복탄력성 설계</div>
-      </div>
-    </div>
-
-    <p>이 7개 기능이 모두 <strong>정적·효율 중심 운영(Static Operations)</strong>에서, 상황을 감지하고 장애를 예측하며 실시간으로 적응하는 <strong>Intelligent Operations</strong>로 이동합니다.</p>
   </section>
 
-  <!-- 일의 변화 -->
   <section id="shift">
     <div class="section-header">
-      <div class="section-num">2</div>
-      <div>
-        <h2>일은 네 방향으로 이동한다</h2>
-        <p>WEF는 산업 현장의 일이 구체적인 네 가지 방향으로 전환될 것으로 정리합니다.</p>
+      <div class="section-num accent">2</div>
+      <h2 class="section-title">업무는 어떻게 바뀌는가: 4대 전환</h2>
+    </div>
+
+    <p>보고서는 인간의 노력이 향하는 곳에서 4가지 상호 강화하는 전환이 일어나고 있다고 분석한다(Figure 5). 인간 주도에서 기계 주도로의 단순 이동이 아니라, 인간 역할 자체의 성격이 달라지는 변화다.</p>
+
+    <div class="grid-2">
+      <div class="shift-card">
+        <div class="shift-label">전환 1</div>
+        <div class="shift-from">주기적 검토 사이클</div>
+        <div class="shift-arrow">↓</div>
+        <div class="shift-to">상시 연속 오케스트레이션</div>
+        <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-3);line-height:1.5">AI 시스템이 24시간 운영을 모니터링하고 실시간 조정—예약된 검토 주기를 상시 관리로 대체</p>
+      </div>
+      <div class="shift-card">
+        <div class="shift-label">전환 2</div>
+        <div class="shift-from">작업 수행(Doing Tasks)</div>
+        <div class="shift-arrow">↓</div>
+        <div class="shift-to">시스템 거버넌스(Governing Systems)</div>
+        <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-3);line-height:1.5">워커는 시스템이 따를 규칙을 설정하고, 산출물을 점검하며, 시스템이 단독으로 결정할 권한이 없는 사안을 처리하는 고판단 역할로 이동</p>
+      </div>
+      <div class="shift-card">
+        <div class="shift-label">전환 3</div>
+        <div class="shift-from">이상 감지(Detection)</div>
+        <div class="shift-arrow">↓</div>
+        <div class="shift-to">사전 예방(Prevention)</div>
+        <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-3);line-height:1.5">인텔리전트 시스템이 문제 발생 전 예측·개입—인간 업무는 대응에서 선견지명으로 전환</p>
+      </div>
+      <div class="shift-card">
+        <div class="shift-label">전환 4</div>
+        <div class="shift-from">폐쇄적 조직(Closed Organisation)</div>
+        <div class="shift-arrow">↓</div>
+        <div class="shift-to">개방형 에코시스템(Open Ecosystem)</div>
+        <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-3);line-height:1.5">미래 직무는 단일 조직이 소유하지 않는 공급업체·파트너 네트워크 전반에서 공유 데이터, 공유 결정, 공유 책임 관리를 요구</p>
       </div>
     </div>
 
-    <div class="shift-grid">
-      <div class="shift-card">
-        <div class="shift-from">기존 → 주기적 업무 수행</div>
-        <span class="shift-arrow">↓</span>
-        <div class="shift-to">지속적 오케스트레이션</div>
-        <p class="shift-desc">과거에는 사람이 정해진 주기로 점검·보고·조정했다면, AI 시스템이 24시간 모니터링하고 실시간 조정합니다. 사람은 예외 상황 개입과 전체 흐름 관리를 맡습니다.</p>
-      </div>
-      <div class="shift-card">
-        <div class="shift-from">기존 → 업무 직접 수행</div>
-        <span class="shift-arrow">↓</span>
-        <div class="shift-to">시스템 거버넌스</div>
-        <p class="shift-desc">사람은 직접 실행보다 시스템이 어떤 규칙으로 움직일지 정하고, 결과를 검증하며, 기계가 독자적으로 결정할 수 없는 판단을 맡습니다.</p>
-      </div>
-      <div class="shift-card">
-        <div class="shift-from">기존 → 사후 탐지와 대응</div>
-        <span class="shift-arrow">↓</span>
-        <div class="shift-to">사전 예방과 선제 개입</div>
-        <p class="shift-desc">품질 문제나 설비 고장을 발견한 뒤 대응하는 방식에서, AI가 이상 징후를 예측하고 선제적으로 개입하는 방식으로 바뀝니다.</p>
-      </div>
-      <div class="shift-card">
-        <div class="shift-from">기존 → 폐쇄적 조직 내 운영</div>
-        <span class="shift-arrow">↓</span>
-        <div class="shift-to">개방형 생태계 협업</div>
-        <p class="shift-desc">공급망·협력사·데이터·책임이 여러 조직에 걸칩니다. 미래 직무는 공유 데이터와 공동 의사결정, 공동 책임을 다룰 수 있어야 합니다.</p>
+    <div class="callout accent">
+      <div class="callout-icon">⚡</div>
+      <div class="callout-body">
+        <strong>생산성 격차: 설계 선택의 결과</strong>
+        <p>Accenture 연구에 따르면 기술과 함께 인력 투자를 우선시하는 기업은 <strong>11% 이상의 생산성 향상</strong>을 실현하는 반면, 인적 요소를 소외시키는 기업은 <strong>4%에 그친다</strong>. 이 격차는 기술적 차이가 아니라 설계 선택의 결과다.</p>
       </div>
     </div>
 
-    <div class="pull-quote">
-      결정적 우위는 자동화 단독에서 오지 않는다. 인간-AI 협업을 중심으로 엔드투엔드 워크플로를 재설계한 조직이 경쟁력을 갖는다.
+    <div class="productivity-compare">
+      <div class="prod-item">
+        <div class="prod-bar-wrap">
+          <div class="prod-bar" style="height:110px;background:linear-gradient(to top,var(--color-green),#5ea87a)"></div>
+        </div>
+        <div class="prod-val" style="color:var(--color-green)">+11%</div>
+        <div class="prod-desc">기술 + 인력<br>병행 투자 기업</div>
+      </div>
+      <div class="prod-divider"></div>
+      <div class="prod-item">
+        <div class="prod-bar-wrap">
+          <div class="prod-bar" style="height:40px;background:linear-gradient(to top,var(--color-text-faint),#ccc)"></div>
+        </div>
+        <div class="prod-val" style="color:var(--color-text-muted)">+4%</div>
+        <div class="prod-desc">인적 요소<br>소외 기업</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="trust">
+    <div class="section-header">
+      <div class="section-num red">3</div>
+      <h2 class="section-title">신뢰의 3차원: 채택 격차의 근본 원인</h2>
     </div>
 
-    <h3>인간 투자가 생산성을 가른다</h3>
-    <div class="prod-compare">
-      <div class="prod-bar high">
-        <div class="prod-pct">+11%</div>
-        <div class="prod-label">기술 + 사람에 함께 투자</div>
-        <div class="prod-desc">워크플로 재설계, 역량 개발, 신뢰 구축을 병행한 조직</div>
-        <div class="prod-track"><div class="prod-fill"></div></div>
+    <p>채택 격차의 근저에는 더 근본적인 신뢰 문제가 있다. 보고서는 기업 신뢰의 방정식을 세 가지 차원으로 제시한다(Figure 3).</p>
+
+    <div class="grid-3">
+      <div class="trust-card">
+        <div>
+          <div class="trust-body">
+            <h3>① 직업 안전성</h3>
+            <p>근로자들이 변화가 자신들과 함께 이루어지는지, 아니면 자신들에게 가해지는지를 읽는 신호</p>
+            <span class="trust-stat">~60% 근로자: AI가 직업 불안 가중</span>
+          </div>
+        </div>
       </div>
-      <div class="prod-bar low">
-        <div class="prod-pct">+4%</div>
-        <div class="prod-label">인간 요소를 주변화</div>
-        <div class="prod-desc">기술 인프라만 투자하고 인력 준비도를 소홀히 한 조직</div>
-        <div class="prod-track"><div class="prod-fill"></div></div>
+      <div class="trust-card">
+        <div>
+          <div class="trust-body">
+            <h3>② 시스템 신뢰</h3>
+            <p>경험 많은 워커들이 자신의 판단이 수년간 표준이었던 영역에서 최근 도입된 시스템의 권고를 따라야 하는 상황</p>
+            <span class="trust-stat">신뢰는 구조적 경험을 통해 획득해야</span>
+          </div>
+        </div>
+      </div>
+      <div class="trust-card">
+        <div>
+          <div class="trust-body">
+            <h3>③ 리더십 신뢰성</h3>
+            <p>임원의 자신감이 역량을 초과할 때 신뢰성은 어떤 커뮤니케이션 캠페인도 복원할 수 없는 속도로 침식된다</p>
+            <span class="trust-stat">1/3 이하 임원만 AI 변화 주도에 준비됨</span>
+          </div>
+        </div>
       </div>
     </div>
 
     <div class="callout warn">
       <div class="callout-icon">⚠️</div>
       <div class="callout-body">
-        <div class="callout-label">병목은 기술이 아니다</div>
-        <p>86%의 기업이 AI가 2030년까지 사업을 변혁할 것으로 예상하면서도, 63%는 <strong>기술 격차(skills gap)</strong>를 가장 큰 변환 장벽으로 꼽습니다. 기계 도입은 이미 시작됐지만, 그것을 효과적으로 운영할 인력이 준비되지 않은 것이 진짜 문제입니다.</p>
+        <strong>투자 불균형이 핵심 문제</strong>
+        <p>공장 관리자의 70%가 인력 전환을 제조 성공의 가장 중요한 단일 요소로 평가하면서도, 절반 가까이가 교육 비용을 주요 장벽으로 꼽는다. 기술 예산이 별도 인력 투자보다 우선시되기 때문이다. Gartner는 2028년까지 공급망 디지털 채택 노력의 60%가 학습·개발 투자 부족으로 약속한 가치를 제공하지 못할 것으로 예측한다.</p>
       </div>
     </div>
   </section>
 
-  <!-- 역량 구조 -->
-  <section id="skills">
+  <section id="jobs">
     <div class="section-header">
-      <div class="section-num">3</div>
-      <div>
-        <h2>Future Skills Matrix — 102개 역량의 구조</h2>
-        <p>보고서의 Skills Matrix는 산업 운영에 필요한 102개 역량을 기능 역량, 기술 도구, 행동·마인드셋으로 구분하고, 기존과 신규·부상으로 분류합니다.</p>
+      <div class="section-num purple">4</div>
+      <h2 class="section-title">직무 전환의 4가지 경로</h2>
+    </div>
+
+    <p>보고서(Figure 8)는 현재 직무가 미래로 이동하는 방식을 네 가지 전환 경로로 분류한다. 이 분류는 단순한 자동화-대체 서사를 넘어, 인간 기여의 재구성을 보여준다.</p>
+
+    <div class="job-type-grid">
+      <div class="job-type-card elevated">
+        <span class="job-tag">Elevated</span>
+        <h3>격상</h3>
+        <p>정밀 실행 → 판단 또는 추가 기능. 기계가 일상적 실행을 맡으면서 인간의 기여가 판단·전략·추가 기능으로 이동</p>
+      </div>
+      <div class="job-type-card expanded">
+        <span class="job-tag">Expanded</span>
+        <h3>확장</h3>
+        <p>동일 역할, 순증 책임. 역할은 유지되지만 프론티어 기술이 담당 범위와 영향을 확대하면서 순증 책임·도구·기대치가 추가</p>
+      </div>
+      <div class="job-type-card emerging">
+        <span class="job-tag">Emerging</span>
+        <h3>신규 등장</h3>
+        <p>순새 역할. 현재 인력에는 존재하지 않으며 프론티어 기술이 도입한 역량과 수요에서 직접 발생하는 신규 직무</p>
+      </div>
+      <div class="job-type-card consolidated">
+        <span class="job-tag">Consolidated</span>
+        <h3>통합·축소</h3>
+        <p>책임이 단계적으로 소멸 또는 축소. 작업이 자동화되거나 인접 역할에 흡수되어 현재 형태로는 지속되지 않음</p>
       </div>
     </div>
 
-    <div class="matrix-bar">
-      <div class="matrix-row">
-        <div class="matrix-label">전체 역량</div>
-        <div class="matrix-track">
-          <div class="matrix-fill" style="width:100%;background:linear-gradient(90deg,var(--color-blue),var(--color-accent))">
-            <span>102개</span>
-          </div>
-        </div>
-        <div class="matrix-count">102</div>
+    <div class="callout green">
+      <div class="callout-icon">🏭</div>
+      <div class="callout-body">
+        <strong>생산 기능 예시: Production Operator → Robo Engineer/Orchestrator</strong>
+        <p>Physical AI가 공장 바닥의 일상적 실행을 흡수하면서 순새 역할이 등장한다. Robo Engineer/Orchestrator는 VR 텔레오퍼레이션을 통해 로봇 행동을 가르치고, 생산 기준에 맞는 자율 시스템 성능을 모니터링하며, 시스템이 사양에서 벗어나거나 인간 판단이 필요한 운영 경계에 도달할 때 개입한다.</p>
       </div>
-      <div class="matrix-row">
-        <div class="matrix-label">기존(Existing)</div>
-        <div class="matrix-track">
-          <div class="matrix-fill" style="width:59%;background:var(--color-blue)">
-            <span>60개</span>
-          </div>
-        </div>
-        <div class="matrix-count">60</div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="section-header">
+      <div class="section-num yellow">5</div>
+      <h2 class="section-title">HMC Future Skills Matrix: 102개 스킬 구조</h2>
+    </div>
+
+    <p>보고서와 함께 공개된 <em>HMC Future Skills Matrix and Crosswalks</em>는 2035 미래 운영 모델을 위해 필요한 역량을 체계적으로 정리한 자료다. 40개 역량군(Capability)에 걸쳐 102개의 고유 스킬을 세 가지 유형으로 분류한다.</p>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-icon">🛠️</div>
+        <h3>Functional Skills (35개)</h3>
+        <p>직무의 '무엇(what)'에 해당하는 도메인 지식과 전문 역량. 거버넌스·의사결정·전략&amp;계획·실행의 4개 축으로 구성</p>
       </div>
-      <div class="matrix-row">
-        <div class="matrix-label">신규·부상</div>
-        <div class="matrix-track">
-          <div class="matrix-fill" style="width:41%;background:var(--color-accent)">
-            <span>42개</span>
-          </div>
-        </div>
-        <div class="matrix-count">42</div>
+      <div class="card">
+        <div class="card-icon">⚙️</div>
+        <h3>Technology Tools (44개)</h3>
+        <p>2035 운영 환경의 특정 도구·플랫폼·시스템 숙련도. AI/자동화, 디지털 트윈, 데이터&amp;분석, 계획&amp;일정 등 12개 하위 범주</p>
       </div>
-      <div class="matrix-row">
-        <div class="matrix-label">Functional Skills</div>
-        <div class="matrix-track">
-          <div class="matrix-fill" style="width:34%;background:var(--color-green)">
-            <span>35개</span>
-          </div>
-        </div>
-        <div class="matrix-count">35개</div>
-      </div>
-      <div class="matrix-row">
-        <div class="matrix-label">Technology Tools</div>
-        <div class="matrix-track">
-          <div class="matrix-fill" style="width:43%;background:var(--color-purple,#5b3a7a)">
-            <span>44개</span>
-          </div>
-        </div>
-        <div class="matrix-count">44개</div>
+      <div class="card">
+        <div class="card-icon">🧠</div>
+        <h3>Behaviours &amp; Mindsets (23개)</h3>
+        <p>직무의 '어떻게(how)'에 해당하는 관찰 가능한 행동과 전문적 지향성. Human-AI Judgement, 책임감, 안전 리더십 등 8개 하위 범주</p>
       </div>
     </div>
 
     <div class="callout info">
-      <div class="callout-icon">ℹ️</div>
+      <div class="callout-icon">📋</div>
       <div class="callout-body">
-        <div class="callout-label">Crosswalk 참고 사항</div>
-        <p>엑셀 Skills Matrix의 Crosswalk 시트(WEF-HMC, O*NET-HMC, ESCO-HMC)는 Functional Skills와 Technology Tools 위주로 구성됩니다. Behaviours & Mindsets는 성향·태도 항목으로 분류 체계 매핑에서 별도 처리되어, 공개 시각화상 102개와 엑셀 교차 항목 79개 간 차이가 발생합니다.</p>
+        <strong>크로스워크 범위</strong>
+        <p>Behaviours &amp; Mindsets는 분류체계로 매핑 가능한 이산 스킬이 아닌 성향(disposition)을 설명하므로 크로스워크에서 제외된다. WEF·O*NET·ESCO 세 가지 외부 분류체계에 매핑되는 스킬은 Functional(35) + Technology(44) = <strong>79개</strong>다.</p>
       </div>
     </div>
 
-    <h3>새롭게 부상하는 핵심 기능 역량 5가지</h3>
-    <p>이 다섯 가지는 공통적으로 "AI를 쓰는 법"보다 <strong>AI가 작동하는 조건과 한계를 설계·감독하는 법</strong>에 가깝습니다.</p>
-
-    <div class="skill-grid">
-      <div class="skill-card">
-        <span class="skill-tag">New/Emerging</span>
-        <div class="skill-name">AI and Autonomous System Governance</div>
-        <p class="skill-desc">자율 시스템이 어디까지 결정할 수 있는지, 언제 인간에게 넘겨야 하는지, 어떻게 감시·감사할지 정하는 능력. 기계에 의사결정을 위임하는 조건을 설계합니다.</p>
+    <div class="skills-breakdown">
+      <div class="skills-title">스킬 구성: 기존 vs 신규·부상</div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label">전체 (102)</div>
+        <div class="skill-bar-track"><div class="skill-bar-fill" style="width:100%;background:var(--color-blue)"></div></div>
+        <div class="skill-bar-val">102</div>
       </div>
-      <div class="skill-card">
-        <span class="skill-tag">New/Emerging</span>
-        <div class="skill-name">AI Output Validation &amp; Advanced Judgement</div>
-        <p class="skill-desc">AI 추천·예측·운영 결과를 신뢰해도 되는지 평가하고, 수용·수정·거부를 판단하는 능력. 알고리즘 출력을 비판적으로 검토하는 인간 심판 역할입니다.</p>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label">Functional Skills</div>
+        <div class="skill-bar-track"><div class="skill-bar-fill" style="width:34.3%;background:var(--color-accent)"></div></div>
+        <div class="skill-bar-val">35</div>
       </div>
-      <div class="skill-card">
-        <span class="skill-tag">New/Emerging</span>
-        <div class="skill-name">Data and Information Governance</div>
-        <p class="skill-desc">AI가 의존하는 운영 데이터, 마스터 데이터, 제품 정보를 정확하고 일관되게 관리하는 능력. 좋은 AI 판단의 전제 조건은 깨끗한 데이터입니다.</p>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label">Technology Tools</div>
+        <div class="skill-bar-track"><div class="skill-bar-fill" style="width:43.1%;background:var(--color-green)"></div></div>
+        <div class="skill-bar-val">44</div>
       </div>
-      <div class="skill-card">
-        <span class="skill-tag">New/Emerging</span>
-        <div class="skill-name">Resilience Planning</div>
-        <p class="skill-desc">공급망·생산 장애를 예상하고 흡수·회복할 수 있도록 운영 계획 안에 회복탄력성을 설계하는 능력. 불확실성을 시스템 안에 내재화합니다.</p>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label">Behaviours &amp; Mindsets</div>
+        <div class="skill-bar-track"><div class="skill-bar-fill" style="width:22.5%;background:var(--color-purple)"></div></div>
+        <div class="skill-bar-val">23</div>
       </div>
-      <div class="skill-card">
-        <span class="skill-tag">New/Emerging</span>
-        <div class="skill-name">Technology and Systems Architecture</div>
-        <p class="skill-desc">OT, MES, ERP, Digital Thread 시스템이 어떻게 연결되고 데이터를 교환할지 설계하는 능력. 기술 스택의 전체 그림을 그리는 역할입니다.</p>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label" style="color:var(--color-green);font-weight:600">신규·부상 (크로스워크 내)</div>
+        <div class="skill-bar-track"><div class="skill-bar-fill" style="width:39.2%;background:linear-gradient(90deg,var(--color-accent),var(--color-green))"></div></div>
+        <div class="skill-bar-val" style="color:var(--color-accent);font-weight:700">31</div>
       </div>
     </div>
+
+    <p style="font-size:var(--text-sm);color:var(--color-text-muted)">신규·부상 스킬 31개의 구성: Functional Skills 5개(AI 자율 시스템 거버넌스, AI 산출물 검증, 데이터·정보 거버넌스, 복원력 계획, 기술·시스템 아키텍처) + Technology Tools 26개(AI 거버넌스 대시보드, 디지털 트윈, GenAI 도구, 멀티에이전트 계획 시스템, XAI, 로봇공학 플리트 관리 등).</p>
   </section>
 
-  <!-- 신규 직무 -->
-  <section id="jobs">
+  <section id="cases">
     <div class="section-header">
-      <div class="section-num">4</div>
-      <div>
-        <h2>새롭게 등장하는 직무</h2>
-        <p>보고서는 80개 이상의 직무 프로필을 매핑하며, 이 중 Intelligent Operations 전환과 함께 부상하는 신규 직무를 다수 제시합니다.</p>
-      </div>
+      <div class="section-num green">6</div>
+      <h2 class="section-title">Global Lighthouse Network 사례 연구</h2>
     </div>
 
-    <div class="job-grid">
-      <div class="job-row">
-        <div class="job-icon">🧠</div>
-        <div class="job-body">
-          <h3>Supply Chain Intelligence Analyst</h3>
-          <p>AI 기반 공급망 가시성 플랫폼을 운영하며 리스크 신호를 해석하고, 공급 중단에 대한 선제적 대응 전략을 수립합니다.</p>
+    <p>보고서는 인간-기계 협업이 실제로 작동하는 방식을 Global Lighthouse Network의 검증된 사례를 통해 제시한다.</p>
+
+    <div class="case-study">
+      <div class="case-header">
+        <div>
+          <div class="case-company">ACG Group</div>
+          <div class="case-location">Shirwal, India</div>
         </div>
+        <span class="case-badge">Global Lighthouse Network</span>
       </div>
-      <div class="job-row">
-        <div class="job-icon">🔍</div>
-        <div class="job-body">
-          <h3>Quality Automation Technician</h3>
-          <p>AI 비전·센서 기반 품질 검사 시스템을 운영하고 교정하며, 기계 판정의 기준과 예외 처리 규칙을 설계·유지합니다.</p>
+      <p class="case-desc">60년 이상 된 장비로 5,000개 이상의 SKU를 생산하는 ACG 사이트는 기계 셋업이 항상 작업자 경험에 의존해 있었다. 2년 이상의 데이터로 학습된 ML 모델을 배포해 최적의 초도 정확 설정을 처방하도록 했다. 핵심은 기계를 운영하는 작업자가 동시에 그 기계의 지능을 훈련하는 구조다.</p>
+      <div class="case-metrics">
+        <div class="case-metric">
+          <span class="metric-val">+37%</span>
+          <span class="metric-label">초도 생산 수율</span>
         </div>
-      </div>
-      <div class="job-row">
-        <div class="job-icon">🗼</div>
-        <div class="job-body">
-          <h3>Control Tower Governor</h3>
-          <p>실시간 운영 데이터 통합 센터(Control Tower)를 관리하며, 여러 시스템의 알림·신호를 통합 판단하고 행동 우선순위를 결정합니다.</p>
+        <div class="case-metric">
+          <span class="metric-val neg">–43%</span>
+          <span class="metric-label">품질 셋업 시간</span>
         </div>
-      </div>
-      <div class="job-row">
-        <div class="job-icon">🚛</div>
-        <div class="job-body">
-          <h3>Autonomous Logistics Specialist</h3>
-          <p>자율 이동 로봇(AMR), 드론, 자율 차량 기반 물류 시스템을 설계·감독하며, 자동화와 인간 작업 간 경계를 조율합니다.</p>
-        </div>
-      </div>
-      <div class="job-row">
-        <div class="job-icon">🤖</div>
-        <div class="job-body">
-          <h3>Robotics Engineer / Orchestrator</h3>
-          <p>다수의 협업 로봇(cobots)과 자율 시스템을 오케스트레이션하며, 로봇 에이전트 간 작업 분배와 예외 처리 로직을 설계합니다.</p>
-        </div>
-      </div>
-      <div class="job-row">
-        <div class="job-icon">📦</div>
-        <div class="job-body">
-          <h3>Autonomous Warehouse &amp; Fulfilment Operator</h3>
-          <p>고도 자동화 창고 환경에서 AI·로봇 시스템을 감독하고, 비정형 상황에서의 예외 처리와 안전 관리를 담당합니다.</p>
+        <div class="case-metric">
+          <span class="metric-val neg">–13%</span>
+          <span class="metric-label">생산 리드타임</span>
         </div>
       </div>
     </div>
 
-    <div class="callout accent">
-      <div class="callout-icon">🏭</div>
-      <div class="callout-body">
-        <div class="callout-label">Global Lighthouse Network</div>
-        <p>WEF는 2026년 6월 기준 <strong>238개의 Global Lighthouse 사이트</strong>를 인증했습니다. 이 사이트들은 AI와 첨단 제조 기술을 실제 현장에서 가장 효과적으로 적용한 세계 최고 수준의 공장·공급망입니다. 이번 코호트는 세 가지 전환 신호를 보여줍니다: <strong>엔드투엔드 인텔리전스, 인간-기계 협업, 성과 동력으로서의 지속가능성</strong>.</p>
+    <div class="case-study">
+      <div class="case-header">
+        <div>
+          <div class="case-company">Kunlene Film Industries</div>
+          <div class="case-location">Suzhou, China</div>
+        </div>
+        <span class="case-badge">Global Lighthouse Network</span>
+      </div>
+      <p class="case-desc">잦은 교체 작업과 기계 파라미터 인터페이스에 대한 제한된 접근 상황에서 균일한 두께를 유지해야 했던 Kunlene은 IIoT 플랫폼과 AI 모델을 통합해 실시간으로 조정을 제안하도록 했다. 작업자는 각 조정을 검토하고 확인한 후에야 효과가 발생하며, 생산 중요 변경에 대한 결정 권한을 유지한다.</p>
+      <div class="case-metrics">
+        <div class="case-metric">
+          <span class="metric-val neg">–50%</span>
+          <span class="metric-label">교체 램프업 시간</span>
+        </div>
+        <div class="case-metric">
+          <span class="metric-val neg">–57%</span>
+          <span class="metric-label">성능 손실</span>
+        </div>
+        <div class="case-metric">
+          <span class="metric-val neg">–37%</span>
+          <span class="metric-label">속도 문제 불량률</span>
+        </div>
       </div>
     </div>
-  </section>
 
-  <!-- 실천 방향 -->
-  <section id="action">
-    <div class="section-header">
-      <div class="section-num">5</div>
-      <div>
-        <h2>조직이 취해야 할 실천 방향</h2>
-        <p>Activation Playbook이 조직·현장·정책 차원에서 제시하는 핵심 행동 방향입니다.</p>
+    <div class="case-study">
+      <div class="case-header">
+        <div>
+          <div class="case-company">Schneider Electric</div>
+          <div class="case-location">Wuhan, China</div>
+        </div>
+        <span class="case-badge">Global Lighthouse Network</span>
+      </div>
+      <p class="case-desc">증가하는 자동화 장비 포트폴리오를 관리하는 새 작업자를 돕기 위해 GenAI 기반 AR 안경을 도입했다. 장비 데이터, 권고사항, 매뉴얼을 업로드해 작업자가 첫날부터 시스템 산출물에 의존할 수 있도록 했다. 핵심 지원 요소는 작업자가 모델 권고를 심문하고 정교화하는 교정된 신뢰 루프였다.</p>
+      <div class="case-metrics">
+        <div class="case-metric">
+          <span class="metric-val">50%</span>
+          <span class="metric-label">장비 숙련 시간 단축<br>(18개월 → 9개월)</span>
+        </div>
       </div>
     </div>
 
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>차원</th><th>핵심 액션</th><th>근거</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>워크플로 재설계</strong></td>
-            <td>기존 직무 단위가 아닌 엔드투엔드 프로세스 기준으로 AI·인간 역할 재분배</td>
-            <td>단순 자동화(기존 방식 그대로 자동화)는 혁신이 아님. 프로세스 전체를 재상상해야 생산성 향상 실현</td>
-          </tr>
-          <tr>
-            <td><strong>역량 개발</strong></td>
-            <td>102개 역량 매트릭스 기준으로 현재 격차 파악 후 upskilling 로드맵 수립</td>
-            <td>63%가 기술 격차를 최대 장벽으로 꼽음. 기술 도입 전 역량 준비도 선행 필요</td>
-          </tr>
-          <tr>
-            <td><strong>신뢰 구축</strong></td>
-            <td>AI 시스템의 판단 과정을 설명 가능하게 하고, 인간 개입 기준을 명문화</td>
-            <td>현장 작업자가 AI를 신뢰하지 않으면 실질적 협업 불가. 거버넌스 설계가 도입만큼 중요</td>
-          </tr>
-          <tr>
-            <td><strong>인력 투자 연계</strong></td>
-            <td>기술 투자 예산과 동등한 비중으로 인력 개발 예산 편성</td>
-            <td>기술 + 인간 병행 투자 시 +11% vs. 기술 단독 시 +4%. ROI 차이가 명확</td>
-          </tr>
-          <tr>
-            <td><strong>생태계 협업</strong></td>
-            <td>공급망 파트너와 데이터 공유·공동 의사결정 프레임워크 구축</td>
-            <td>산업 운영이 기업 경계를 넘어 연결됨. 단독 최적화는 한계에 도달</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="case-study">
+      <div class="case-header">
+        <div>
+          <div class="case-company">OCP Group</div>
+          <div class="case-location">Casablanca, Morocco</div>
+        </div>
+        <span class="case-badge">Partner Consultation</span>
+      </div>
+      <p class="case-desc">인산 생산 라인의 파일럿에서 작업자, 기술자, 엔지니어, 데이터 과학자가 첫날부터 함께 협력하는 모델을 구축했다. 이 접근법은 다른 라인에서의 채택 수요를 창출했다.</p>
+      <div class="case-metrics">
+        <div class="case-metric">
+          <span class="metric-val">↑ 20%</span>
+          <span class="metric-label">생산성 향상</span>
+        </div>
+        <div class="case-metric">
+          <span class="metric-val neg">↓ 0.5%</span>
+          <span class="metric-label">불량률 감소</span>
+        </div>
+      </div>
     </div>
 
     <div class="pull-quote">
-      기계는 이미 실행을 흡수하고 있다. 이제 남은 질문은 "누가 기계를 판단하고 감독하고 책임질 것인가"다.
+      <p>"우리는 수년간 디지털 전환과 자동화를 진행했고 기술만으로는 지속 가능한 변화를 만들 수 없다는 것을 배웠다. 작년에 바뀐 것은 사람을 참여시킨 것이다. 사람을 프로젝트에 참여시키면 그들은 주인의식을 갖는다. 주인의식이 있으면 90% 성공을 확신할 수 있다."</p>
+      <cite>— Fatima Zohra Lahiani, Head of Talent &amp; Organizational Development, OCP Group</cite>
+    </div>
+  </section>
+
+  <section id="action">
+    <div class="section-header">
+      <div class="section-num blue">7</div>
+      <h2 class="section-title">3단계 실행 전략</h2>
     </div>
 
-    <div class="callout green">
-      <div class="callout-icon">💡</div>
+    <p>보고서는 기술 배포와 인력 전환을 별도의 워크스트림이 아닌 단일 통합 이니셔티브로 다루어야 한다고 강조한다. 실행은 세 수준에서 동시에 진행되어야 한다.</p>
+
+    <div class="callout purple">
+      <div class="callout-icon">🔑</div>
       <div class="callout-body">
-        <div class="callout-label">한국 교육·산업에의 시사점</div>
-        <p>자동화 도입이 빠른 자동차·전자·반도체·물류 분야에서, <strong>AI 거버넌스 역량, 데이터 품질 관리, 회복탄력성 설계</strong> 등 신규 역량의 체계적 육성이 시급합니다. 기술 교육 커리큘럼도 도구 조작 숙련에서 <strong>AI 판단 검증과 시스템 감독</strong> 중심으로 재편될 필요가 있습니다.</p>
+        <strong>핵심 원칙: 통합 소유권</strong>
+        <p>COO, CTO, CPO는 단일 전환 여정의 공동 소유자로 운영해야 한다. 이를 분리하는 조직은 기술이 인력을 앞지르고, 파일럿 이후 채택이 정체되며, 투자가 성과를 내지 못하는 패턴을 반복적으로 경험한다.</p>
+      </div>
+    </div>
+
+    <table class="action-table">
+      <thead>
+        <tr>
+          <th>수준</th>
+          <th>핵심 전략</th>
+          <th>주요 행동</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="level-badge level-site">Site</span></td>
+          <td>문화·학습·최전선 소유권</td>
+          <td>① 기술 설계·배포에 최전선 인력 참여 (참여 기업은 20%+ 생산성 향상 2배 가능성) ② 업무 흐름 속에 학습 통합 ③ 예외 처리·비판적 사고·고급 판단 역량 개발 ④ 가시적 경력 경로 제공 ⑤ 구조적 피드백 루프 구축</td>
+        </tr>
+        <tr>
+          <td><span class="level-badge level-ent">Enterprise</span></td>
+          <td>통합 재발명 아젠다</td>
+          <td>① 중앙 전환 오피스(CTO) 설립 ② 미래 업무 센터(Centre for Future Work) 구축 ③ Human-in-the-Lead 거버넌스 구조 개발 ④ 스킬-인센티브 연동 (기술 습득에 보상하는 pay-for-skills 모델)</td>
+        </tr>
+        <tr>
+          <td><span class="level-badge level-eco">Ecosystem</span></td>
+          <td>시스템 전반 정렬</td>
+          <td>① 공통 스킬 매트릭스 기준점으로 동기화 ② 스킬 매트릭스 거버넌스 위원회 운영 ③ 미래 스킬 기반 공공 훈련 자금 지원 ④ 조기 경력 교육 경로 구축 ⑤ 의미 있는 재배치 지원 프로그램</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="grid-2" style="margin-top:var(--space-6)">
+      <div class="card">
+        <div class="card-icon">🏛️</div>
+        <h3>Ohio Manufacturers Association (OMA)</h3>
+        <p>지역사회 대학, 직업 센터, 인력 위원회, 제조업체가 공통 교육과정과 자격증명을 개발해 교육자가 가르치는 것과 산업 필요를 일치. <strong>19개 섹터 파트너십, 3,500개 고용주, 12만 개 자격증명</strong></p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔬</div>
+        <h3>Center for Advanced Manufacturing, MassTech</h3>
+        <p>자본 장비 보조금을 인력 계획 조건부로 지급, 학계-스타트업 협력 자금 지원. 기술 대 인재 사이의 트레이드오프를 통합 시스템으로 전환. <strong>신규 일자리 2,000개, 총 투자 약 2억 달러, 신제품 100+ 개</strong></p>
       </div>
     </div>
   </section>
 
-  <div class="footer">
-    원문: <a href="https://www.weforum.org/publications/human-machine-collaboration-in-industrial-operations-activation-playbook/" target="_blank" rel="noopener">WEF Human-Machine Collaboration in Industrial Operations: Activation Playbook</a>
-    &nbsp;·&nbsp; World Economic Forum, June 2026 &nbsp;·&nbsp; In collaboration with Accenture
+  <div class="summary-banner">
+    <h2>세 가지 조건이 동시에 충족되어야 한다</h2>
+    <p>Site 수준에서 최전선 워커는 워크플로 재설계의 수령자가 아닌 능동적 참여자여야 한다. Enterprise 수준에서 기술 배포와 인력 전환은 단일 통합 프로그램으로 다루어야 한다. Ecosystem 수준에서 정부, 고용주, 훈련 제공자는 공유 스킬 아키텍처에서 운영해야 한다. 인텔리전트 산업 운영으로의 전환에서 그 판단을 활성화하는 제도적 조건을 구축하는 조직이 지속 가능한 경쟁 우위를 확보한다.</p>
   </div>
 
-</main>
+</div>
 
 <script>
-const bar = document.getElementById('read-progress');
-addEventListener('scroll', () => {
-  const h = document.documentElement;
-  const max = h.scrollHeight - h.clientHeight;
-  bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
-}, { passive: true });
+  const bar = document.getElementById('read-progress');
+  window.addEventListener('scroll', () => {
+    const d = document.documentElement;
+    const pct = (d.scrollTop / (d.scrollHeight - d.clientHeight)) * 100;
+    bar.style.width = Math.min(pct, 100) + '%';
+  }, {passive: true});
 </script>
 
 <!-- Back to index -->
