@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>우리반 입장코드 만들기 — 파이어스토어의 컬렉션과 문서</title>
+  <title>우리반 입장코드 만들기 — Firestore의 컬렉션과 문서</title>
   <meta name="description" content="교실 Q&A 앱의 학급 입장 코드를 2주 후 자동 만료시키는 방법. 코드를 문서 ID로 두고, expiresAt로 수명을 제한하고, 만료+재발급으로 잠김을 복구하고, 멤버십은 uid로 분리해 기존 학생을 보호하는 설계를 다이어그램으로 풀어봅니다.">
-  <meta property="og:title" content="우리반 입장코드 만들기 — 파이어스토어의 컬렉션과 문서">
+  <meta property="og:title" content="우리반 입장코드 만들기 — Firestore의 컬렉션과 문서">
   <meta property="og:description" content="코드는 입장권, 멤버십은 정기권. 2주 만료는 신규 입장만 막고 기존 학생은 그대로. get/list 분리·expiresAt·재발급·Cloud Function 검증까지.">
   <style>
     :root {
@@ -178,7 +178,7 @@
   <div class="hero-inner">
     <div class="eyebrow"><span class="eyebrow-dot"></span>Firestore 보안 설계</div>
     <h1>우리반 <span class="hl">입장코드 만들기</span></h1>
-    <p class="hero-subtitle">파이어스토어의 컬렉션과 문서</p>
+    <p class="hero-subtitle">Firestore의 컬렉션과 문서</p>
     <p class="hero-lead">교실 Q&amp;A 앱에서 학생이 학급에 들어올 때 쓰는 입장 코드. 한 번 만들면 영원히 유효하다면, 유출된 코드로 1년 뒤에도 낯선 사람이 들어올 수 있습니다. 코드에 <strong>수명(2주)</strong>을 주되, 이미 들어온 학생은 건드리지 않는 설계를 다이어그램으로 풀어봅니다.</p>
     <div class="hero-meta">
       <span class="hero-tag">Firestore</span>
