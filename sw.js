@@ -1,4 +1,4 @@
-const CACHE = 'my-html-v20260629-2322';
+const CACHE = 'my-html-v20260629-2323';
 const PRECACHE = [
   '/my-html/',
   '/my-html/index.html',
