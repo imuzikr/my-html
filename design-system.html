@@ -1048,6 +1048,7 @@
         <a class="ds-nav-link" href="#alerts">Alerts</a>
         <a class="ds-nav-link" href="#callouts">Callouts</a>
         <a class="ds-nav-link" href="#article-elements">Article Elements</a>
+        <a class="ds-nav-link" href="#reusable-patterns">Reusable Patterns</a>
         <a class="ds-nav-link" href="#charts">Data Viz</a>
       </div>
       <div class="ds-nav-section">
@@ -1804,6 +1805,124 @@
   &lt;<span class="tok-keyword">h3</span>&gt;제목&lt;/<span class="tok-keyword">h3</span>&gt;
   &lt;<span class="tok-keyword">p</span>&gt;설명 텍스트&lt;/<span class="tok-keyword">p</span>&gt;
 &lt;/<span class="tok-keyword">div</span>&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- ── REUSABLE PATTERNS ──────────────────────────────────── -->
+    <section class="ds-section" id="reusable-patterns">
+      <div class="ds-section-header">
+        <h2>Reusable Patterns</h2>
+        <span class="ds-section-tag">Article</span>
+      </div>
+      <p class="text-muted mb-6" style="font-size:var(--text-sm);">난도 있는 기술 아티클(Firestore 보안 설계 등)에서 검증된 세 가지 설명 패턴입니다. 복사해서 그대로 쓰세요. 모든 색은 디자인 토큰을 사용합니다.</p>
+
+      <style>
+        /* 1. Inline SVG diagram wrapper */
+        .rp-diagram-wrap{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-6) 0;box-shadow:var(--shadow-sm)}
+        .rp-diagram-wrap svg{width:100%;height:auto;display:block}
+        .rp-diagram-caption{font-size:var(--text-sm);color:var(--color-text-faint);margin-top:var(--space-3);margin-bottom:0;text-align:center}
+        /* 2. Bad / Good compare cards */
+        .rp-compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin:var(--space-6) 0}
+        .rp-compare-card{border-radius:var(--radius-lg);padding:var(--space-5);border:1px solid}
+        .rp-compare-card.bad{background:var(--color-red-soft);border-color:#e8c0bc}
+        .rp-compare-card.good{background:var(--color-green-soft);border-color:#bcd8c4}
+        .rp-compare-card h4{font-size:var(--text-base);margin-bottom:var(--space-3);display:flex;align-items:center;gap:var(--space-2)}
+        .rp-compare-card.bad h4{color:var(--color-red)}
+        .rp-compare-card.good h4{color:var(--color-green)}
+        .rp-compare-card p{font-size:var(--text-sm);margin-bottom:0;color:var(--color-text-muted)}
+        /* 3. Step list + summary pull-quote */
+        .rp-step-list{counter-reset:step;list-style:none;padding:0;margin:var(--space-6) 0}
+        .rp-step-list li{position:relative;padding:var(--space-4) var(--space-4) var(--space-4) calc(var(--space-12) + var(--space-2));margin-bottom:var(--space-3);background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-md)}
+        .rp-step-list li::before{counter-increment:step;content:counter(step);position:absolute;left:var(--space-4);top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:var(--radius-full);background:var(--color-green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:var(--weight-bold);font-size:var(--text-sm)}
+        .rp-pull-quote{border-left:4px solid var(--color-accent);background:var(--color-accent-soft);padding:var(--space-5) var(--space-6);border-radius:0 var(--radius-lg) var(--radius-lg) 0;color:#5b2b18;margin:var(--space-6) 0;font-weight:var(--weight-medium);font-size:var(--text-lg);line-height:var(--leading-loose)}
+        @media(max-width:640px){.rp-compare-grid{grid-template-columns:1fr}}
+      </style>
+
+      <!-- Pattern 1: Inline SVG diagram -->
+      <h4 class="mb-4">1 · Inline SVG Diagram</h4>
+      <p class="text-muted mb-4" style="font-size:var(--text-sm);">외부 의존성 없이 저장소에 그대로 배포되는 자체 완결형 다이어그램. mermaid.ink 같은 외부 렌더러 대신 <code>&lt;svg viewBox&gt;</code>를 직접 작성합니다. 막대·타임라인·시퀀스·계층 등 어떤 형태든 가능하며, 색은 토큰(<code>#3a6b4a</code> green / <code>#2d5a8e</code> blue / <code>#d95f2b</code> accent / <code>#a8322a</code> red)을 씁니다. 화살표는 <code>&lt;marker&gt;</code>로 정의합니다.</p>
+      <div class="rp-diagram-wrap">
+        <svg viewBox="0 0 600 150" role="img" aria-label="get과 list 분리 예시 다이어그램">
+          <rect x="230" y="40" width="140" height="70" rx="10" fill="#f5f2ed" stroke="#dedad2"/>
+          <text x="300" y="60" text-anchor="middle" font-size="12" font-weight="700" fill="#6b6a63">joinCodes</text>
+          <text x="300" y="84" text-anchor="middle" font-size="12" font-family="monospace" fill="#1a1a18">ABCDEF → xJ3k9</text>
+          <rect x="30" y="55" width="150" height="40" rx="10" fill="#e6f0e9" stroke="#bcd8c4"/>
+          <text x="105" y="80" text-anchor="middle" font-size="12" font-family="monospace" fill="#244730">get("ABCDEF")</text>
+          <path d="M180 75 L226 75" stroke="#3a6b4a" stroke-width="2.5" marker-end="url(#rpArrowG)"/>
+          <text x="203" y="67" text-anchor="middle" font-size="11" font-weight="700" fill="#3a6b4a">✓</text>
+          <rect x="420" y="55" width="150" height="40" rx="10" fill="#fbe8e6" stroke="#e8c0bc"/>
+          <text x="495" y="80" text-anchor="middle" font-size="12" font-family="monospace" fill="#5c1f1a">list(...)</text>
+          <path d="M374 75 L416 75" stroke="#a8322a" stroke-width="2.5" stroke-dasharray="5 4" marker-end="url(#rpArrowR)"/>
+          <text x="397" y="67" text-anchor="middle" font-size="11" font-weight="700" fill="#a8322a">✗</text>
+          <defs>
+            <marker id="rpArrowG" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#3a6b4a"/></marker>
+            <marker id="rpArrowR" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#a8322a"/></marker>
+          </defs>
+        </svg>
+        <p class="rp-diagram-caption">코드 = 문서 ID. get은 콕 집어 읽기(허용), list는 전체 훑기(차단).</p>
+      </div>
+
+      <!-- Pattern 2: Bad / Good compare cards -->
+      <h4 class="mb-4 mt-6">2 · Bad / Good Compare Cards</h4>
+      <p class="text-muted mb-4" style="font-size:var(--text-sm);">안티패턴(✗ 빨강)과 해법(✓ 초록)을 나란히 배치해 대비를 만듭니다. "왜 이게 문제이고 무엇이 답인가"를 한눈에 보여줄 때 효과적입니다.</p>
+      <div class="rp-compare-grid">
+        <div class="rp-compare-card bad">
+          <h4>✗ 코드를 필드에 두면</h4>
+          <p>코드로 찾으려면 전체 훑기(list)가 필요 → 다른 반 코드까지 다 보임.</p>
+        </div>
+        <div class="rp-compare-card good">
+          <h4>✓ 코드를 문서 ID로 두면</h4>
+          <p>아는 사람만 get으로 하나에 도달. list는 관리자만 → 우회 차단.</p>
+        </div>
+      </div>
+
+      <!-- Pattern 3: Step list + summary pull-quote -->
+      <h4 class="mb-4 mt-6">3 · Step List + Summary Pull-quote</h4>
+      <p class="text-muted mb-4" style="font-size:var(--text-sm);">번호가 자동 매겨지는 단계 리스트로 전체 절차를 압축하고, 마지막에 한 줄 풀인용으로 핵심을 못 박습니다. 보통 글의 마지막 "한 장 요약" 섹션에서 함께 씁니다.</p>
+      <ol class="rp-step-list">
+        <li><strong>코드는 문서 ID로.</strong> get은 누구나, list는 교사만.</li>
+        <li><strong>만료는 expiresAt으로.</strong> 판정은 <code>expiresAt &lt; now</code> 한 번.</li>
+        <li><strong>코드 만료 ≠ 추방.</strong> 소속은 uid 기준 멤버십에 별도 저장.</li>
+      </ol>
+      <div class="rp-pull-quote">
+        코드는 14일짜리 입장권, 멤버십은 평생 정기권. 만료는 새 손님만 막고, 기존 학생은 uid로 어느 기기에서든 다시 들어온다.
+      </div>
+
+      <div class="code-block mt-6">
+        <div class="code-block-header">
+          <span class="code-block-lang">HTML · 세 패턴 마크업</span>
+          <button class="code-block-copy" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code><span class="tok-comment">&lt;!-- 1. Inline SVG diagram --&gt;</span>
+&lt;<span class="tok-keyword">div</span> class=<span class="tok-string">"diagram-wrap"</span>&gt;
+  &lt;<span class="tok-keyword">svg</span> viewBox=<span class="tok-string">"0 0 800 230"</span> role=<span class="tok-string">"img"</span> aria-label=<span class="tok-string">"..."</span>&gt;
+    <span class="tok-comment">&lt;!-- 색: #3a6b4a green / #2d5a8e blue / #d95f2b accent / #a8322a red --&gt;</span>
+    &lt;<span class="tok-keyword">rect</span> .../&gt; &lt;<span class="tok-keyword">text</span> ...&gt;...&lt;/<span class="tok-keyword">text</span>&gt;
+    &lt;<span class="tok-keyword">path</span> d=<span class="tok-string">"M.. L.."</span> marker-end=<span class="tok-string">"url(#arrow)"</span>/&gt;
+    &lt;<span class="tok-keyword">defs</span>&gt;&lt;<span class="tok-keyword">marker</span> id=<span class="tok-string">"arrow"</span> ...&gt;&lt;<span class="tok-keyword">path</span> d=<span class="tok-string">"M0 0 L6 3 L0 6 Z"</span>/&gt;&lt;/<span class="tok-keyword">marker</span>&gt;&lt;/<span class="tok-keyword">defs</span>&gt;
+  &lt;/<span class="tok-keyword">svg</span>&gt;
+  &lt;<span class="tok-keyword">p</span> class=<span class="tok-string">"diagram-caption"</span>&gt;캡션&lt;/<span class="tok-keyword">p</span>&gt;
+&lt;/<span class="tok-keyword">div</span>&gt;
+
+<span class="tok-comment">&lt;!-- 2. Bad / Good compare cards --&gt;</span>
+&lt;<span class="tok-keyword">div</span> class=<span class="tok-string">"compare-grid"</span>&gt;
+  &lt;<span class="tok-keyword">div</span> class=<span class="tok-string">"compare-card bad"</span>&gt;&lt;<span class="tok-keyword">h4</span>&gt;✗ 안티패턴&lt;/<span class="tok-keyword">h4</span>&gt;&lt;<span class="tok-keyword">p</span>&gt;...&lt;/<span class="tok-keyword">p</span>&gt;&lt;/<span class="tok-keyword">div</span>&gt;
+  &lt;<span class="tok-keyword">div</span> class=<span class="tok-string">"compare-card good"</span>&gt;&lt;<span class="tok-keyword">h4</span>&gt;✓ 해법&lt;/<span class="tok-keyword">h4</span>&gt;&lt;<span class="tok-keyword">p</span>&gt;...&lt;/<span class="tok-keyword">p</span>&gt;&lt;/<span class="tok-keyword">div</span>&gt;
+&lt;/<span class="tok-keyword">div</span>&gt;
+
+<span class="tok-comment">&lt;!-- 3. Step list + summary pull-quote --&gt;</span>
+&lt;<span class="tok-keyword">ol</span> class=<span class="tok-string">"step-list"</span>&gt;
+  &lt;<span class="tok-keyword">li</span>&gt;&lt;<span class="tok-keyword">strong</span>&gt;단계 제목.&lt;/<span class="tok-keyword">strong</span>&gt; 설명&lt;/<span class="tok-keyword">li</span>&gt;
+&lt;/<span class="tok-keyword">ol</span>&gt;
+&lt;<span class="tok-keyword">div</span> class=<span class="tok-string">"pull-quote"</span>&gt;한 줄 핵심 요약&lt;/<span class="tok-keyword">div</span>&gt;</code></pre>
+      </div>
+
+      <div class="alert alert-info mt-6">
+        <span class="alert-icon">ℹ</span>
+        <div class="alert-content">
+          <div class="alert-title">CSS는 각 아티클에 인라인</div>
+          <div class="alert-body">이 패턴들의 클래스(<code>.diagram-wrap</code>, <code>.compare-card</code>, <code>.step-list</code>, <code>.pull-quote</code>)는 공용 스타일시트가 아니라 각 아티클의 <code>&lt;style&gt;</code>에 인라인으로 둡니다. 아티클은 단일 HTML 파일로 독립 배포되기 때문입니다. 위 데모는 <code>.rp-</code> 접두사로 스코프했지만, 실제 아티클에서는 접두사 없이 씁니다.</div>
+        </div>
       </div>
     </section>
 
