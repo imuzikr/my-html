@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>입장 코드 2주 만료 설계 — Firestore로 안전한 학급 입장 코드 만들기</title>
+  <title>안전한 우리반 입장코드 — Firestore 입장 코드 2주 만료 설계</title>
   <meta name="description" content="교실 Q&A 앱의 학급 입장 코드를 2주 후 자동 만료시키는 방법. 코드를 문서 ID로 두고, expiresAt로 수명을 제한하고, 만료+재발급으로 잠김을 복구하고, 멤버십은 uid로 분리해 기존 학생을 보호하는 설계를 다이어그램으로 풀어봅니다.">
-  <meta property="og:title" content="입장 코드 2주 만료 설계 — Firestore로 안전한 학급 입장 코드 만들기">
+  <meta property="og:title" content="안전한 우리반 입장코드 — Firestore 입장 코드 2주 만료 설계">
   <meta property="og:description" content="코드는 입장권, 멤버십은 정기권. 2주 만료는 신규 입장만 막고 기존 학생은 그대로. get/list 분리·expiresAt·재발급·Cloud Function 검증까지.">
   <style>
     :root {
@@ -49,6 +49,7 @@
     h1{font-size:clamp(1.9rem,5vw,3.2rem);line-height:var(--leading-tight);letter-spacing:-.03em;color:#fff;margin-bottom:var(--space-5);font-weight:var(--weight-bold)}
     h1 .hl{background:linear-gradient(90deg,#b4e6c4,#ffd4b0 60%,#ffb87a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
     .hero-lead{font-size:var(--text-lg);color:rgba(255,255,255,.78);max-width:760px;line-height:var(--leading-loose);margin-bottom:var(--space-6)}
+    .hero-lead strong{color:#fff;font-weight:var(--weight-semibold)}
     .hero-meta{display:flex;flex-wrap:wrap;gap:var(--space-2);align-items:center}
     .hero-tag{font-size:var(--text-xs);color:rgba(255,255,255,.78);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);padding:var(--space-1) var(--space-3);border-radius:var(--radius-full)}
     main{max-width:900px;margin:0 auto;padding:var(--space-12) var(--space-6)}
@@ -175,7 +176,7 @@
 <header class="hero">
   <div class="hero-inner">
     <div class="eyebrow"><span class="eyebrow-dot"></span>Firestore 보안 설계</div>
-    <h1>입장 코드를<br><span class="hl">2주 후에 만료시키기</span></h1>
+    <h1>안전한<br><span class="hl">우리반 입장코드</span></h1>
     <p class="hero-lead">교실 Q&amp;A 앱에서 학생이 학급에 들어올 때 쓰는 입장 코드. 한 번 만들면 영원히 유효하다면, 유출된 코드로 1년 뒤에도 낯선 사람이 들어올 수 있습니다. 코드에 <strong>수명(2주)</strong>을 주되, 이미 들어온 학생은 건드리지 않는 설계를 다이어그램으로 풀어봅니다.</p>
     <div class="hero-meta">
       <span class="hero-tag">Firestore</span>
