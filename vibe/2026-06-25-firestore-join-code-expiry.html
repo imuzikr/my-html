@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>입장 코드 2주 만료 설계 — Firestore로 안전한 학급 입장 코드 만들기</title>
+  <meta name="description" content="교실 Q&A 앱의 학급 입장 코드를 2주 후 자동 만료시키는 방법. 코드를 문서 ID로 두고, expiresAt로 수명을 제한하고, 만료+재발급으로 잠김을 복구하고, 멤버십은 uid로 분리해 기존 학생을 보호하는 설계를 다이어그램으로 풀어봅니다.">
+  <meta property="og:title" content="입장 코드 2주 만료 설계 — Firestore로 안전한 학급 입장 코드 만들기">
+  <meta property="og:description" content="코드는 입장권, 멤버십은 정기권. 2주 만료는 신규 입장만 막고 기존 학생은 그대로. get/list 분리·expiresAt·재발급·Cloud Function 검증까지.">
+  <style>
+    :root {
+      --color-bg:#f5f2ed; --color-bg-alt:#eceae4; --color-bg-card:#ffffff;
+      --color-text:#1a1a18; --color-text-muted:#6b6a63; --color-text-faint:#a09f97;
+      --color-border:#dedad2;
+      --color-accent:#d95f2b; --color-accent-hover:#c2521f; --color-accent-soft:#faeee7;
+      --color-blue:#2d5a8e; --color-blue-soft:#e5eef7;
+      --color-green:#3a6b4a; --color-green-soft:#e6f0e9;
+      --color-purple:#5b3a7a; --color-purple-soft:#ece4f5;
+      --color-yellow:#8a6a00; --color-yellow-soft:#fdf5d9;
+      --color-red:#a8322a; --color-red-soft:#fbe8e6;
+      --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR","Apple SD Gothic Neo",Helvetica,Arial,sans-serif;
+      --font-mono:"SF Mono","Fira Code","Cascadia Code",Consolas,"Liberation Mono",monospace;
+      --text-xs:0.75rem; --text-sm:0.875rem; --text-base:1rem; --text-lg:1.125rem;
+      --text-xl:1.25rem; --text-2xl:1.5rem; --text-3xl:1.875rem;
+      --weight-medium:500; --weight-semibold:600; --weight-bold:700;
+      --leading-tight:1.25; --leading-normal:1.6; --leading-loose:1.8;
+      --space-1:0.25rem; --space-2:0.5rem; --space-3:0.75rem; --space-4:1rem;
+      --space-5:1.25rem; --space-6:1.5rem; --space-8:2rem; --space-12:3rem;
+      --radius-md:8px; --radius-lg:12px; --radius-full:9999px;
+      --shadow-sm:0 1px 3px rgba(0,0,0,0.07); --shadow-md:0 6px 18px rgba(0,0,0,0.08);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--font-sans);background:var(--color-bg);color:var(--color-text);line-height:var(--leading-normal);word-break:keep-all}
+    #read-progress{position:fixed;top:0;left:0;width:0;height:3px;background:var(--color-accent);z-index:1000;transition:width 80ms linear}
+    .site-nav{position:sticky;top:0;z-index:500;background:rgba(245,242,237,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--color-border)}
+    .nav-inner{max-width:900px;margin:0 auto;padding:var(--space-3) var(--space-6);display:flex;justify-content:space-between;align-items:center;gap:var(--space-4)}
+    .nav-brand{color:var(--color-accent);font-weight:var(--weight-bold);text-decoration:none;font-size:var(--text-sm);white-space:nowrap}
+    .nav-links{display:flex;gap:var(--space-1);list-style:none;overflow-x:auto;scrollbar-width:none}
+    .nav-links::-webkit-scrollbar{display:none}
+    .nav-links a{display:block;color:var(--color-text-muted);text-decoration:none;font-size:var(--text-sm);padding:var(--space-1) var(--space-3);border-radius:var(--radius-full);white-space:nowrap;transition:all 180ms ease}
+    .nav-links a:hover{background:var(--color-bg-alt);color:var(--color-text)}
+    .hero{background:linear-gradient(140deg,#0a1f1a 0%,#0f2238 38%,#1c1330 68%,#2a1206 100%);padding:calc(var(--space-12)*1.4) var(--space-6) var(--space-12);position:relative;overflow:hidden}
+    .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 15% 35%,rgba(58,107,74,.30),transparent 46%),radial-gradient(circle at 85% 22%,rgba(217,95,43,.24),transparent 44%);pointer-events:none}
+    .hero::after{content:"";position:absolute;right:5%;bottom:8%;width:280px;height:280px;border-radius:50%;border:1px solid rgba(255,255,255,.04);box-shadow:0 0 0 64px rgba(255,255,255,.015);pointer-events:none}
+    .hero-inner{max-width:900px;margin:0 auto;position:relative}
+    .eyebrow{display:inline-flex;align-items:center;gap:var(--space-2);color:#a8d8b8;border:1px solid rgba(168,216,184,.3);background:rgba(255,255,255,.07);border-radius:var(--radius-full);padding:var(--space-1) var(--space-4);font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.10em;text-transform:uppercase;margin-bottom:var(--space-6)}
+    .eyebrow-dot{width:6px;height:6px;border-radius:50%;background:#6ab88a;display:inline-block}
+    h1{font-size:clamp(1.9rem,5vw,3.2rem);line-height:var(--leading-tight);letter-spacing:-.03em;color:#fff;margin-bottom:var(--space-5);font-weight:var(--weight-bold)}
+    h1 .hl{background:linear-gradient(90deg,#b4e6c4,#ffd4b0 60%,#ffb87a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero-lead{font-size:var(--text-lg);color:rgba(255,255,255,.78);max-width:760px;line-height:var(--leading-loose);margin-bottom:var(--space-6)}
+    .hero-meta{display:flex;flex-wrap:wrap;gap:var(--space-2);align-items:center}
+    .hero-tag{font-size:var(--text-xs);color:rgba(255,255,255,.78);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);padding:var(--space-1) var(--space-3);border-radius:var(--radius-full)}
+    main{max-width:900px;margin:0 auto;padding:var(--space-12) var(--space-6)}
+    .summary{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-8);margin-bottom:var(--space-12);position:relative;overflow:hidden}
+    .summary::before{content:"";position:absolute;top:0;left:0;width:6px;height:100%;background:linear-gradient(180deg,var(--color-green),var(--color-accent))}
+    .summary-label{font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.10em;text-transform:uppercase;color:var(--color-accent);margin-bottom:var(--space-3)}
+    .summary p{font-size:var(--text-base);line-height:var(--leading-loose);color:var(--color-text)}
+    section{margin-bottom:var(--space-12);scroll-margin-top:80px}
+    .section-header{display:flex;gap:var(--space-4);align-items:flex-start;margin-bottom:var(--space-6)}
+    .section-num{width:42px;height:42px;border-radius:var(--radius-full);background:linear-gradient(135deg,var(--color-green),var(--color-accent));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:var(--weight-bold);flex-shrink:0;font-size:var(--text-lg);box-shadow:var(--shadow-sm)}
+    h2{font-size:var(--text-2xl);line-height:var(--leading-tight);letter-spacing:-.02em;margin-bottom:var(--space-2)}
+    h3{font-size:var(--text-xl);margin:var(--space-6) 0 var(--space-3);line-height:var(--leading-tight)}
+    p{color:var(--color-text-muted);margin-bottom:var(--space-4);line-height:var(--leading-loose)}
+    strong{color:var(--color-text);font-weight:var(--weight-semibold)}
+    ul,ol{padding-left:var(--space-6);margin-bottom:var(--space-4)}
+    li{color:var(--color-text-muted);margin-bottom:var(--space-2);line-height:var(--leading-loose)}
+    code{font-family:var(--font-mono);font-size:.88em;background:var(--color-bg-alt);border:1px solid var(--color-border);border-radius:4px;padding:1px 6px;color:var(--color-text)}
+    .callout{display:flex;gap:var(--space-4);border-radius:var(--radius-md);padding:var(--space-5) var(--space-6);margin:var(--space-6) 0;align-items:flex-start}
+    .callout-icon{font-size:1.4rem;flex-shrink:0;line-height:1;margin-top:2px}
+    .callout-body{flex:1}
+    .callout-label{font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.08em;text-transform:uppercase;margin-bottom:var(--space-2)}
+    .callout-body p{font-size:var(--text-base);margin-bottom:0;line-height:var(--leading-loose)}
+    .callout.info{background:var(--color-blue-soft);border:1px solid #c0d4eb;border-left:4px solid var(--color-blue)}
+    .callout.info .callout-label{color:var(--color-blue)}
+    .callout.info .callout-body p{color:#1e3a5f}
+    .callout.warn{background:var(--color-yellow-soft);border:1px solid #e8d8a0;border-left:4px solid var(--color-yellow)}
+    .callout.warn .callout-label{color:var(--color-yellow)}
+    .callout.warn .callout-body p{color:#5a4500}
+    .callout.err{background:var(--color-red-soft);border:1px solid #e8c0bc;border-left:4px solid var(--color-red)}
+    .callout.err .callout-label{color:var(--color-red)}
+    .callout.err .callout-body p{color:#5c1f1a}
+    .callout.analogy{background:var(--color-purple-soft);border:1px solid #d0c4e8;border-left:4px solid var(--color-purple)}
+    .callout.analogy .callout-label{color:var(--color-purple)}
+    .callout.analogy .callout-body p{color:#3d2856}
+    .callout.green{background:var(--color-green-soft);border:1px solid #bcd8c4;border-left:4px solid var(--color-green)}
+    .callout.green .callout-label{color:var(--color-green)}
+    .callout.green .callout-body p{color:#244730}
+    .overview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--space-4);margin:var(--space-6) 0}
+    .ov-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+    .ov-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px}
+    .ov-card.c-1::before{background:var(--color-accent)}
+    .ov-card.c-2::before{background:var(--color-blue)}
+    .ov-card.c-3::before{background:var(--color-green)}
+    .ov-card.c-4::before{background:var(--color-purple)}
+    .ov-icon{width:40px;height:40px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;margin-bottom:var(--space-3);font-size:1.2rem}
+    .ov-card.c-1 .ov-icon{background:var(--color-accent-soft)}
+    .ov-card.c-2 .ov-icon{background:var(--color-blue-soft)}
+    .ov-card.c-3 .ov-icon{background:var(--color-green-soft)}
+    .ov-card.c-4 .ov-icon{background:var(--color-purple-soft)}
+    .ov-name{font-size:var(--text-base);font-weight:var(--weight-bold);margin-bottom:var(--space-2);color:var(--color-text)}
+    .ov-desc{font-size:var(--text-sm);color:var(--color-text-muted);line-height:var(--leading-loose);margin:0}
+    .code-block{background:#1e1d1a;border-radius:var(--radius-md);overflow:hidden;margin:var(--space-5) 0;border:1px solid #2c2b27}
+    .code-head{display:flex;justify-content:space-between;align-items:center;padding:var(--space-2) var(--space-4);background:#252420;border-bottom:1px solid #34322d}
+    .code-lang{font-family:var(--font-mono);font-size:var(--text-sm);color:#a09f97}
+    .copy-btn{font-family:var(--font-sans);font-size:var(--text-sm);color:#d8d6cf;background:#34322d;border:1px solid #44423b;border-radius:6px;padding:3px 12px;cursor:pointer;transition:all 180ms ease}
+    .copy-btn:hover{background:#44423b}
+    .code-block pre{margin:0;padding:var(--space-5);overflow-x:auto}
+    .code-block code{font-family:var(--font-mono);font-size:var(--text-sm);line-height:1.7;color:#e6e4dd;white-space:pre;background:none;border:none;padding:0;border-radius:0}
+    .tok-keyword{color:#e0884f}
+    .tok-string{color:#9ec98a}
+    .tok-comment{color:#7d7a70;font-style:italic}
+    .tok-fn{color:#7daea3}
+    .tok-num{color:#c99ed4}
+    .diagram-wrap{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-6) 0;box-shadow:var(--shadow-sm)}
+    .diagram-wrap svg{width:100%;height:auto;display:block}
+    .diagram-caption{font-size:var(--text-sm);color:var(--color-text-faint);margin-top:var(--space-3);margin-bottom:0;text-align:center}
+    .table-wrap{overflow-x:auto;margin:var(--space-5) 0}
+    table{border-collapse:collapse;width:100%;font-size:var(--text-sm)}
+    th,td{border:1px solid var(--color-border);padding:var(--space-3) var(--space-4);text-align:left;vertical-align:top;line-height:var(--leading-loose)}
+    th{background:var(--color-bg-alt);font-weight:var(--weight-semibold);color:var(--color-text)}
+    td code{font-family:var(--font-mono);color:var(--color-accent);font-size:0.85em;background:var(--color-accent-soft);border-color:transparent}
+    .pull-quote{border-left:4px solid var(--color-accent);background:var(--color-accent-soft);padding:var(--space-5) var(--space-6);border-radius:0 var(--radius-lg) var(--radius-lg) 0;color:#5b2b18;margin:var(--space-6) 0;font-weight:var(--weight-medium);font-size:var(--text-lg);line-height:var(--leading-loose)}
+    .step-list{counter-reset:step;list-style:none;padding:0;margin:var(--space-6) 0}
+    .step-list li{position:relative;padding:var(--space-4) var(--space-4) var(--space-4) calc(var(--space-12) + var(--space-2));margin-bottom:var(--space-3);background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-md)}
+    .step-list li::before{counter-increment:step;content:counter(step);position:absolute;left:var(--space-4);top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:var(--radius-full);background:var(--color-green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:var(--weight-bold);font-size:var(--text-sm)}
+    .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin:var(--space-6) 0}
+    .compare-card{border-radius:var(--radius-lg);padding:var(--space-5);border:1px solid}
+    .compare-card.bad{background:var(--color-red-soft);border-color:#e8c0bc}
+    .compare-card.good{background:var(--color-green-soft);border-color:#bcd8c4}
+    .compare-card h4{font-size:var(--text-base);margin-bottom:var(--space-3);display:flex;align-items:center;gap:var(--space-2)}
+    .compare-card.bad h4{color:var(--color-red)}
+    .compare-card.good h4{color:var(--color-green)}
+    .compare-card p{font-size:var(--text-sm);margin-bottom:0;color:var(--color-text-muted)}
+    .compare-card code{background:rgba(255,255,255,.6)}
+    .footer{text-align:center;color:var(--color-text-faint);font-size:var(--text-sm);margin-top:var(--space-8);padding-top:var(--space-6);border-top:1px solid var(--color-border)}
+    @media(max-width:640px){
+      main{padding:var(--space-8) var(--space-4)}
+      h1{font-size:1.75rem}
+      .hero{padding:var(--space-8) var(--space-4)}
+      .overview-grid{grid-template-columns:1fr 1fr}
+      .compare-grid{grid-template-columns:1fr}
+    }
+  </style>
+  <style id="mobile-font-scale">
+  @media(max-width:700px){
+    :root{
+      --text-sm:1rem; --text-base:1.15rem; --text-lg:1.35rem;
+      --text-xl:1.55rem; --text-2xl:1.85rem; --text-3xl:2.25rem;
+    }
+  }
+  </style>
+</head>
+<body>
+
+<div id="read-progress" aria-hidden="true"></div>
+
+<nav class="site-nav" aria-label="사이트 내비게이션">
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">← Vibe</a>
+    <ul class="nav-links">
+      <li><a href="#why">왜 만료</a></li>
+      <li><a href="#base">코드=문서ID</a></li>
+      <li><a href="#store">만료 저장</a></li>
+      <li><a href="#flow">입장 흐름</a></li>
+      <li><a href="#where">검증 위치</a></li>
+      <li><a href="#reissue">재발급</a></li>
+      <li><a href="#member">멤버십 분리</a></li>
+      <li><a href="#rules">보안 규칙</a></li>
+      <li><a href="#summary">요약</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow"><span class="eyebrow-dot"></span>Firestore 보안 설계</div>
+    <h1>입장 코드를<br><span class="hl">2주 후에 만료시키기</span></h1>
+    <p class="hero-lead">교실 Q&amp;A 앱에서 학생이 학급에 들어올 때 쓰는 입장 코드. 한 번 만들면 영원히 유효하다면, 유출된 코드로 1년 뒤에도 낯선 사람이 들어올 수 있습니다. 코드에 <strong>수명(2주)</strong>을 주되, 이미 들어온 학생은 건드리지 않는 설계를 다이어그램으로 풀어봅니다.</p>
+    <div class="hero-meta">
+      <span class="hero-tag">Firestore</span>
+      <span class="hero-tag">보안 규칙</span>
+      <span class="hero-tag">Cloud Functions</span>
+      <span class="hero-tag">defense-in-depth</span>
+      <span class="hero-tag">2026-06-25</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <div class="summary">
+    <div class="summary-label">핵심 요약</div>
+    <p><strong>입장 코드는 입장권, 멤버십은 정기권</strong>입니다. 코드를 <strong>문서 ID</strong>로 두면 아는 사람만 콕 집어 읽고(<code>get</code>) 긁어모으기(<code>list</code>)는 막힙니다. 여기에 <strong><code>expiresAt</code></strong> 필드로 2주짜리 수명을 주면, 유출된 코드도 시간이 지나면 스스로 무력화됩니다. 단, 만료는 <strong>신규 입장만</strong> 막아야 합니다. 이미 들어온 학생의 소속은 <strong><code>uid</code> 기준 멤버십</strong>으로 따로 저장해, 코드가 만료돼도 기기를 바꿔도 그대로 유지됩니다. 그리고 활동 중 잠기는 사고를 막기 위해 <strong>관리자 원클릭 재발급</strong>을 함께 둡니다.</p>
+  </div>
+
+  <!-- 1 -->
+  <section id="why">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>왜 입장 코드에 수명을 줘야 하나</h2>
+        <p>입장 코드는 본질적으로 "아는 사람은 쓸 수 있는 비밀 값"입니다. 그런데 비밀은 시간이 지날수록 샙니다. 칠판에 적혔다 사진 찍히고, 단톡방에 공유되고, 졸업한 형이 후배에게 알려줍니다.</p>
+      </div>
+    </div>
+
+    <p>코드가 <strong>영구히 유효</strong>하면, 한 번이라도 유출된 코드는 영원히 위험합니다. 작년에 찍힌 칠판 사진 한 장으로 모르는 사람이 올해 우리 반에 들어올 수 있습니다. 해결의 핵심은 코드에 <strong>유효기간</strong>을 줘서, 설령 유출되더라도 시간이 지나면 <strong>스스로 무력화</strong>되게 만드는 것입니다.</p>
+
+    <div class="callout analogy">
+      <div class="callout-icon">🎟️</div>
+      <div class="callout-body">
+        <div class="callout-label">비유 — 입장권과 정기권</div>
+        <p>입장 코드는 놀이공원 <strong>당일 입장권</strong>입니다. 들어올 때 한 번 쓰고 나면 역할이 끝납니다. 반면 한 번 들어온 학생의 소속은 <strong>회원 정기권</strong>입니다. 입장권 유효기간이 지나도, 이미 회원이 된 사람은 계속 회원입니다. 이 둘을 섞으면 "입장권 만료 = 회원 추방"이라는 사고가 납니다. <strong>분리하는 것이 설계의 핵심</strong>입니다.</p>
+      </div>
+    </div>
+
+    <p>이것이 보안에서 말하는 <strong>다층 방어(defense-in-depth)</strong>입니다. 코드를 문서 ID로 숨기는 1차 방어에 더해, 시간 제한이라는 2차 방어를 겹쳐 둡니다. 한 겹이 뚫려도 다음 겹이 막습니다.</p>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 800 230" role="img" aria-label="영구 코드와 2주 만료 코드의 위험 노출 비교">
+        <text x="400" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1a18">유출된 코드의 위험 노출 기간</text>
+        <!-- 영구 코드 -->
+        <text x="20" y="78" font-size="14" font-weight="600" fill="#a8322a">영구 코드</text>
+        <rect x="120" y="62" width="640" height="26" rx="6" fill="#fbe8e6" stroke="#e8c0bc"/>
+        <rect x="120" y="62" width="640" height="26" rx="6" fill="#a8322a" opacity="0.55"/>
+        <text x="440" y="80" text-anchor="middle" font-size="12" fill="#fff" font-weight="600">유출 시점부터 끝까지 계속 위험 ▶▶▶</text>
+        <!-- 만료 코드 -->
+        <text x="20" y="150" font-size="14" font-weight="600" fill="#3a6b4a">2주 만료 코드</text>
+        <rect x="120" y="134" width="640" height="26" rx="6" fill="#e6f0e9" stroke="#bcd8c4"/>
+        <rect x="120" y="134" width="120" height="26" rx="6" fill="#8a6a00" opacity="0.55"/>
+        <rect x="240" y="134" width="520" height="26" rx="6" fill="#3a6b4a" opacity="0.18"/>
+        <text x="180" y="152" text-anchor="middle" font-size="11" fill="#fff" font-weight="600">위험 14일</text>
+        <text x="500" y="152" text-anchor="middle" font-size="12" fill="#244730" font-weight="600">만료 후 자동 안전 ✓</text>
+        <line x1="240" y1="128" x2="240" y2="168" stroke="#3a6b4a" stroke-width="2" stroke-dasharray="3 3"/>
+        <text x="240" y="186" text-anchor="middle" font-size="11" fill="#3a6b4a">expiresAt</text>
+        <!-- 시간축 -->
+        <text x="120" y="214" font-size="11" fill="#a09f97">코드 생성/유출</text>
+        <text x="760" y="214" text-anchor="end" font-size="11" fill="#a09f97">시간 →</text>
+      </svg>
+      <p class="diagram-caption">영구 코드는 유출 즉시 영구 위험. 2주 만료 코드는 노출 창을 14일로 잘라낸다.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section id="base">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>출발점: 코드를 "문서 ID"로 둔다</h2>
+        <p>만료를 붙이기 전에, 코드 저장 방식부터 바로잡아야 합니다. 코드를 문서의 <strong>필드</strong>에 두면 만료를 붙여도 새는 구멍이 남습니다.</p>
+      </div>
+    </div>
+
+    <p>읽기에는 두 종류가 있습니다. <strong><code>get</code></strong>은 문서 ID를 정확히 알아야 그 문서 하나만 읽고(사물함 번호를 알아야 그 칸만 엶), <strong><code>list</code></strong>는 컬렉션을 쭉 훑어 가져옵니다(사물함 전체를 다 엶). 보안 규칙에서 이 둘을 <strong>따로 허용</strong>할 수 있다는 점이 설계의 지렛대입니다.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card bad">
+        <h4>✗ 코드를 필드에 두면</h4>
+        <p><code>classes/xJ3k9 { joinCode:"ABCDEF" }</code><br><br>ID는 의미 없는 자동 번호라, 코드로 찾으려면 <strong>전체 훑기(list)</strong>가 필요합니다. 훑는 김에 <strong>다른 반 코드까지 다 보입니다.</strong> "로그인하면 읽기 허용" 규칙이면 누구나 모든 코드를 긁어모을 수 있습니다.</p>
+      </div>
+      <div class="compare-card good">
+        <h4>✓ 코드를 문서 ID로 두면</h4>
+        <p><code>joinCodes/ABCDEF { classId:"xJ3k9" }</code><br><br>코드를 아는 사람만 <code>get("ABCDEF")</code>로 그 문서 하나에 도달합니다. <strong>get은 누구나 허용, list는 교사만 허용</strong>으로 나누면, 모르는 사람은 다른 코드를 알아낼 길이 없습니다.</p>
+      </div>
+    </div>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 800 300" role="img" aria-label="get과 list 분리 다이어그램">
+        <text x="400" y="26" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1a18">joinCodes 컬렉션 — get과 list를 분리해 허용</text>
+
+        <!-- 컬렉션 박스 -->
+        <rect x="300" y="55" width="200" height="150" rx="10" fill="#f5f2ed" stroke="#dedad2"/>
+        <text x="400" y="78" text-anchor="middle" font-size="13" font-weight="700" fill="#6b6a63">joinCodes</text>
+        <rect x="320" y="92" width="160" height="32" rx="6" fill="#fff" stroke="#dedad2"/>
+        <text x="400" y="113" text-anchor="middle" font-size="13" font-family="monospace" fill="#1a1a18">ABCDEF → xJ3k9</text>
+        <rect x="320" y="132" width="160" height="32" rx="6" fill="#fff" stroke="#dedad2"/>
+        <text x="400" y="153" text-anchor="middle" font-size="13" font-family="monospace" fill="#1a1a18">QWERTY → p8m2k</text>
+        <rect x="320" y="172" width="160" height="24" rx="6" fill="#fff" stroke="#dedad2"/>
+        <text x="400" y="189" text-anchor="middle" font-size="12" font-family="monospace" fill="#a09f97">… (반마다 1개)</text>
+
+        <!-- 학생 get -->
+        <rect x="40" y="95" width="180" height="70" rx="10" fill="#e6f0e9" stroke="#bcd8c4"/>
+        <text x="130" y="120" text-anchor="middle" font-size="14" font-weight="700" fill="#3a6b4a">학생</text>
+        <text x="130" y="142" text-anchor="middle" font-size="12" font-family="monospace" fill="#244730">get("ABCDEF")</text>
+        <text x="130" y="158" text-anchor="middle" font-size="11" fill="#3a6b4a">코드를 아는 한 명</text>
+        <path d="M220 130 L296 130" stroke="#3a6b4a" stroke-width="2.5" fill="none" marker-end="url(#arrowG)"/>
+        <text x="258" y="122" text-anchor="middle" font-size="11" font-weight="700" fill="#3a6b4a">✓ 1개만</text>
+
+        <!-- 침입자 list -->
+        <rect x="40" y="200" width="180" height="70" rx="10" fill="#fbe8e6" stroke="#e8c0bc"/>
+        <text x="130" y="225" text-anchor="middle" font-size="14" font-weight="700" fill="#a8322a">침입자</text>
+        <text x="130" y="247" text-anchor="middle" font-size="12" font-family="monospace" fill="#5c1f1a">list(joinCodes)</text>
+        <text x="130" y="263" text-anchor="middle" font-size="11" fill="#a8322a">전체 긁어모으기 시도</text>
+        <path d="M220 235 L300 200" stroke="#a8322a" stroke-width="2.5" fill="none" stroke-dasharray="5 4" marker-end="url(#arrowR)"/>
+        <text x="262" y="262" text-anchor="middle" font-size="11" font-weight="700" fill="#a8322a">✗ 규칙이 차단</text>
+
+        <!-- 교사 list -->
+        <rect x="560" y="95" width="200" height="70" rx="10" fill="#e5eef7" stroke="#c0d4eb"/>
+        <text x="660" y="120" text-anchor="middle" font-size="14" font-weight="700" fill="#2d5a8e">교사(관리자)</text>
+        <text x="660" y="142" text-anchor="middle" font-size="12" font-family="monospace" fill="#1e3a5f">list(joinCodes)</text>
+        <text x="660" y="158" text-anchor="middle" font-size="11" fill="#2d5a8e">관리만 — 허용</text>
+        <path d="M500 130 L556 130" stroke="#2d5a8e" stroke-width="2.5" fill="none" marker-end="url(#arrowB)"/>
+        <text x="528" y="122" text-anchor="middle" font-size="11" font-weight="700" fill="#2d5a8e">✓</text>
+
+        <defs>
+          <marker id="arrowG" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#3a6b4a"/></marker>
+          <marker id="arrowR" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#a8322a"/></marker>
+          <marker id="arrowB" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#2d5a8e"/></marker>
+        </defs>
+      </svg>
+      <p class="diagram-caption">코드 = 문서 ID. get은 콕 집어 읽기(누구나), list는 전체 훑기(교사만). 침입자의 긁어모으기가 막힌다.</p>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">🔑</div>
+      <div class="callout-body">
+        <div class="callout-label">한 줄 정리</div>
+        <p>비밀 값을 <strong>필드</strong>에 두면 찾으려다 다 새고, <strong>문서 ID</strong>로 두면 아는 사람만 콕 집어 읽고(get) 훑기(list)는 관리자만 → 우회 차단. 만료는 이 토대 <strong>위에</strong> 얹습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section id="store">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>만료 시각을 어떻게 저장하나</h2>
+        <p>"2주 후 만료"를 데이터로 표현하는 방법은 두 가지입니다. 둘 중 <strong>만료 시각 자체를 저장</strong>하는 쪽이 검증이 단순합니다.</p>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>방식</th><th>저장 형태</th><th>만료 판정</th><th>평가</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>A. 생성시각 + 기간</strong></td>
+            <td><code>createdAt</code>만 저장</td>
+            <td>읽을 때마다 <code>createdAt + 14일 &lt; now</code> 계산</td>
+            <td>기간을 바꾸면 과거 코드까지 소급 적용됨 (장점이자 함정)</td>
+          </tr>
+          <tr>
+            <td><strong>B. 만료시각 직접 저장</strong> ✓</td>
+            <td><code>expiresAt</code> 저장</td>
+            <td><code>expiresAt &lt; now</code> 한 번 비교</td>
+            <td>판정이 단순·명확. 코드마다 수명을 다르게 줄 수도 있음</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>권장은 <strong>B</strong>입니다. 코드를 만들 때 <code>expiresAt = now + 14일</code>을 함께 적어 둡니다. 그러면 "만료됐나?"는 <code>expiresAt &lt; now</code> 단 한 번의 비교로 끝납니다. 보안 규칙 안에서도 쉽게 검사할 수 있습니다(뒤에서).</p>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 800 250" role="img" aria-label="joinCode 문서의 만료 필드 구조">
+        <text x="400" y="26" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1a18">joinCodes/ABCDEF 문서 한 장</text>
+        <rect x="230" y="50" width="340" height="180" rx="12" fill="#fff" stroke="#dedad2" stroke-width="1.5"/>
+        <rect x="230" y="50" width="340" height="34" rx="12" fill="#faeee7"/>
+        <text x="400" y="73" text-anchor="middle" font-size="14" font-weight="700" font-family="monospace" fill="#d95f2b">ABCDEF  ← 문서 ID = 입장 코드</text>
+
+        <line x1="250" y1="100" x2="550" y2="100" stroke="#eceae4"/>
+        <text x="250" y="124" font-size="13" font-family="monospace" fill="#6b6a63">classId:</text>
+        <text x="550" y="124" text-anchor="end" font-size="13" font-family="monospace" fill="#1a1a18">"xJ3k9"</text>
+
+        <line x1="250" y1="140" x2="550" y2="140" stroke="#eceae4"/>
+        <text x="250" y="164" font-size="13" font-family="monospace" fill="#6b6a63">createdAt:</text>
+        <text x="550" y="164" text-anchor="end" font-size="13" font-family="monospace" fill="#1a1a18">2026-06-25 09:00</text>
+
+        <line x1="250" y1="180" x2="550" y2="180" stroke="#eceae4"/>
+        <rect x="240" y="186" width="320" height="34" rx="6" fill="#e6f0e9"/>
+        <text x="250" y="208" font-size="13" font-family="monospace" font-weight="700" fill="#3a6b4a">expiresAt:</text>
+        <text x="550" y="208" text-anchor="end" font-size="13" font-family="monospace" font-weight="700" fill="#244730">2026-07-09 09:00</text>
+
+        <!-- +14일 표시 -->
+        <path d="M165 157 Q150 187 165 207" stroke="#3a6b4a" stroke-width="2" fill="none" marker-end="url(#a14)"/>
+        <text x="120" y="187" text-anchor="middle" font-size="13" font-weight="700" fill="#3a6b4a">+14일</text>
+        <text x="640" y="157" font-size="11" fill="#a09f97">생성 시각</text>
+        <text x="640" y="208" font-size="11" fill="#3a6b4a" font-weight="600">만료 시각</text>
+        <defs><marker id="a14" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#3a6b4a"/></marker></defs>
+      </svg>
+      <p class="diagram-caption">코드를 만들 때 expiresAt = createdAt + 14일을 함께 박아 둔다. 판정은 expiresAt &lt; now 한 번.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-head"><span class="code-lang">javascript — 코드 생성 (서버/Cloud Function 권장)</span><button class="copy-btn">Copy</button></div>
+<pre><code><span class="tok-comment">// 14일을 밀리초로: 14 * 24 * 60 * 60 * 1000</span>
+<span class="tok-keyword">const</span> TWO_WEEKS = <span class="tok-num">14</span> * <span class="tok-num">24</span> * <span class="tok-num">60</span> * <span class="tok-num">60</span> * <span class="tok-num">1000</span>;
+
+<span class="tok-keyword">const</span> now = Timestamp.<span class="tok-fn">now</span>();
+<span class="tok-keyword">const</span> expiresAt = Timestamp.<span class="tok-fn">fromMillis</span>(now.<span class="tok-fn">toMillis</span>() + TWO_WEEKS);
+
+<span class="tok-keyword">await</span> <span class="tok-fn">setDoc</span>(<span class="tok-fn">doc</span>(db, <span class="tok-string">"joinCodes"</span>, code), {
+  classId,
+  createdAt: now,
+  expiresAt,                <span class="tok-comment">// ← 만료 시각을 직접 저장</span>
+  createdBy: teacherUid,
+});</code></pre>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section id="flow">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>입장 흐름: 코드 한 줄로 끝나지 않는다</h2>
+        <p>학생이 코드를 입력하면 내부에서는 세 단계가 순서대로 일어납니다. 코드 <strong>존재</strong> → <strong>만료</strong> → <strong>멤버십 생성</strong>. 어느 한 단계라도 실패하면 입장이 막힙니다.</p>
+      </div>
+    </div>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 800 430" role="img" aria-label="입장 코드 검증 시퀀스 다이어그램">
+        <text x="400" y="26" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1a18">입장 코드 검증 시퀀스</text>
+
+        <!-- 라이프라인 헤더 -->
+        <rect x="40" y="46" width="150" height="38" rx="8" fill="#e6f0e9" stroke="#bcd8c4"/>
+        <text x="115" y="70" text-anchor="middle" font-size="13" font-weight="700" fill="#3a6b4a">학생 앱</text>
+        <rect x="325" y="46" width="150" height="38" rx="8" fill="#fdf5d9" stroke="#e8d8a0"/>
+        <text x="400" y="70" text-anchor="middle" font-size="13" font-weight="700" fill="#8a6a00">검증 로직</text>
+        <rect x="610" y="46" width="150" height="38" rx="8" fill="#e5eef7" stroke="#c0d4eb"/>
+        <text x="685" y="70" text-anchor="middle" font-size="13" font-weight="700" fill="#2d5a8e">Firestore</text>
+
+        <!-- 라이프라인 -->
+        <line x1="115" y1="84" x2="115" y2="410" stroke="#cfcdc4" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <line x1="400" y1="84" x2="400" y2="410" stroke="#cfcdc4" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <line x1="685" y1="84" x2="685" y2="410" stroke="#cfcdc4" stroke-width="1.5" stroke-dasharray="4 4"/>
+
+        <!-- 1. 코드 입력 -->
+        <path d="M115 110 L398 110" stroke="#3a6b4a" stroke-width="2" marker-end="url(#fa)"/>
+        <text x="256" y="103" text-anchor="middle" font-size="12" fill="#244730">① 코드 "ABCDEF" 입력</text>
+
+        <!-- 2. get -->
+        <path d="M400 140 L683 140" stroke="#2d5a8e" stroke-width="2" marker-end="url(#fb)"/>
+        <text x="542" y="133" text-anchor="middle" font-size="12" font-family="monospace" fill="#1e3a5f">② get(joinCodes/ABCDEF)</text>
+        <path d="M685 170 L402 170" stroke="#2d5a8e" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#fb)"/>
+        <text x="542" y="163" text-anchor="middle" font-size="12" fill="#2d5a8e">문서 반환 {classId, expiresAt}</text>
+
+        <!-- 존재 판정 -->
+        <rect x="320" y="186" width="160" height="30" rx="6" fill="#fff" stroke="#e8d8a0"/>
+        <text x="400" y="206" text-anchor="middle" font-size="11.5" fill="#8a6a00">존재하나? 없으면 ✗ 잘못된 코드</text>
+
+        <!-- 3. 만료 판정 -->
+        <rect x="300" y="232" width="200" height="44" rx="8" fill="#fdf5d9" stroke="#e8d8a0"/>
+        <text x="400" y="252" text-anchor="middle" font-size="12" font-weight="700" fill="#8a6a00">③ expiresAt &lt; now ?</text>
+        <text x="400" y="269" text-anchor="middle" font-size="11" fill="#8a6a00">지났으면 ✗ 만료된 코드</text>
+
+        <!-- 4. 멤버십 생성 -->
+        <path d="M400 300 L683 300" stroke="#d95f2b" stroke-width="2" marker-end="url(#fc)"/>
+        <text x="542" y="293" text-anchor="middle" font-size="12" font-family="monospace" fill="#9a4520">④ set(memberships/{uid}_{classId})</text>
+        <path d="M685 330 L402 330" stroke="#d95f2b" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#fc)"/>
+        <text x="542" y="323" text-anchor="middle" font-size="12" fill="#d95f2b">소속 기록 완료</text>
+
+        <!-- 5. 입장 완료 -->
+        <path d="M398 360 L117 360" stroke="#3a6b4a" stroke-width="2.5" marker-end="url(#fa)"/>
+        <text x="256" y="353" text-anchor="middle" font-size="12" font-weight="700" fill="#3a6b4a">⑤ 입장 완료 ✓</text>
+
+        <rect x="40" y="385" width="720" height="22" rx="6" fill="#e6f0e9" opacity="0.5"/>
+        <text x="400" y="400" text-anchor="middle" font-size="11.5" fill="#244730">존재 ✓ + 만료 안 됨 ✓ → 그때만 멤버십을 만든다</text>
+
+        <defs>
+          <marker id="fa" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#3a6b4a"/></marker>
+          <marker id="fb" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#2d5a8e"/></marker>
+          <marker id="fc" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#d95f2b"/></marker>
+        </defs>
+      </svg>
+      <p class="diagram-caption">코드 입력 → get으로 존재 확인 → expiresAt 만료 확인 → 통과하면 멤버십 생성 → 입장.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-head"><span class="code-lang">javascript — 입장 검증의 뼈대</span><button class="copy-btn">Copy</button></div>
+<pre><code><span class="tok-keyword">async function</span> <span class="tok-fn">joinClass</span>(code, uid) {
+  <span class="tok-keyword">const</span> snap = <span class="tok-keyword">await</span> <span class="tok-fn">getDoc</span>(<span class="tok-fn">doc</span>(db, <span class="tok-string">"joinCodes"</span>, code));
+
+  <span class="tok-comment">// ② 존재 확인</span>
+  <span class="tok-keyword">if</span> (!snap.<span class="tok-fn">exists</span>()) <span class="tok-keyword">throw new</span> <span class="tok-fn">Error</span>(<span class="tok-string">"잘못된 코드입니다"</span>);
+
+  <span class="tok-comment">// ③ 만료 확인 — expiresAt 과 현재 시각 비교</span>
+  <span class="tok-keyword">const</span> { classId, expiresAt } = snap.<span class="tok-fn">data</span>();
+  <span class="tok-keyword">if</span> (expiresAt.<span class="tok-fn">toMillis</span>() &lt; Date.<span class="tok-fn">now</span>()) {
+    <span class="tok-keyword">throw new</span> <span class="tok-fn">Error</span>(<span class="tok-string">"만료된 코드입니다. 선생님께 새 코드를 받으세요"</span>);
+  }
+
+  <span class="tok-comment">// ④ 멤버십 생성 — uid 기준으로 소속을 기록</span>
+  <span class="tok-keyword">await</span> <span class="tok-fn">setDoc</span>(<span class="tok-fn">doc</span>(db, <span class="tok-string">"memberships"</span>, <span class="tok-string">`</span>${uid}_${classId}<span class="tok-string">`</span>), {
+    uid, classId, joinedAt: <span class="tok-fn">serverTimestamp</span>(),
+  });
+}</code></pre>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <div class="callout-label">주의 — 이 코드는 "뼈대"일 뿐</div>
+        <p>위는 클라이언트에서 검증하는 단순 버전입니다. 작정한 사용자는 앱 화면을 우회해 <code>memberships</code>에 직접 쓸 수 있습니다. 진짜 안전하게 하려면 검증을 <strong>어디서</strong> 하느냐가 중요합니다 — 다음 섹션.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="where">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <h2>검증을 "어디서" 하나 — 3개의 방어선</h2>
+        <p>같은 만료 검사라도 <strong>어디서</strong> 실행하느냐에 따라 안전 강도가 다릅니다. 클라이언트는 속이기 쉽고, 서버는 속일 수 없습니다.</p>
+      </div>
+    </div>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 800 290" role="img" aria-label="클라이언트 보안규칙 Cloud Function 3계층 방어">
+        <text x="400" y="26" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1a18">검증 위치별 방어 강도</text>
+
+        <!-- 계층 1 -->
+        <rect x="60" y="50" width="680" height="58" rx="10" fill="#e6f0e9" stroke="#bcd8c4"/>
+        <circle cx="98" cy="79" r="18" fill="#3a6b4a"/><text x="98" y="84" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">1</text>
+        <text x="130" y="74" font-size="14" font-weight="700" fill="#244730">클라이언트 (앱 안 JS)</text>
+        <text x="130" y="95" font-size="12" fill="#3a6b4a">UX용 — "만료됐어요" 친절 안내. 하지만 우회 가능 → 보안 아님</text>
+        <text x="720" y="84" text-anchor="end" font-size="12" font-weight="700" fill="#3a6b4a">편의</text>
+
+        <!-- 계층 2 -->
+        <rect x="60" y="118" width="680" height="58" rx="10" fill="#fdf5d9" stroke="#e8d8a0"/>
+        <circle cx="98" cy="147" r="18" fill="#8a6a00"/><text x="98" y="152" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">2</text>
+        <text x="130" y="142" font-size="14" font-weight="700" fill="#5a4500">보안 규칙 (Security Rules)</text>
+        <text x="130" y="163" font-size="12" fill="#8a6a00">서버가 강제. get/list 분리, 본인 uid만 쓰기 등 — 직접 조회도 차단</text>
+        <text x="720" y="152" text-anchor="end" font-size="12" font-weight="700" fill="#8a6a00">강제</text>
+
+        <!-- 계층 3 -->
+        <rect x="60" y="186" width="680" height="58" rx="10" fill="#e5eef7" stroke="#c0d4eb"/>
+        <circle cx="98" cy="215" r="18" fill="#2d5a8e"/><text x="98" y="220" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">3</text>
+        <text x="130" y="210" font-size="14" font-weight="700" fill="#1e3a5f">Cloud Function (서버 함수)</text>
+        <text x="130" y="231" font-size="12" fill="#2d5a8e">서버가 코드 검증 후에만 멤버십 생성. 클라 직접 쓰기 불가 → 우회 불가</text>
+        <text x="720" y="220" text-anchor="end" font-size="12" font-weight="700" fill="#2d5a8e">최강</text>
+
+        <text x="400" y="270" text-anchor="middle" font-size="12" fill="#6b6a63">아래로 갈수록 안전. 보통 1+2로 충분하고, 민감하면 3을 더한다 (다층 방어)</text>
+      </svg>
+      <p class="diagram-caption">클라이언트는 친절한 안내, 보안 규칙은 강제, Cloud Function은 우회 불가. 겹쳐 쌓는다.</p>
+    </div>
+
+    <div class="overview-grid">
+      <div class="ov-card c-3">
+        <div class="ov-icon">🙂</div>
+        <div class="ov-name">간단 버전</div>
+        <p class="ov-desc">"본인 것만 생성(uid 일치)" 규칙 + 코드·만료 검증은 앱에서. 일반 사용엔 충분, 작정하면 우회 가능.</p>
+      </div>
+      <div class="ov-card c-2">
+        <div class="ov-icon">🛡️</div>
+        <div class="ov-name">튼튼한 버전</div>
+        <p class="ov-desc">입장을 <strong>Cloud Function</strong>으로 처리. 서버가 만료·코드 검증 후에만 멤버십 생성, 클라이언트 직접 쓰기 불가 → 우회 불가.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section id="reissue">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div>
+        <h2>만료만 두면 생기는 사고 — 재발급을 함께</h2>
+        <p>"무조건 자동 만료"만 두면, 정당한 사용자가 활동 중에 잠길 수 있습니다. 그래서 <strong>만료 + 관리자용 원클릭 재발급</strong>을 한 쌍으로 둡니다.</p>
+      </div>
+    </div>
+
+    <p>예를 들어 전학 온 학생이 2주가 막 지난 코드를 받았거나, 교사가 깜빡하고 코드를 갱신하지 않았다면, 새 학생이 들어올 길이 막힙니다. 보안(자동 만료)은 유지하면서 이 잠김을 즉시 푸는 장치가 <strong>재발급</strong>입니다.</p>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 800 290" role="img" aria-label="코드 만료와 재발급 순환">
+        <text x="400" y="26" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1a18">만료 + 재발급의 순환</text>
+
+        <!-- 생성 -->
+        <rect x="60" y="70" width="170" height="64" rx="10" fill="#e6f0e9" stroke="#bcd8c4"/>
+        <text x="145" y="98" text-anchor="middle" font-size="13" font-weight="700" fill="#244730">코드 발급</text>
+        <text x="145" y="118" text-anchor="middle" font-size="11.5" fill="#3a6b4a">expiresAt = now+14d</text>
+
+        <!-- 유효 -->
+        <rect x="315" y="70" width="170" height="64" rx="10" fill="#e5eef7" stroke="#c0d4eb"/>
+        <text x="400" y="98" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a5f">유효 기간</text>
+        <text x="400" y="118" text-anchor="middle" font-size="11.5" fill="#2d5a8e">학생들 입장 가능</text>
+
+        <!-- 만료 -->
+        <rect x="570" y="70" width="170" height="64" rx="10" fill="#fbe8e6" stroke="#e8c0bc"/>
+        <text x="655" y="98" text-anchor="middle" font-size="13" font-weight="700" fill="#5c1f1a">만료</text>
+        <text x="655" y="118" text-anchor="middle" font-size="11.5" fill="#a8322a">신규 입장 차단</text>
+
+        <path d="M230 102 L312 102" stroke="#6b6a63" stroke-width="2" marker-end="url(#ra)"/>
+        <path d="M485 102 L567 102" stroke="#6b6a63" stroke-width="2" marker-end="url(#ra)"/>
+
+        <!-- 재발급 분기 -->
+        <rect x="300" y="200" width="200" height="58" rx="10" fill="#fdf5d9" stroke="#e8d8a0"/>
+        <text x="400" y="225" text-anchor="middle" font-size="13" font-weight="700" fill="#5a4500">교사: 원클릭 재발급</text>
+        <text x="400" y="244" text-anchor="middle" font-size="11.5" fill="#8a6a00">새 코드 + 새 expiresAt</text>
+
+        <path d="M655 134 Q655 230 502 230" stroke="#d95f2b" stroke-width="2" fill="none" marker-end="url(#rc)"/>
+        <text x="600" y="190" text-anchor="middle" font-size="11.5" fill="#d95f2b">잠기면</text>
+        <path d="M300 224 Q145 224 145 138" stroke="#3a6b4a" stroke-width="2" fill="none" stroke-dasharray="5 4" marker-end="url(#rb)"/>
+        <text x="195" y="190" text-anchor="middle" font-size="11.5" fill="#3a6b4a">새 14일 시작</text>
+
+        <text x="400" y="284" text-anchor="middle" font-size="12" fill="#6b6a63">자동 만료로 보안 유지 · 재발급으로 잠김 즉시 복구</text>
+        <defs>
+          <marker id="ra" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#6b6a63"/></marker>
+          <marker id="rb" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#3a6b4a"/></marker>
+          <marker id="rc" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#d95f2b"/></marker>
+        </defs>
+      </svg>
+      <p class="diagram-caption">발급 → 유효 → 만료의 순환에, 교사가 언제든 끼어들어 재발급할 수 있는 경로를 더한다.</p>
+    </div>
+
+    <div class="callout green">
+      <div class="callout-icon">🔁</div>
+      <div class="callout-body">
+        <div class="callout-label">재발급의 두 가지 방법</div>
+        <p><strong>(가) expiresAt만 연장</strong> — 같은 코드의 만료 시각을 now+14d로 갱신. 간단하지만 유출된 코드가 그대로 살아납니다. <strong>(나) 코드 교체</strong> — 옛 문서를 지우고 새 코드 문서를 발급. 유출된 옛 코드를 무력화하므로 <strong>보안상 더 권장</strong>됩니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section id="member">
+    <div class="section-header">
+      <div class="section-num">7</div>
+      <div>
+        <h2>가장 중요한 분리 — 코드 만료 ≠ 학생 추방</h2>
+        <p>여기서 실수하면 "코드가 만료됐더니 멀쩡히 활동하던 학생들이 다 튕겨 나갔다"는 사고가 납니다. 코드와 멤버십은 <strong>완전히 다른 데이터</strong>입니다.</p>
+      </div>
+    </div>
+
+    <p>입장 코드는 <strong>처음 들어올 때의 입장권</strong>이고, 멤버십은 <strong>한 번 들어오면 유지되는 소속 기록</strong>입니다. 코드 만료는 <strong>신규 입장만</strong> 막고, 기존 멤버는 건드리지 않습니다. 둘을 다른 컬렉션으로 저장하기 때문에 자연스럽게 분리됩니다.</p>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 800 320" role="img" aria-label="입장 코드와 멤버십의 분리">
+        <text x="400" y="26" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1a18">입장권(코드) vs 정기권(멤버십)</text>
+
+        <!-- 코드 영역 -->
+        <rect x="40" y="50" width="340" height="240" rx="12" fill="#fbe8e6" opacity="0.4"/>
+        <text x="210" y="76" text-anchor="middle" font-size="14" font-weight="700" fill="#a8322a">joinCodes — 입장권 (수명 14일)</text>
+        <rect x="70" y="92" width="280" height="50" rx="8" fill="#fff" stroke="#e8c0bc"/>
+        <text x="210" y="112" text-anchor="middle" font-size="12.5" font-family="monospace" fill="#5c1f1a">ABCDEF { expiresAt: 7/9 }</text>
+        <text x="210" y="130" text-anchor="middle" font-size="11" fill="#a8322a">14일 지나면 만료 ✗</text>
+
+        <rect x="70" y="160" width="280" height="110" rx="8" fill="#fff" stroke="#e8c0bc"/>
+        <text x="210" y="184" text-anchor="middle" font-size="12" fill="#6b6a63">만료되면…</text>
+        <text x="210" y="210" text-anchor="middle" font-size="13" font-weight="700" fill="#a8322a">신규 학생 입장 ✗ 차단</text>
+        <line x1="100" y1="228" x2="320" y2="228" stroke="#eceae4"/>
+        <text x="210" y="252" text-anchor="middle" font-size="13" font-weight="700" fill="#3a6b4a">기존 학생 → 영향 없음 ✓</text>
+
+        <!-- 멤버십 영역 -->
+        <rect x="420" y="50" width="340" height="240" rx="12" fill="#e6f0e9" opacity="0.4"/>
+        <text x="590" y="76" text-anchor="middle" font-size="14" font-weight="700" fill="#3a6b4a">memberships — 정기권 (영구)</text>
+        <rect x="450" y="92" width="280" height="50" rx="8" fill="#fff" stroke="#bcd8c4"/>
+        <text x="590" y="112" text-anchor="middle" font-size="11.5" font-family="monospace" fill="#244730">{uid}_{classId} { joinedAt }</text>
+        <text x="590" y="130" text-anchor="middle" font-size="11" fill="#3a6b4a">문서 ID에 uid 포함</text>
+
+        <rect x="450" y="160" width="280" height="110" rx="8" fill="#fff" stroke="#bcd8c4"/>
+        <text x="590" y="186" text-anchor="middle" font-size="12" fill="#6b6a63">앱 열 때마다…</text>
+        <text x="590" y="212" text-anchor="middle" font-size="13" font-weight="700" fill="#3a6b4a">내 uid의 소속을 읽어 표시</text>
+        <line x1="480" y1="230" x2="700" y2="230" stroke="#eceae4"/>
+        <text x="590" y="254" text-anchor="middle" font-size="12.5" fill="#244730">기기 바꿔도 같은 uid → 유지 ✓</text>
+
+        <!-- 분리 표시 -->
+        <line x1="400" y1="60" x2="400" y2="280" stroke="#cfcdc4" stroke-width="2" stroke-dasharray="6 5"/>
+        <circle cx="400" cy="170" r="22" fill="#fff" stroke="#dedad2" stroke-width="1.5"/>
+        <text x="400" y="176" text-anchor="middle" font-size="15" font-weight="700" fill="#6b6a63">≠</text>
+      </svg>
+      <p class="diagram-caption">코드는 입장 순간에만 쓰이고 14일 후 만료. 소속은 uid 기준 멤버십에 별도 저장되어 만료·기기변경과 무관하게 유지.</p>
+    </div>
+
+    <div class="callout analogy">
+      <div class="callout-icon">🪪</div>
+      <div class="callout-body">
+        <div class="callout-label">비유 — 신분증과 책상 위 포스트잇</div>
+        <p><strong>uid</strong>는 어디서든 통하는 <strong>신분증</strong>(계정에 붙음, 기기 바뀌어도 동일). 서버의 멤버십은 중앙 사무실의 <strong>내 서류함</strong>(uid로 찾음). 반면 소속을 브라우저 <code>localStorage</code>에만 두면 그건 <strong>그 컴퓨터 책상의 포스트잇</strong>이라, 기기를 바꾸거나 캐시를 지우면 사라집니다. "기기를 넘어 유지"가 필요한 순간 서버에 uid로 옮겨야 합니다.</p>
+      </div>
+    </div>
+
+    <div class="callout err">
+      <div class="callout-icon">🚫</div>
+      <div class="callout-body">
+        <div class="callout-label">흔한 함정</div>
+        <p>소속 상태를 <code>localStorage</code>에만 저장하면 그 값은 그 기기·그 브라우저 안에서만 유지됩니다. 처음 구현할 때 간단해서 그렇게 두기 쉽지만, 학생이 학교 컴퓨터에서 집 노트북으로 바꾸는 순간 소속이 사라집니다. 유지돼야 할 상태는 <strong>서버에 uid 기준</strong>으로 저장하세요.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section id="rules">
+    <div class="section-header">
+      <div class="section-num">8</div>
+      <div>
+        <h2>보안 규칙으로 못 박기</h2>
+        <p>지금까지의 설계를 Firestore 보안 규칙으로 옮깁니다. 핵심은 세 가지 — <strong>코드 get/list 분리</strong>, <strong>만료 검사</strong>, <strong>멤버십은 본인 uid만</strong>.</p>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-head"><span class="code-lang">firestore.rules</span><button class="copy-btn">Copy</button></div>
+<pre><code><span class="tok-fn">rules_version</span> = <span class="tok-string">'2'</span>;
+<span class="tok-keyword">service</span> cloud.firestore {
+  <span class="tok-keyword">match</span> /databases/{db}/documents {
+
+    <span class="tok-comment">// 입장 코드: get 은 로그인한 누구나, list 는 교사만</span>
+    <span class="tok-keyword">match</span> /joinCodes/{code} {
+      <span class="tok-keyword">allow</span> get: <span class="tok-keyword">if</span> request.auth != <span class="tok-keyword">null</span>;
+      <span class="tok-keyword">allow</span> list: <span class="tok-keyword">if</span> <span class="tok-fn">isTeacher</span>();
+      <span class="tok-keyword">allow</span> write: <span class="tok-keyword">if</span> <span class="tok-fn">isTeacher</span>();   <span class="tok-comment">// 발급·재발급은 교사만</span>
+    }
+
+    <span class="tok-comment">// 멤버십: 문서 ID 안의 uid 가 본인일 때만 생성</span>
+    <span class="tok-keyword">match</span> /memberships/{mid} {
+      <span class="tok-keyword">allow</span> read: <span class="tok-keyword">if</span> request.auth != <span class="tok-keyword">null</span>
+                  &amp;&amp; resource.data.uid == request.auth.uid;
+      <span class="tok-keyword">allow</span> create: <span class="tok-keyword">if</span> request.auth != <span class="tok-keyword">null</span>
+        &amp;&amp; request.resource.data.uid == request.auth.uid
+        <span class="tok-comment">// ★ 만료 검사: 가리키는 코드가 아직 살아 있어야 함</span>
+        &amp;&amp; <span class="tok-fn">get</span>(/databases/{db}/documents/joinCodes/$(request.resource.data.code))
+             .data.expiresAt &gt; request.time;
+    }
+
+    <span class="tok-keyword">function</span> <span class="tok-fn">isTeacher</span>() {
+      <span class="tok-keyword">return</span> request.auth != <span class="tok-keyword">null</span>
+        &amp;&amp; <span class="tok-fn">get</span>(/databases/{db}/documents/users/$(request.auth.uid))
+             .data.role == <span class="tok-string">"teacher"</span>;
+    }
+  }
+}</code></pre>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">⏱️</div>
+      <div class="callout-body">
+        <div class="callout-label">규칙 안의 시간 — request.time</div>
+        <p>보안 규칙에서 <code>request.time</code>은 <strong>서버가 요청을 받은 시각</strong>입니다. 클라이언트 시계를 조작해도 이 값은 못 바꿉니다. 그래서 <code>expiresAt &gt; request.time</code>으로 만료를 검사하면, 사용자가 기기 시간을 과거로 돌려도 만료된 코드로는 멤버십을 만들 수 없습니다. <strong>만료 판정은 반드시 서버 시간 기준</strong>으로.</p>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-icon">🧩</div>
+      <div class="callout-body">
+        <div class="callout-label">규칙 안 get() 은 비용·복잡도가 있다</div>
+        <p>규칙에서 다른 문서를 <code>get()</code>으로 참조하면 읽기 1회가 더 들고 규칙이 복잡해집니다. 트래픽이 많거나 입장 로직이 더 정교해야 한다면, 멤버십 생성을 <strong>Cloud Function</strong>으로 옮기는 편이 깔끔합니다(섹션 5의 3계층). 함수 안에서 코드 존재·만료를 검사하고, 클라이언트의 <code>memberships</code> 직접 쓰기는 규칙으로 아예 막습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section id="summary">
+    <div class="section-header">
+      <div class="section-num">9</div>
+      <div>
+        <h2>한 장 요약</h2>
+        <p>입장 코드 2주 만료 설계의 전체 그림입니다.</p>
+      </div>
+    </div>
+
+    <ol class="step-list">
+      <li><strong>코드는 문서 ID로.</strong> <code>joinCodes/ABCDEF</code> — get은 누구나, list는 교사만. 긁어모으기 차단.</li>
+      <li><strong>만료는 expiresAt으로.</strong> 발급 때 <code>now + 14일</code>을 박아 두고, 판정은 <code>expiresAt &lt; now</code> 한 번.</li>
+      <li><strong>입장은 3단계.</strong> 코드 존재 → 만료 안 됨 → 그때만 멤버십 생성.</li>
+      <li><strong>검증은 서버에서.</strong> 클라이언트는 안내용, 보안 규칙·Cloud Function이 강제. 만료는 <code>request.time</code> 기준.</li>
+      <li><strong>만료엔 재발급을 한 쌍으로.</strong> 자동 만료로 보안, 원클릭 재발급으로 잠김 복구. 코드 교체 방식이 더 안전.</li>
+      <li><strong>코드 만료 ≠ 학생 추방.</strong> 소속은 <code>memberships/{uid}_{classId}</code>에 별도 저장 → 만료·기기변경과 무관하게 유지.</li>
+    </ol>
+
+    <div class="pull-quote">
+      코드는 14일짜리 입장권, 멤버십은 평생 정기권. 만료는 새 손님만 막고, 이미 들어온 학생은 uid라는 신분증으로 어느 기기에서든 다시 들어온다.
+    </div>
+  </section>
+
+  <div class="footer">
+    교실 Q&amp;A 서비스 예시 · Firestore 보안 설계 시리즈 &nbsp;·&nbsp; 2026-06-25
+  </div>
+
+</main>
+
+<script>
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const code = btn.closest('.code-block').querySelector('code').innerText;
+    const label = btn.textContent;
+    const flash = ok => {
+      btn.textContent = ok ? 'Copied ✓' : 'Failed';
+      btn.disabled = true;
+      setTimeout(() => { btn.textContent = label; btn.disabled = false; }, 1500);
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(code).then(() => flash(true)).catch(fallback);
+    } else { fallback(); }
+    function fallback() {
+      const ta = document.createElement('textarea');
+      ta.value = code; ta.style.cssText = 'position:fixed;opacity:0;';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      try { flash(document.execCommand('copy')); } catch { flash(false); }
+      document.body.removeChild(ta);
+    }
+  });
+});
+
+const bar = document.getElementById('read-progress');
+addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const max = h.scrollHeight - h.clientHeight;
+  bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+}, { passive: true });
+</script>
+
+<a id="back-to-index" href="index.html" aria-label="목록으로 돌아가기" title="목록으로"><svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M8.5 15L3 10l5.5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10h14" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></a>
+<style>
+#back-to-index{position:fixed;bottom:1.5rem;left:1.5rem;width:44px;height:44px;background:#6b6a63;color:#fff;border-radius:9999px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.18);transition:background .15s,transform .15s;z-index:800;}
+#back-to-index:hover{background:#3a6b4a;transform:translateY(-2px)}
+</style>
+
+</body>
+</html>
