@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM은 어떻게 말을 이해하고 만들어 낼까? - 고등학생용 슬라이드</title>
+  <meta name="description" content="고등학생에게 LLM의 학습 원리, 토큰과 벡터, 어텐션, 다음 토큰 예측, 환각, 프롬프트 엔지니어링과 인간의 책임을 설명하는 HTML 발표 슬라이드 덱.">
+  <meta property="og:title" content="LLM은 어떻게 말을 이해하고 만들어 낼까?">
+  <meta property="og:description" content="고등학생 대상 LLM 원리와 책임 있는 AI 사용 수업용 HTML 슬라이드.">
+  <style>
+    :root {
+      --color-bg:#f5f2ed; --color-bg-alt:#eceae4; --color-bg-card:#ffffff;
+      --color-text:#1a1a18; --color-text-muted:#6b6a63; --color-text-faint:#a09f97;
+      --color-border:#dedad2; --color-accent:#d95f2b; --color-accent-hover:#c2521f;
+      --color-accent-soft:#faeee7;
+      --color-green:#3a6b4a; --color-green-soft:#e6f0e9;
+      --color-blue:#2d5a8e; --color-blue-soft:#e5eef7;
+      --color-yellow:#8a6a00; --color-yellow-soft:#fdf5d9;
+      --color-red:#b03a2e; --color-red-soft:#fdecea;
+      --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+      --font-mono:"SF Mono","Fira Code",Consolas,"Liberation Mono",monospace;
+      --text-xs:0.75rem; --text-sm:0.875rem; --text-base:1rem; --text-lg:1.125rem;
+      --text-xl:1.25rem; --text-2xl:1.5rem; --text-3xl:1.875rem;
+      --weight-medium:500; --weight-semibold:600; --weight-bold:700;
+      --leading-tight:1.25; --leading-normal:1.6; --leading-loose:1.8;
+      --space-1:0.25rem; --space-2:0.5rem; --space-3:0.75rem; --space-4:1rem;
+      --space-5:1.25rem; --space-6:1.5rem; --space-8:2rem; --space-12:3rem;
+      --radius-md:8px; --radius-lg:12px; --radius-full:9999px;
+      --shadow-sm:0 1px 3px rgba(0,0,0,0.07); --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{font-size:16px;scroll-behavior:smooth}
+    body{background:var(--color-bg);color:var(--color-text);font-family:var(--font-sans);font-size:var(--text-base);line-height:var(--leading-normal);word-break:keep-all;overflow:hidden}
+    a{color:inherit}
+    #deck{height:100vh;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none}
+    #deck::-webkit-scrollbar{display:none}
+    .slide{min-height:100vh;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;padding:var(--space-12) var(--space-6);position:relative}
+    .slide-inner{width:100%;max-width:900px;margin:0 auto}
+    .title-slide{background:var(--color-text);color:var(--color-bg)}
+    .title-slide .slide-inner{display:grid;grid-template-columns:1fr 320px;gap:var(--space-12);align-items:center}
+    .eyebrow{display:inline-flex;align-items:center;gap:var(--space-2);font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.10em;text-transform:uppercase;color:var(--color-accent);background:rgba(217,95,43,.12);border:1px solid rgba(217,95,43,.28);border-radius:var(--radius-full);padding:var(--space-1) var(--space-4);margin-bottom:var(--space-6)}
+    .eyebrow::before{content:"";width:6px;height:6px;border-radius:var(--radius-full);background:var(--color-accent)}
+    h1{font-size:3.75rem;line-height:var(--leading-tight);letter-spacing:0;font-weight:var(--weight-bold);margin-bottom:var(--space-6)}
+    h2{font-size:3rem;line-height:var(--leading-tight);letter-spacing:0;font-weight:var(--weight-bold);margin-bottom:var(--space-6)}
+    h3{font-size:var(--text-2xl);line-height:var(--leading-tight);font-weight:var(--weight-semibold);margin-bottom:var(--space-4)}
+    p{font-size:var(--text-lg);line-height:var(--leading-loose);color:var(--color-text-muted);margin-bottom:var(--space-4)}
+    .title-slide p{color:rgba(245,242,237,.78)}
+    .lead{font-size:var(--text-xl);max-width:760px}
+    .muted{color:var(--color-text-muted)}
+    .meta-row{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-top:var(--space-6)}
+    .tag{font-size:var(--text-sm);font-weight:var(--weight-medium);border:1px solid var(--color-border);background:var(--color-bg-card);color:var(--color-text-muted);border-radius:var(--radius-full);padding:var(--space-1) var(--space-3)}
+    .title-slide .tag{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);color:rgba(245,242,237,.82)}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-6);align-items:stretch}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4)}
+    .card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);box-shadow:var(--shadow-sm)}
+    .card h3{font-size:var(--text-xl);margin-bottom:var(--space-3)}
+    .card p,.card li{font-size:var(--text-base)}
+    ul,ol{padding-left:var(--space-6);margin-bottom:var(--space-4)}
+    li{font-size:var(--text-lg);line-height:var(--leading-loose);color:var(--color-text-muted);margin-bottom:var(--space-2)}
+    strong{color:var(--color-text);font-weight:var(--weight-semibold)}
+    .title-slide strong{color:var(--color-bg)}
+    code{font-family:var(--font-mono);font-size:.9em;background:var(--color-bg-alt);border:1px solid var(--color-border);border-radius:4px;padding:1px 6px}
+    .accent{color:var(--color-accent)}
+    .note{background:var(--color-accent-soft);border-left:4px solid var(--color-accent);border-radius:0 var(--radius-lg) var(--radius-lg) 0;padding:var(--space-5) var(--space-6);margin-top:var(--space-6)}
+    .note p{color:#5b2b18;margin:0;font-weight:var(--weight-medium)}
+    .diagram{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);box-shadow:var(--shadow-sm);margin-top:var(--space-6)}
+    .diagram svg{width:100%;height:auto;display:block}
+    .diagram-caption{font-size:var(--text-sm);color:var(--color-text-faint);text-align:center;margin-top:var(--space-3);margin-bottom:0}
+    .compare{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-5);margin-top:var(--space-6)}
+    .compare-card{border-radius:var(--radius-lg);padding:var(--space-6);border:1px solid}
+    .compare-card.good{background:var(--color-green-soft);border-color:#bcd8c4}
+    .compare-card.warn{background:var(--color-yellow-soft);border-color:#e8d8a0}
+    .compare-card.bad{background:var(--color-red-soft);border-color:#e8c0bc}
+    .compare-card h3{font-size:var(--text-xl)}
+    .formula{display:flex;flex-wrap:wrap;gap:var(--space-3);margin-top:var(--space-6)}
+    .formula span{display:inline-flex;align-items:center;min-height:44px;background:var(--color-blue-soft);color:var(--color-blue);border:1px solid #c0d4eb;border-radius:var(--radius-full);padding:var(--space-2) var(--space-4);font-weight:var(--weight-semibold)}
+    .prompt-box{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);box-shadow:var(--shadow-sm);margin-top:var(--space-5)}
+    .prompt-head{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);margin-bottom:var(--space-3)}
+    .prompt-title{font-weight:var(--weight-bold);color:var(--color-text)}
+    .copy-btn{min-height:44px;border:1px solid var(--color-accent);background:var(--color-accent);color:#fff;border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);font-family:var(--font-sans);font-size:var(--text-sm);font-weight:var(--weight-semibold);cursor:pointer;transition:all 180ms ease}
+    .copy-btn:hover{background:var(--color-accent-hover);border-color:var(--color-accent-hover)}
+    .prompt-text{white-space:pre-wrap;font-family:var(--font-mono);font-size:var(--text-sm);line-height:var(--leading-loose);background:var(--color-bg-alt);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-4);color:var(--color-text)}
+    .closing{background:var(--color-blue-soft)}
+    .closing .slide-inner{display:grid;gap:var(--space-8)}
+    .quote{font-size:var(--text-2xl);line-height:var(--leading-loose);font-weight:var(--weight-semibold);color:var(--color-text);background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-8);box-shadow:var(--shadow-md)}
+    #progress{position:fixed;top:0;left:0;height:3px;background:var(--color-accent);width:0%;transition:width 200ms ease;z-index:1000}
+    #counter{position:fixed;right:var(--space-6);bottom:var(--space-6);font-size:var(--text-sm);font-weight:var(--weight-semibold);color:var(--color-text-muted);background:rgba(255,255,255,.86);border:1px solid var(--color-border);border-radius:var(--radius-full);padding:var(--space-2) var(--space-4);z-index:1000}
+    .nav-btn{position:fixed;bottom:var(--space-6);width:44px;height:44px;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-bg-card);color:var(--color-text);cursor:pointer;font-size:var(--text-xl);box-shadow:var(--shadow-sm);transition:all 180ms ease;z-index:1000}
+    .nav-btn:hover{transform:translateY(-2px);border-color:var(--color-accent);color:var(--color-accent)}
+    #btn-prev{left:calc(50% - 60px)}
+    #btn-next{left:calc(50% + 12px)}
+    .hint{position:fixed;left:var(--space-6);bottom:var(--space-6);font-size:var(--text-sm);color:var(--color-text-faint);z-index:1000}
+    .pill-list{display:flex;flex-wrap:wrap;gap:var(--space-3);margin-top:var(--space-4)}
+    .pill{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-full);padding:var(--space-2) var(--space-4);font-size:var(--text-base);font-weight:var(--weight-semibold);color:var(--color-text)}
+    @media(max-width:800px){
+      body{overflow:hidden}
+      .slide{padding:var(--space-8) var(--space-4)}
+      .title-slide .slide-inner,.grid-2,.grid-3,.compare,.closing .slide-inner{grid-template-columns:1fr}
+      .title-slide .diagram{display:none}
+      .hint{display:none}
+      #counter{right:var(--space-4);bottom:var(--space-4)}
+      .nav-btn{bottom:var(--space-4)}
+      h1{font-size:2.25rem}
+      h2{font-size:2rem}
+      p,li{font-size:var(--text-base)}
+      .lead{font-size:var(--text-lg)}
+    }
+  </style>
+
+<style id="mobile-font-scale">
+@media(max-width:700px){
+  :root{
+    --text-sm:1rem;
+    --text-base:1.15rem;
+    --text-lg:1.35rem;
+    --text-xl:1.55rem;
+    --text-2xl:1.85rem;
+    --text-3xl:2.25rem;
+  }
+}
+</style>
+</head>
+<body>
+<div id="deck">
+  <section class="slide title-slide">
+    <div class="slide-inner">
+      <div>
+        <div class="eyebrow">AI Literacy Slide Deck</div>
+        <h1>LLM은 어떻게 말을 이해하고 만들어 낼까?</h1>
+        <p class="lead">고등학생을 위한 LLM 작동 원리, 프롬프트 엔지니어링, 그리고 책임 있는 AI 사용 수업</p>
+        <div class="meta-row">
+          <span class="tag">토큰</span>
+          <span class="tag">벡터</span>
+          <span class="tag">어텐션</span>
+          <span class="tag">다음 토큰 예측</span>
+          <span class="tag">책임 있는 사용</span>
+        </div>
+      </div>
+      <div class="diagram">
+        <svg viewBox="0 0 320 260" role="img" aria-label="LLM 흐름 요약">
+          <defs><marker id="tArrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#d95f2b"/></marker></defs>
+          <rect x="30" y="24" width="260" height="44" rx="8" fill="#ffffff" stroke="#dedad2"/>
+          <rect x="30" y="108" width="260" height="44" rx="8" fill="#ffffff" stroke="#dedad2"/>
+          <rect x="30" y="192" width="260" height="44" rx="8" fill="#ffffff" stroke="#dedad2"/>
+          <text x="160" y="51" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1a18">언어</text>
+          <text x="160" y="135" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1a18">벡터 계산</text>
+          <text x="160" y="219" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1a18">다음 토큰</text>
+          <line x1="160" y1="70" x2="160" y2="104" stroke="#d95f2b" stroke-width="2" marker-end="url(#tArrow)"/>
+          <line x1="160" y1="154" x2="160" y2="188" stroke="#d95f2b" stroke-width="2" marker-end="url(#tArrow)"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Big Picture</div>
+      <h2>오늘의 핵심 문장</h2>
+      <p class="lead">LLM은 사람의 언어를 그대로 이해하는 것이 아니라, 언어를 숫자와 벡터로 바꾸고, 여러 신경망 층에서 계산한 뒤, 다음 토큰을 예측하며 문장을 만들어 내는 모델입니다.</p>
+      <div class="note"><p>수업의 목표는 “AI가 똑똑하다”가 아니라 “AI가 어떻게 계산하고, 우리는 어떻게 판단해야 하는가”입니다.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Roadmap</div>
+      <h2>언어가 답변이 되기까지</h2>
+      <div class="grid-3">
+        <div class="card"><h3>1. 쪼개기</h3><p>문장을 토큰으로 나누고 번호를 붙입니다.</p></div>
+        <div class="card"><h3>2. 표현하기</h3><p>번호를 의미 좌표인 임베딩 벡터로 바꿉니다.</p></div>
+        <div class="card"><h3>3. 계산하기</h3><p>어텐션과 여러 층이 문맥 관계를 계산합니다.</p></div>
+        <div class="card"><h3>4. 배우기</h3><p>예측, 비교, 수정을 반복하며 가중치를 조정합니다.</p></div>
+        <div class="card"><h3>5. 생성하기</h3><p>다음 토큰 예측을 반복해 답변을 만듭니다.</p></div>
+        <div class="card"><h3>6. 판단하기</h3><p>그럴듯한 답도 검토하고 사람이 책임집니다.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Token</div>
+      <h2>컴퓨터는 문장을 작은 조각으로 나눈다</h2>
+      <div class="compare">
+        <div class="compare-card good">
+          <h3>사람</h3>
+          <p>단어를 보면 의미, 경험, 상황을 떠올립니다.</p>
+        </div>
+        <div class="compare-card warn">
+          <h3>컴퓨터</h3>
+          <p>문자를 데이터로 저장하고 계산 가능한 형태로 바꿉니다.</p>
+        </div>
+      </div>
+      <div class="note"><p>토큰은 문장을 처리하기 위해 나눈 작은 조각입니다. “나는 학교에 간다”는 “나는 / 학교 / 에 / 간다”처럼 나뉠 수 있습니다.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">ID vs Meaning</div>
+      <h2>번호만으로는 의미의 가까움을 알 수 없다</h2>
+      <div class="grid-3">
+        <div class="card"><h3>고양이 = 10</h3><p>번호는 단지 출석번호입니다.</p></div>
+        <div class="card"><h3>자동차 = 11</h3><p>번호가 가깝다고 의미가 가까운 것은 아닙니다.</p></div>
+        <div class="card"><h3>강아지 = 500</h3><p>의미는 가깝지만 번호는 멀 수 있습니다.</p></div>
+      </div>
+      <p class="lead">그래서 LLM은 토큰 번호를 의미를 계산할 수 있는 <strong>벡터</strong>로 바꿉니다.</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Embedding</div>
+      <h2>벡터는 의미를 나타내는 좌표다</h2>
+      <p class="lead">벡터는 숫자 하나가 아니라 여러 숫자의 묶음입니다. 단어의 특징을 여러 방향에서 표현합니다.</p>
+      <div class="diagram">
+        <svg viewBox="0 0 760 250" role="img" aria-label="벡터 공간에서 가까운 단어">
+          <line x1="80" y1="200" x2="700" y2="200" stroke="#6b6a63" stroke-width="1.5"/>
+          <line x1="80" y1="200" x2="80" y2="40" stroke="#6b6a63" stroke-width="1.5"/>
+          <circle cx="190" cy="112" r="12" fill="#3a6b4a"/><text x="190" y="92" text-anchor="middle" font-size="13" fill="#1a1a18">고양이</text>
+          <circle cx="238" cy="130" r="12" fill="#3a6b4a"/><text x="238" y="158" text-anchor="middle" font-size="13" fill="#1a1a18">강아지</text>
+          <circle cx="292" cy="102" r="12" fill="#3a6b4a"/><text x="292" y="82" text-anchor="middle" font-size="13" fill="#1a1a18">토끼</text>
+          <circle cx="560" cy="112" r="12" fill="#2d5a8e"/><text x="560" y="92" text-anchor="middle" font-size="13" fill="#1a1a18">자동차</text>
+          <circle cx="610" cy="136" r="12" fill="#2d5a8e"/><text x="610" y="164" text-anchor="middle" font-size="13" fill="#1a1a18">버스</text>
+          <text x="390" y="230" text-anchor="middle" font-size="12" fill="#6b6a63">비슷한 문맥에 자주 등장하는 단어는 학습 과정에서 가까운 표현을 갖게 됩니다.</text>
+        </svg>
+        <p class="diagram-caption">임베딩은 처음부터 정답 좌표가 아니라, 학습을 통해 계속 조정되는 표현입니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Hidden Layers</div>
+      <h2>신경망 층은 벡터를 계속 가공한다</h2>
+      <p class="lead">입력 벡터는 그대로 지나가지 않습니다. 여러 층에서 가중치를 곱하고 더하며 중요한 특징을 더 강하게 반영합니다.</p>
+      <div class="diagram">
+        <svg viewBox="0 0 760 270" role="img" aria-label="신경망 층 구조">
+          <defs><marker id="nnArrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#6b6a63"/></marker></defs>
+          <text x="110" y="35" text-anchor="middle" font-size="14" font-weight="700" fill="#2d5a8e">입력층</text>
+          <text x="315" y="35" text-anchor="middle" font-size="14" font-weight="700" fill="#3a6b4a">히든 레이어</text>
+          <text x="565" y="35" text-anchor="middle" font-size="14" font-weight="700" fill="#d95f2b">출력층</text>
+          <g fill="#e5eef7" stroke="#2d5a8e">
+            <circle cx="110" cy="80" r="18"/><circle cx="110" cy="135" r="18"/><circle cx="110" cy="190" r="18"/>
+          </g>
+          <g fill="#e6f0e9" stroke="#3a6b4a">
+            <circle cx="280" cy="65" r="18"/><circle cx="280" cy="120" r="18"/><circle cx="280" cy="175" r="18"/><circle cx="280" cy="230" r="18"/>
+            <circle cx="390" cy="80" r="18"/><circle cx="390" cy="145" r="18"/><circle cx="390" cy="210" r="18"/>
+          </g>
+          <g fill="#faeee7" stroke="#d95f2b">
+            <circle cx="565" cy="105" r="18"/><circle cx="565" cy="170" r="18"/>
+          </g>
+          <line x1="135" y1="135" x2="250" y2="120" stroke="#6b6a63" marker-end="url(#nnArrow)"/>
+          <line x1="305" y1="120" x2="360" y2="145" stroke="#6b6a63" marker-end="url(#nnArrow)"/>
+          <line x1="415" y1="145" x2="535" y2="137" stroke="#6b6a63" marker-end="url(#nnArrow)"/>
+          <text x="380" y="255" text-anchor="middle" font-size="12" fill="#6b6a63">깊은 층으로 갈수록 단순 특징에서 문맥과 의미 관계로 이동합니다.</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Context</div>
+      <h2>같은 단어도 문맥에 따라 달라진다</h2>
+      <div class="grid-3">
+        <div class="card"><h3>배를 먹었다</h3><p>여기서 배는 과일입니다.</p></div>
+        <div class="card"><h3>배를 탔다</h3><p>여기서 배는 교통수단입니다.</p></div>
+        <div class="card"><h3>배가 아프다</h3><p>여기서 배는 몸의 일부입니다.</p></div>
+      </div>
+      <p class="lead">문맥을 반영하려면 단어 하나만 보는 것이 아니라 문장 안의 다른 단어들과의 관계를 계산해야 합니다.</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Attention</div>
+      <h2>어텐션은 중요한 단어에 형광펜을 치는 과정이다</h2>
+      <div class="diagram">
+        <svg viewBox="0 0 760 270" role="img" aria-label="어텐션 예시">
+          <defs><marker id="attArrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#d95f2b"/></marker></defs>
+          <text x="380" y="42" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1a18">민지는 비가 와서 우산을 챙겼다.</text>
+          <rect x="120" y="95" width="90" height="52" rx="10" fill="#ffffff" stroke="#dedad2"/><text x="165" y="127" text-anchor="middle" font-size="14" fill="#1a1a18">민지</text>
+          <rect x="245" y="95" width="90" height="52" rx="10" fill="#fdf5d9" stroke="#8a6a00"/><text x="290" y="127" text-anchor="middle" font-size="14" font-weight="700" fill="#5a4500">비</text>
+          <rect x="370" y="95" width="90" height="52" rx="10" fill="#ffffff" stroke="#dedad2"/><text x="415" y="127" text-anchor="middle" font-size="14" fill="#1a1a18">와서</text>
+          <rect x="495" y="95" width="90" height="52" rx="10" fill="#e5eef7" stroke="#2d5a8e"/><text x="540" y="127" text-anchor="middle" font-size="14" font-weight="700" fill="#1e3a5f">우산</text>
+          <path d="M535 150 C505 205 340 205 296 151" stroke="#d95f2b" stroke-width="2.4" fill="none" marker-end="url(#attArrow)"/>
+          <text x="410" y="222" text-anchor="middle" font-size="13" fill="#d95f2b">우산을 이해하려면 “비”가 중요합니다.</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Attention Detail</div>
+      <h2>어텐션을 조금 더 정확히 말하면</h2>
+      <div class="grid-3">
+        <div class="card"><h3>질문 카드</h3><p>나는 어떤 정보를 찾고 있는가?</p></div>
+        <div class="card"><h3>이름표 카드</h3><p>나는 어떤 정보와 관련 있는가?</p></div>
+        <div class="card"><h3>내용 카드</h3><p>내가 전달할 정보는 무엇인가?</p></div>
+      </div>
+      <div class="note"><p>트랜스포머는 단순히 원래 벡터가 가까운지만 보는 것이 아니라, 각 토큰을 여러 관점으로 바꾼 뒤 관련성을 계산합니다.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Transformer</div>
+      <h2>트랜스포머가 특별한 이유</h2>
+      <div class="compare">
+        <div class="compare-card warn">
+          <h3>이전 방식</h3>
+          <p>문장을 앞에서부터 하나씩 읽어야 해서 느리고, 멀리 떨어진 단어 관계를 놓치기 쉬웠습니다.</p>
+        </div>
+        <div class="compare-card good">
+          <h3>트랜스포머</h3>
+          <p>문장 전체를 한꺼번에 보며 모든 단어 사이의 관계를 계산합니다. 그래서 먼 거리의 관계도 더 잘 포착합니다.</p>
+        </div>
+      </div>
+      <p class="lead">어텐션은 문장 속 토큰들이 서로를 참고하도록 만드는 핵심 장치입니다.</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Training</div>
+      <h2>모델은 예측하고, 비교하고, 수정하며 배운다</h2>
+      <ol>
+        <li>벡터를 입력한다.</li>
+        <li>모델이 다음 토큰을 예측한다.</li>
+        <li>정답과 비교한다.</li>
+        <li>틀린 정도, 즉 오차를 계산한다.</li>
+        <li>오차를 줄이는 방향으로 가중치를 수정한다.</li>
+      </ol>
+      <div class="note"><p>이 과정을 수많은 문장에 대해 반복하는 것이 LLM 학습의 기본 구조입니다.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Training vs Use</div>
+      <h2>학습할 때와 사용할 때는 다르다</h2>
+      <div class="compare">
+        <div class="compare-card good">
+          <h3>학습할 때</h3>
+          <p>예측, 비교, 오차 계산을 통해 모델 안의 가중치를 수정합니다.</p>
+        </div>
+        <div class="compare-card warn">
+          <h3>사용할 때</h3>
+          <p>이미 학습된 가중치를 이용해 현재 대화 문맥에서 다음 토큰을 예측합니다.</p>
+        </div>
+      </div>
+      <p class="lead">일반적인 대화 중에는 모델의 기본 가중치가 매번 즉시 바뀌지는 않습니다. 다만 현재 대화 내용은 문맥으로 참고합니다.</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Probability</div>
+      <h2>LLM은 다음 말을 확률로 고른다</h2>
+      <div class="diagram">
+        <svg viewBox="0 0 760 290" role="img" aria-label="다음 토큰 확률 예시">
+          <text x="380" y="36" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1a18">오늘 날씨가 매우 ___</text>
+          <rect x="130" y="78" width="500" height="40" rx="8" fill="#e6f0e9" stroke="#3a6b4a"/><rect x="130" y="78" width="175" height="40" rx="8" fill="#3a6b4a"/><text x="150" y="104" font-size="13" font-weight="700" fill="#ffffff">좋다 35%</text>
+          <rect x="130" y="132" width="500" height="40" rx="8" fill="#e5eef7" stroke="#2d5a8e"/><rect x="130" y="132" width="125" height="40" rx="8" fill="#2d5a8e"/><text x="150" y="158" font-size="13" font-weight="700" fill="#ffffff">맑다 25%</text>
+          <rect x="130" y="186" width="500" height="40" rx="8" fill="#fdf5d9" stroke="#8a6a00"/><rect x="130" y="186" width="75" height="40" rx="8" fill="#8a6a00"/><text x="150" y="212" font-size="13" font-weight="700" fill="#ffffff">춥다 15%</text>
+          <text x="380" y="260" text-anchor="middle" font-size="12" fill="#6b6a63">모델은 후보들의 가능성을 계산하고, 설정에 따라 안정적이거나 다양한 답을 만듭니다.</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Generation</div>
+      <h2>전체 답을 한 번에 꺼내지 않는다</h2>
+      <div class="card">
+        <p><strong>인공지능은</strong></p>
+        <p><strong>인공지능은 사람의</strong></p>
+        <p><strong>인공지능은 사람의 언어를</strong></p>
+        <p><strong>인공지능은 사람의 언어를 처리하는</strong></p>
+      </div>
+      <p class="lead">예측한 토큰을 다시 입력에 포함하고, 다음 토큰을 또 예측합니다. 이 반복이 문장이 됩니다.</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Limits</div>
+      <h2>LLM은 사람처럼 경험하지 않는다</h2>
+      <div class="compare">
+        <div class="compare-card good">
+          <h3>잘하는 것</h3>
+          <p>언어 패턴, 문맥 관계, 글의 흐름을 매우 잘 계산합니다.</p>
+        </div>
+        <div class="compare-card bad">
+          <h3>주의할 것</h3>
+          <p>직접 경험하거나 느끼지는 않으며, 그럴듯하지만 틀린 답을 할 수 있습니다.</p>
+        </div>
+      </div>
+      <div class="note"><p>LLM의 “이해”는 인간처럼 경험을 떠올리는 이해라기보다, 단어와 문맥의 관계를 계산하는 방식의 이해에 가깝습니다.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Hallucination</div>
+      <h2>왜 그럴듯한데 틀린 말을 할까?</h2>
+      <ul>
+        <li>LLM은 데이터베이스처럼 정답을 찾아 꺼내는 방식이 아닙니다.</li>
+        <li>지금 문맥에서 다음에 올 법한 말을 예측하는 방식입니다.</li>
+        <li>그래서 모르는 내용도 문장 패턴에 맞춰 자연스럽게 이어 말할 수 있습니다.</li>
+        <li>출처, 날짜, 숫자, 인물 이름, 최신 정보에서 특히 조심해야 합니다.</li>
+      </ul>
+      <div class="note"><p>말이 자연스럽다고 해서 항상 사실이라는 뜻은 아닙니다.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Context Window</div>
+      <h2>LLM은 무한히 기억하지 않는다</h2>
+      <div class="diagram">
+        <svg viewBox="0 0 760 260" role="img" aria-label="컨텍스트 창 설명">
+          <rect x="70" y="54" width="620" height="120" rx="16" fill="#ffffff" stroke="#dedad2"/>
+          <text x="380" y="84" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1a18">컨텍스트 창</text>
+          <rect x="112" y="110" width="120" height="42" rx="8" fill="#e5eef7" stroke="#2d5a8e"/><text x="172" y="136" text-anchor="middle" font-size="12" fill="#1e3a5f">앞 대화</text>
+          <rect x="256" y="110" width="120" height="42" rx="8" fill="#e6f0e9" stroke="#3a6b4a"/><text x="316" y="136" text-anchor="middle" font-size="12" fill="#244730">첨부 문서</text>
+          <rect x="400" y="110" width="120" height="42" rx="8" fill="#faeee7" stroke="#d95f2b"/><text x="460" y="136" text-anchor="middle" font-size="12" fill="#8a3b1d">현재 질문</text>
+          <rect x="544" y="110" width="104" height="42" rx="8" fill="#fdf5d9" stroke="#8a6a00"/><text x="596" y="136" text-anchor="middle" font-size="12" fill="#5a4500">답변</text>
+          <text x="380" y="218" text-anchor="middle" font-size="12" fill="#6b6a63">한 번에 참고할 수 있는 범위 안의 텍스트를 보고 답합니다.</text>
+        </svg>
+      </div>
+      <p class="lead">책 전체를 항상 보는 것이 아니라, 책상 위에 펼쳐진 몇 쪽을 보며 답하는 것과 비슷합니다.</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Prompting</div>
+      <h2>좋은 질문이 좋은 답변을 만든다</h2>
+      <div class="compare">
+        <div class="compare-card bad">
+          <h3>모호한 질문</h3>
+          <p>역사 알려줘.</p>
+        </div>
+        <div class="compare-card good">
+          <h3>구체적인 질문</h3>
+          <p>고등학생 수준으로 산업혁명의 원인 3가지와 결과 3가지를 표로 정리해 줘. 각 항목은 한 문장씩 설명해 줘.</p>
+        </div>
+      </div>
+      <div class="formula">
+        <span>역할</span><span>목표</span><span>맥락</span><span>조건</span><span>출력 형식</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Prompt Example</div>
+      <h2>학생용 프롬프트 공식</h2>
+      <div class="prompt-box">
+        <div class="prompt-head">
+          <div class="prompt-title">발표 준비용 프롬프트</div>
+          <button class="copy-btn" type="button">Copy</button>
+        </div>
+        <div class="prompt-text">너는 고등학생에게 설명하는 과학 선생님이야. 나는 LLM의 작동 원리를 발표하려고 해. 토큰, 임베딩, 어텐션, 다음 토큰 예측을 쉬운 비유와 함께 설명해 줘. 어려운 수식은 빼고, 발표용 5문장으로 정리해 줘.</div>
+      </div>
+      <p class="lead">프롬프트 엔지니어링은 요령이 아니라, 목적과 조건을 분명히 하는 사고 훈련입니다.</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Workflow</div>
+      <h2>한 번에 완벽한 답을 기대하지 말자</h2>
+      <ol>
+        <li>초안 만들기</li>
+        <li>부족한 점 물어보기</li>
+        <li>반례나 오류 찾기</li>
+        <li>더 쉽게 바꾸기</li>
+        <li>최종 판단은 사람이 하기</li>
+      </ol>
+      <div class="note"><p>LLM은 정답 자판기가 아니라 생각을 발전시키는 도구로 쓰는 편이 좋습니다.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Check</div>
+      <h2>그대로 믿으면 안 되는 항목</h2>
+      <div class="pill-list">
+        <span class="pill">숫자</span>
+        <span class="pill">날짜</span>
+        <span class="pill">인물 이름</span>
+        <span class="pill">논문과 기사</span>
+        <span class="pill">출처</span>
+        <span class="pill">법률</span>
+        <span class="pill">의학</span>
+        <span class="pill">진학과 진로</span>
+      </div>
+      <div class="prompt-box">
+        <div class="prompt-head"><div class="prompt-title">검토용 질문</div><button class="copy-btn" type="button">Copy</button></div>
+        <div class="prompt-text">이 답변에서 사실 확인이 필요한 부분을 따로 표시해 줘. 확실한 내용과 추정한 내용을 나누어 설명해 줘.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide closing">
+    <div class="slide-inner">
+      <div>
+        <div class="eyebrow">Responsibility</div>
+        <h2>최종 판단과 책임은 인간에게 있다</h2>
+      </div>
+      <div class="quote">LLM은 강력한 도구이지만, 최종 결과를 이해하고 선택하고 책임지는 주체는 인간이다. AI가 만든 답변을 그대로 제출하거나 믿는 것이 아니라, 사람이 목적에 맞게 검토하고 수정하고 판단해야 한다.</div>
+    </div>
+  </section>
+
+  <section class="slide title-slide">
+    <div class="slide-inner">
+      <div>
+        <div class="eyebrow">Closing Question</div>
+        <h1>AI가 이해한다는 것은 무엇일까?</h1>
+        <p class="lead">벡터로 표현된 의미는 인간의 이해와 같은가? AI의 답변은 언제 신뢰할 수 있을까? AI를 사용할 때 사람의 판단은 왜 필요할까?</p>
+      </div>
+      <div class="diagram">
+        <svg viewBox="0 0 320 240" role="img" aria-label="마무리 질문">
+          <circle cx="160" cy="120" r="86" fill="#ffffff" stroke="#dedad2"/>
+          <text x="160" y="92" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1a18">도구</text>
+          <text x="160" y="124" text-anchor="middle" font-size="16" font-weight="700" fill="#d95f2b">판단</text>
+          <text x="160" y="156" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1a18">책임</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="progress"></div>
+<button id="btn-prev" class="nav-btn" type="button" onclick="navSlide(-1)" aria-label="이전 슬라이드">&#8249;</button>
+<button id="btn-next" class="nav-btn" type="button" onclick="navSlide(1)" aria-label="다음 슬라이드">&#8250;</button>
+<div id="counter"></div>
+<div class="hint">Arrow keys / Scroll</div>
+
+<script>
+const deck = document.getElementById('deck');
+const slides = Array.from(document.querySelectorAll('.slide'));
+let current = 0;
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting && e.intersectionRatio >= 0.6) {
+      current = slides.indexOf(e.target);
+      updateUI();
+    }
+  });
+}, { threshold: 0.6, root: deck });
+slides.forEach(s => observer.observe(s));
+function updateUI() {
+  const pct = slides.length > 1 ? (current / (slides.length - 1)) * 100 : 100;
+  document.getElementById('progress').style.width = pct + '%';
+  document.getElementById('counter').textContent = (current + 1) + ' / ' + slides.length;
+  document.getElementById('btn-prev').style.opacity = current === 0 ? '0' : '1';
+  document.getElementById('btn-next').style.opacity = current === slides.length - 1 ? '0' : '1';
+}
+function navSlide(dir) {
+  const next = Math.max(0, Math.min(slides.length - 1, current + dir));
+  slides[next].scrollIntoView({ behavior: 'smooth' });
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') navSlide(1);
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') navSlide(-1);
+  if (e.key === 'Home') slides[0].scrollIntoView({ behavior: 'smooth' });
+  if (e.key === 'End') slides[slides.length - 1].scrollIntoView({ behavior: 'smooth' });
+});
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const box = btn.closest('.prompt-box');
+    const text = box.querySelector('.prompt-text').innerText;
+    copyToClipboard(text, btn);
+  });
+});
+function copyToClipboard(text, btn) {
+  const label = btn.textContent;
+  const flash = ok => {
+    btn.textContent = ok ? 'Copied' : 'Failed';
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = label; btn.disabled = false; }, 1500);
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => flash(true)).catch(fallback);
+  } else { fallback(); }
+  function fallback() {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;opacity:0;';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try { flash(document.execCommand('copy')); } catch { flash(false); }
+    document.body.removeChild(ta);
+  }
+}
+updateUI();
+</script>
+
+<!-- Back to index -->
+<a id="back-to-index" href="index.html" aria-label="목록으로 돌아가기" title="목록으로"><svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M8.5 15L3 10l5.5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10h14" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></a>
+<style>
+#back-to-index{position:fixed;bottom:1.5rem;left:1.5rem;width:44px;height:44px;background:#6b6a63;color:#fff;border-radius:9999px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.18);transition:background .15s,transform .15s;z-index:800;}
+#back-to-index:hover{background:#d95f2b;transform:translateX(-2px);}
+@media(max-width:600px){#back-to-index{bottom:1rem;left:1rem;}}
+</style>
+</body>
+</html>
