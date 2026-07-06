@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>고등학생에게 LLM 설명하기: 학습 원리, 프롬프트, 책임 있는 사용</title>
+  <meta name="description" content="고등학생에게 LLM의 작동 원리를 토큰, 임베딩, 어텐션, 다음 토큰 예측으로 쉽게 설명하고, 프롬프트 엔지니어링과 최종 판단 책임까지 수업 흐름으로 연결하는 바이브 아티클.">
+  <meta property="og:title" content="고등학생에게 LLM 설명하기: 학습 원리, 프롬프트, 책임 있는 사용">
+  <meta property="og:description" content="LLM 원리 설명을 수업으로 바꾸는 구조: 토큰과 벡터, 트랜스포머, 학습과 생성의 차이, 환각, 학생용 프롬프트 공식, 인간의 판단 책임.">
+  <style>
+    :root {
+      --color-bg:#f5f2ed; --color-bg-alt:#eceae4; --color-bg-card:#ffffff;
+      --color-text:#1a1a18; --color-text-muted:#6b6a63; --color-text-faint:#a09f97;
+      --color-border:#dedad2; --color-accent:#d95f2b; --color-accent-hover:#c2521f;
+      --color-accent-soft:#faeee7;
+      --color-green:#3a6b4a; --color-green-soft:#e6f0e9;
+      --color-blue:#2d5a8e; --color-blue-soft:#e5eef7;
+      --color-yellow:#8a6a00; --color-yellow-soft:#fdf5d9;
+      --color-red:#b03a2e; --color-red-soft:#fdecea;
+      --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+      --font-mono:"SF Mono","Fira Code",Consolas,"Liberation Mono",monospace;
+      --text-xs:0.75rem; --text-sm:0.875rem; --text-base:1rem; --text-lg:1.125rem;
+      --text-xl:1.25rem; --text-2xl:1.5rem; --text-3xl:1.875rem;
+      --weight-medium:500; --weight-semibold:600; --weight-bold:700;
+      --leading-tight:1.25; --leading-normal:1.6; --leading-loose:1.8;
+      --space-1:0.25rem; --space-2:0.5rem; --space-3:0.75rem; --space-4:1rem;
+      --space-5:1.25rem; --space-6:1.5rem; --space-8:2rem; --space-12:3rem;
+      --radius-md:8px; --radius-lg:12px; --radius-full:9999px;
+      --shadow-sm:0 1px 3px rgba(0,0,0,0.07); --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--color-bg);color:var(--color-text);font-family:var(--font-sans);font-size:var(--text-base);line-height:var(--leading-normal);word-break:keep-all}
+    a{color:inherit}
+    #read-progress{position:fixed;top:0;left:0;width:0;height:3px;background:var(--color-accent);z-index:1000;transition:width 80ms linear}
+    .site-nav{position:sticky;top:0;z-index:500;background:rgba(245,242,237,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--color-border)}
+    .nav-inner{max-width:900px;margin:0 auto;padding:var(--space-3) var(--space-6);display:flex;align-items:center;justify-content:space-between;gap:var(--space-4)}
+    .nav-brand{color:var(--color-accent);font-size:var(--text-sm);font-weight:var(--weight-bold);text-decoration:none;white-space:nowrap}
+    .nav-links{display:flex;gap:var(--space-1);list-style:none;overflow-x:auto;scrollbar-width:none}
+    .nav-links::-webkit-scrollbar{display:none}
+    .nav-links a{display:block;color:var(--color-text-muted);font-size:var(--text-sm);font-weight:var(--weight-medium);text-decoration:none;padding:var(--space-2) var(--space-3);border-radius:var(--radius-full);white-space:nowrap;transition:all 180ms ease}
+    .nav-links a:hover{background:var(--color-bg-alt);color:var(--color-text)}
+    .hero{background:#20272a;color:#fff;padding:var(--space-12) var(--space-6);position:relative;overflow:hidden}
+    .hero::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(45,90,142,.56),rgba(58,107,74,.40) 45%,rgba(217,95,43,.34));pointer-events:none}
+    .hero svg{position:absolute;right:calc((100vw - 900px)/2 - 40px);bottom:-20px;width:360px;height:260px;opacity:.24}
+    .hero-inner{max-width:900px;margin:0 auto;position:relative;z-index:1}
+    .eyebrow{display:inline-flex;align-items:center;gap:var(--space-2);border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.10);border-radius:var(--radius-full);padding:var(--space-1) var(--space-4);font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.10em;text-transform:uppercase;color:#f5f2ed;margin-bottom:var(--space-6)}
+    .eyebrow-dot{width:6px;height:6px;border-radius:50%;background:#ffd2b8;display:inline-block}
+    h1{font-size:var(--text-3xl);line-height:var(--leading-tight);letter-spacing:0;color:#fff;margin-bottom:var(--space-5);font-weight:var(--weight-bold);max-width:760px}
+    .hero-lead{font-size:var(--text-lg);line-height:var(--leading-loose);color:rgba(255,255,255,.82);max-width:760px;margin-bottom:var(--space-6)}
+    .hero-meta{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+    .hero-tag{font-size:var(--text-xs);color:rgba(255,255,255,.82);background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.16);padding:var(--space-1) var(--space-3);border-radius:var(--radius-full)}
+    main{max-width:900px;margin:0 auto;padding:var(--space-12) var(--space-6)}
+    section{margin-bottom:var(--space-12);scroll-margin-top:76px}
+    .summary{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:var(--space-8);margin-bottom:var(--space-12);position:relative;overflow:hidden}
+    .summary::before{content:"";position:absolute;top:0;left:0;width:6px;height:100%;background:linear-gradient(180deg,var(--color-blue),var(--color-accent))}
+    .summary-label{font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.10em;text-transform:uppercase;color:var(--color-accent);margin-bottom:var(--space-3)}
+    .summary p{font-size:var(--text-base);line-height:var(--leading-loose);color:var(--color-text);margin-bottom:0}
+    .section-header{display:flex;gap:var(--space-4);align-items:flex-start;margin-bottom:var(--space-6)}
+    .section-num{width:42px;height:42px;border-radius:var(--radius-full);background:linear-gradient(135deg,var(--color-blue),var(--color-accent));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:var(--weight-bold);font-size:var(--text-lg);box-shadow:var(--shadow-sm);flex-shrink:0}
+    h2{font-size:var(--text-2xl);line-height:var(--leading-tight);letter-spacing:0;margin-bottom:var(--space-2);color:var(--color-text)}
+    h3{font-size:var(--text-xl);margin:var(--space-6) 0 var(--space-3);line-height:var(--leading-tight)}
+    p{color:var(--color-text-muted);margin-bottom:var(--space-4);line-height:var(--leading-loose)}
+    strong{color:var(--color-text);font-weight:var(--weight-semibold)}
+    ul,ol{padding-left:var(--space-6);margin-bottom:var(--space-4)}
+    li{color:var(--color-text-muted);margin-bottom:var(--space-2);line-height:var(--leading-loose)}
+    code{font-family:var(--font-mono);font-size:.9em;background:var(--color-bg-alt);border:1px solid var(--color-border);border-radius:4px;padding:1px 6px;color:var(--color-text)}
+    .flow-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-3);margin:var(--space-6) 0}
+    .flow-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);box-shadow:var(--shadow-sm);transition:all 180ms ease;min-height:148px}
+    .flow-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+    .flow-kicker{font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.08em;text-transform:uppercase;color:var(--color-accent);margin-bottom:var(--space-2)}
+    .flow-title{font-size:var(--text-base);font-weight:var(--weight-bold);color:var(--color-text);margin-bottom:var(--space-2)}
+    .flow-card p{font-size:var(--text-sm);line-height:var(--leading-loose);margin:0}
+    .callout{display:flex;gap:var(--space-4);border-radius:var(--radius-md);padding:var(--space-5) var(--space-6);margin:var(--space-6) 0;align-items:flex-start}
+    .callout-mark{width:34px;height:34px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;font-weight:var(--weight-bold);flex-shrink:0}
+    .callout-label{font-size:var(--text-xs);font-weight:var(--weight-bold);letter-spacing:.08em;text-transform:uppercase;margin-bottom:var(--space-2)}
+    .callout p{font-size:var(--text-base);margin-bottom:0}
+    .callout.blue{background:var(--color-blue-soft);border:1px solid #c0d4eb;border-left:4px solid var(--color-blue)}
+    .callout.blue .callout-mark{background:var(--color-blue);color:#fff}.callout.blue .callout-label{color:var(--color-blue)}
+    .callout.green{background:var(--color-green-soft);border:1px solid #bcd8c4;border-left:4px solid var(--color-green)}
+    .callout.green .callout-mark{background:var(--color-green);color:#fff}.callout.green .callout-label{color:var(--color-green)}
+    .callout.yellow{background:var(--color-yellow-soft);border:1px solid #e8d8a0;border-left:4px solid var(--color-yellow)}
+    .callout.yellow .callout-mark{background:var(--color-yellow);color:#fff}.callout.yellow .callout-label{color:var(--color-yellow)}
+    .callout.red{background:var(--color-red-soft);border:1px solid #e8c0bc;border-left:4px solid var(--color-red)}
+    .callout.red .callout-mark{background:var(--color-red);color:#fff}.callout.red .callout-label{color:var(--color-red)}
+    .diagram-wrap{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);margin:var(--space-6) 0;box-shadow:var(--shadow-sm)}
+    .diagram-wrap svg{width:100%;height:auto;display:block}
+    .diagram-caption{font-size:var(--text-sm);color:var(--color-text-faint);margin-top:var(--space-3);margin-bottom:0;text-align:center}
+    .table-wrap{overflow-x:auto;margin:var(--space-5) 0;border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm)}
+    table{border-collapse:collapse;width:100%;font-size:var(--text-sm);background:var(--color-bg-card)}
+    th,td{border-bottom:1px solid var(--color-border);padding:var(--space-3) var(--space-4);text-align:left;vertical-align:top;line-height:var(--leading-loose)}
+    th{background:var(--color-bg-alt);font-weight:var(--weight-bold);color:var(--color-text)}
+    tr:last-child td{border-bottom:none}
+    .tabs{border-bottom:1px solid var(--color-border);display:flex;gap:0;margin:var(--space-6) 0;overflow-x:auto}
+    .tab-btn{background:none;border:none;border-bottom:2px solid transparent;padding:var(--space-3) var(--space-4);font-size:var(--text-sm);font-weight:var(--weight-semibold);color:var(--color-text-muted);cursor:pointer;transition:color 140ms ease,border-color 140ms ease;margin-bottom:-1px;min-height:44px;white-space:nowrap}
+    .tab-btn:hover{color:var(--color-text)}
+    .tab-btn.active{color:var(--color-accent);border-bottom-color:var(--color-accent)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .prompt-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);box-shadow:var(--shadow-sm);margin-bottom:var(--space-4)}
+    .prompt-card h4{font-size:var(--text-base);margin-bottom:var(--space-3);color:var(--color-text)}
+    .prompt-text{font-family:var(--font-mono);font-size:var(--text-sm);line-height:var(--leading-loose);background:var(--color-bg-alt);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-4);white-space:pre-wrap;color:var(--color-text)}
+    .code-head{display:flex;justify-content:space-between;align-items:center;gap:var(--space-4);margin-bottom:var(--space-3)}
+    .copy-btn{font-family:var(--font-sans);font-size:var(--text-sm);color:#fff;background:var(--color-accent);border:1px solid var(--color-accent);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);cursor:pointer;transition:all 180ms ease;min-height:44px}
+    .copy-btn:hover{background:var(--color-accent-hover);border-color:var(--color-accent-hover)}
+    .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin:var(--space-6) 0}
+    .compare-card{border-radius:var(--radius-lg);padding:var(--space-5);border:1px solid}
+    .compare-card.bad{background:var(--color-red-soft);border-color:#e8c0bc}
+    .compare-card.good{background:var(--color-green-soft);border-color:#bcd8c4}
+    .compare-card h4{font-size:var(--text-base);margin-bottom:var(--space-3)}
+    .compare-card.bad h4{color:var(--color-red)}.compare-card.good h4{color:var(--color-green)}
+    .compare-card p{font-size:var(--text-sm);margin-bottom:0}
+    .step-list{counter-reset:step;list-style:none;padding:0;margin:var(--space-6) 0}
+    .step-list li{position:relative;padding:var(--space-4) var(--space-4) var(--space-4) calc(var(--space-12) + var(--space-2));margin-bottom:var(--space-3);background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-md)}
+    .step-list li::before{counter-increment:step;content:counter(step);position:absolute;left:var(--space-4);top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:var(--radius-full);background:var(--color-blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:var(--weight-bold);font-size:var(--text-sm)}
+    .pull-quote{border-left:4px solid var(--color-accent);background:var(--color-accent-soft);padding:var(--space-5) var(--space-6);border-radius:0 var(--radius-lg) var(--radius-lg) 0;color:#5b2b18;margin:var(--space-6) 0;font-weight:var(--weight-medium);font-size:var(--text-lg);line-height:var(--leading-loose)}
+    details{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);margin-bottom:var(--space-3);box-shadow:var(--shadow-sm)}
+    summary{cursor:pointer;font-weight:var(--weight-semibold);color:var(--color-text);min-height:44px;display:flex;align-items:center}
+    details p{margin-top:var(--space-3);margin-bottom:0}
+    .footer{text-align:center;color:var(--color-text-faint);font-size:var(--text-sm);margin-top:var(--space-8);padding-top:var(--space-6);border-top:1px solid var(--color-border)}
+    @media(max-width:760px){
+      .nav-inner{padding:var(--space-2) var(--space-4)}
+      .hero{padding:var(--space-8) var(--space-4)}
+      .hero svg{display:none}
+      main{padding:var(--space-8) var(--space-4)}
+      .flow-grid{grid-template-columns:1fr 1fr}
+      .compare-grid{grid-template-columns:1fr}
+      .section-header{gap:var(--space-3)}
+      .section-num{width:36px;height:36px;font-size:var(--text-base)}
+      .callout{padding:var(--space-4);gap:var(--space-3)}
+    }
+    @media(max-width:520px){
+      .flow-grid{grid-template-columns:1fr}
+      .step-list li{padding-left:var(--space-4);padding-top:var(--space-12)}
+      .step-list li::before{top:var(--space-4);transform:none}
+    }
+  </style>
+
+<style id="mobile-font-scale">
+@media(max-width:700px){
+  :root{
+    --text-sm:1rem;
+    --text-base:1.15rem;
+    --text-lg:1.35rem;
+    --text-xl:1.55rem;
+    --text-2xl:1.85rem;
+    --text-3xl:2.25rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<div id="read-progress" aria-hidden="true"></div>
+
+<nav class="site-nav" aria-label="문서 내비게이션">
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">Vibe</a>
+    <ul class="nav-links">
+      <li><a href="#frame">수업 흐름</a></li>
+      <li><a href="#model">작동 원리</a></li>
+      <li><a href="#learning">학습과 생성</a></li>
+      <li><a href="#limits">한계</a></li>
+      <li><a href="#prompt">프롬프트</a></li>
+      <li><a href="#responsibility">책임</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <svg viewBox="0 0 520 360" aria-hidden="true">
+    <defs>
+      <marker id="heroArrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#ffffff"/></marker>
+    </defs>
+    <rect x="40" y="44" width="120" height="62" rx="12" fill="none" stroke="#ffffff" stroke-width="2"/>
+    <rect x="202" y="44" width="120" height="62" rx="12" fill="none" stroke="#ffffff" stroke-width="2"/>
+    <rect x="364" y="44" width="120" height="62" rx="12" fill="none" stroke="#ffffff" stroke-width="2"/>
+    <path d="M160 75 L198 75" stroke="#ffffff" stroke-width="2" marker-end="url(#heroArrow)"/>
+    <path d="M322 75 L360 75" stroke="#ffffff" stroke-width="2" marker-end="url(#heroArrow)"/>
+    <text x="100" y="80" text-anchor="middle" font-size="17" fill="#ffffff">토큰</text>
+    <text x="262" y="80" text-anchor="middle" font-size="17" fill="#ffffff">벡터</text>
+    <text x="424" y="80" text-anchor="middle" font-size="17" fill="#ffffff">예측</text>
+    <circle cx="110" cy="215" r="44" fill="none" stroke="#ffffff" stroke-width="2"/>
+    <circle cx="260" cy="215" r="44" fill="none" stroke="#ffffff" stroke-width="2"/>
+    <circle cx="410" cy="215" r="44" fill="none" stroke="#ffffff" stroke-width="2"/>
+    <path d="M154 215 C190 160 220 160 256 215" stroke="#ffffff" stroke-width="2" fill="none" marker-end="url(#heroArrow)"/>
+    <path d="M304 215 C340 270 370 270 406 215" stroke="#ffffff" stroke-width="2" fill="none" marker-end="url(#heroArrow)"/>
+    <text x="110" y="220" text-anchor="middle" font-size="15" fill="#ffffff">질문</text>
+    <text x="260" y="220" text-anchor="middle" font-size="15" fill="#ffffff">관계</text>
+    <text x="410" y="220" text-anchor="middle" font-size="15" fill="#ffffff">책임</text>
+  </svg>
+  <div class="hero-inner">
+    <div class="eyebrow"><span class="eyebrow-dot"></span>AI Literacy for High School</div>
+    <h1>고등학생에게 LLM을 설명할 때, 원리와 사용법을 함께 가르치는 방법</h1>
+    <p class="hero-lead">LLM 수업은 “AI가 똑똑하다”에서 끝나면 부족합니다. <strong>토큰, 벡터, 어텐션, 다음 토큰 예측</strong>으로 작동 원리를 잡고, 마지막에는 <strong>프롬프트 작성과 인간의 판단 책임</strong>으로 연결해야 실제 사용 역량이 됩니다.</p>
+    <div class="hero-meta">
+      <span class="hero-tag">LLM 원리</span>
+      <span class="hero-tag">프롬프트 엔지니어링</span>
+      <span class="hero-tag">AI 리터러시</span>
+      <span class="hero-tag">고등학생 수업</span>
+      <span class="hero-tag">2026-07-06</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="summary">
+    <div class="summary-label">핵심 요약</div>
+    <p>고등학생 대상 LLM 설명은 <strong>계산 원리</strong>와 <strong>사용 책임</strong>을 분리하지 않는 편이 좋습니다. 먼저 언어가 토큰과 벡터로 바뀌고, 트랜스포머가 문맥 관계를 계산하며, 모델이 다음 토큰을 확률로 예측한다는 흐름을 보여 줍니다. 그다음 “그럴듯하지만 틀릴 수 있다”는 한계를 설명하고, 학생들이 실제 과제와 발표에서 쓸 수 있는 프롬프트 공식과 검토 습관을 붙입니다.</p>
+  </div>
+
+  <section id="frame">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <h2>수업의 중심 질문을 바꿔야 한다</h2>
+        <p>“LLM은 어떻게 말을 만들까?”만 묻는 수업은 기술 설명으로 끝납니다. 고등학생에게는 한 질문을 더 붙여야 합니다.</p>
+      </div>
+    </div>
+    <div class="pull-quote">LLM은 어떻게 작동하는가? 그리고 우리는 그 답변을 어떻게 판단해야 하는가?</div>
+    <p>이 두 질문을 함께 다루면 학생들이 AI를 마술처럼 받아들이지 않습니다. AI의 답변을 <strong>결과물</strong>이 아니라 <strong>검토해야 할 초안</strong>으로 보게 됩니다. 발표 자료의 구조도 이 방향으로 잡는 것이 좋습니다.</p>
+    <div class="flow-grid">
+      <article class="flow-card">
+        <div class="flow-kicker">Step 1</div>
+        <div class="flow-title">언어를 계산 가능한 형태로</div>
+        <p>문장을 토큰으로 나누고, 토큰을 숫자와 벡터로 바꾼다.</p>
+      </article>
+      <article class="flow-card">
+        <div class="flow-kicker">Step 2</div>
+        <div class="flow-title">문맥 관계 계산</div>
+        <p>어텐션으로 어떤 단어가 어떤 단어와 관련 있는지 계산한다.</p>
+      </article>
+      <article class="flow-card">
+        <div class="flow-kicker">Step 3</div>
+        <div class="flow-title">학습과 생성 구분</div>
+        <p>학습 때는 가중치를 고치고, 사용 때는 다음 토큰을 예측한다.</p>
+      </article>
+      <article class="flow-card">
+        <div class="flow-kicker">Step 4</div>
+        <div class="flow-title">책임 있는 사용</div>
+        <p>프롬프트를 구체화하고, 사실 확인과 최종 판단을 사람이 한다.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="model">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <h2>LLM은 문장을 “의미 있는 숫자 흐름”으로 바꾼다</h2>
+        <p>학생들에게 가장 먼저 보여 줄 그림은 “문장 → 토큰 → 벡터 → 문맥 벡터 → 다음 토큰”입니다.</p>
+      </div>
+    </div>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 860 300" role="img" aria-label="LLM 처리 흐름: 문장, 토큰, 벡터, 어텐션, 다음 토큰 예측">
+        <defs>
+          <marker id="arrowA" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#2d5a8e"/></marker>
+          <marker id="arrowB" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#d95f2b"/></marker>
+        </defs>
+        <text x="430" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1a18">언어가 답변이 되기까지</text>
+        <rect x="35" y="72" width="140" height="72" rx="10" fill="#e5eef7" stroke="#b8cde5"/>
+        <text x="105" y="102" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a5f">문장</text>
+        <text x="105" y="124" text-anchor="middle" font-size="11.5" fill="#2d5a8e">“배를 탔다”</text>
+
+        <rect x="225" y="72" width="140" height="72" rx="10" fill="#faeee7" stroke="#f0c8b6"/>
+        <text x="295" y="102" text-anchor="middle" font-size="13" font-weight="700" fill="#8a3b1d">토큰</text>
+        <text x="295" y="124" text-anchor="middle" font-size="11.5" fill="#d95f2b">배 / 를 / 탔다</text>
+
+        <rect x="415" y="72" width="140" height="72" rx="10" fill="#e6f0e9" stroke="#bcd8c4"/>
+        <text x="485" y="102" text-anchor="middle" font-size="13" font-weight="700" fill="#244730">임베딩</text>
+        <text x="485" y="124" text-anchor="middle" font-size="11.5" fill="#3a6b4a">의미 좌표</text>
+
+        <rect x="605" y="72" width="220" height="72" rx="10" fill="#fdf5d9" stroke="#e8d8a0"/>
+        <text x="715" y="102" text-anchor="middle" font-size="13" font-weight="700" fill="#5a4500">어텐션과 층 계산</text>
+        <text x="715" y="124" text-anchor="middle" font-size="11.5" fill="#8a6a00">문맥을 반영한 새 벡터</text>
+
+        <path d="M176 108 L222 108" stroke="#2d5a8e" stroke-width="2.4" marker-end="url(#arrowA)"/>
+        <path d="M366 108 L412 108" stroke="#2d5a8e" stroke-width="2.4" marker-end="url(#arrowA)"/>
+        <path d="M556 108 L602 108" stroke="#2d5a8e" stroke-width="2.4" marker-end="url(#arrowA)"/>
+
+        <rect x="210" y="205" width="440" height="56" rx="12" fill="#ffffff" stroke="#dedad2"/>
+        <text x="430" y="228" text-anchor="middle" font-size="13" font-weight="700" fill="#1a1a18">다음 토큰 확률</text>
+        <text x="430" y="249" text-anchor="middle" font-size="12" fill="#6b6a63">“그래서” 28% · “그리고” 17% · “하지만” 8% · ...</text>
+        <path d="M715 146 C715 198 655 232 654 232" stroke="#d95f2b" stroke-width="2.4" fill="none" marker-end="url(#arrowB)"/>
+      </svg>
+      <p class="diagram-caption">LLM은 문장을 한 번에 “이해”해서 답을 꺼내는 것이 아니라, 토큰의 벡터를 여러 층에서 바꾸고 다음 토큰의 가능성을 계산한다.</p>
+    </div>
+
+    <div class="callout blue">
+      <div class="callout-mark">i</div>
+      <div>
+        <div class="callout-label">수업에서 조심할 표현</div>
+        <p>“LLM이 이해한다”는 말을 완전히 금지할 필요는 없습니다. 다만 인간처럼 경험을 떠올리는 이해가 아니라, <strong>텍스트 패턴과 문맥 관계를 벡터로 계산하는 방식의 이해</strong>라고 덧붙이면 오해가 줄어듭니다.</p>
+      </div>
+    </div>
+
+    <h3>어텐션은 “가까운 단어 찾기”보다 조금 더 정교하다</h3>
+    <p>쉬운 설명에서는 “관련 있는 단어에 형광펜을 친다”고 말해도 좋습니다. 다만 정확도를 조금 올리려면 질문 카드, 이름표 카드, 내용 카드 비유를 붙이면 좋습니다.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>비유</th><th>학생용 설명</th><th>어텐션에서의 역할</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>질문 카드</td><td>나는 어떤 정보를 찾고 있는가?</td><td>현재 토큰이 찾는 단서</td></tr>
+          <tr><td>이름표 카드</td><td>나는 어떤 정보와 관련 있는가?</td><td>다른 토큰이 가진 단서</td></tr>
+          <tr><td>내용 카드</td><td>내가 전달할 정보는 무엇인가?</td><td>관련성이 높을 때 가져올 정보</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="learning">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <h2>학습할 때와 사용할 때는 다르다</h2>
+        <p>학생들이 가장 자주 헷갈리는 지점은 “대화하면 모델이 바로 나를 학습하나요?”입니다.</p>
+      </div>
+    </div>
+
+    <div class="compare-grid">
+      <div class="compare-card good">
+        <h4>학습할 때</h4>
+        <p>모델이 다음 토큰을 예측하고, 정답과 비교하고, 오차를 줄이도록 내부 가중치를 수정한다. 이 과정은 대규모 데이터와 많은 계산 자원이 필요하다.</p>
+      </div>
+      <div class="compare-card bad">
+        <h4>사용할 때</h4>
+        <p>이미 학습된 가중치를 사용해 현재 대화 문맥에서 다음 토큰을 예측한다. 일반적인 대화 중에 기본 모델의 가중치가 매번 즉시 바뀌는 것은 아니다.</p>
+      </div>
+    </div>
+
+    <div class="callout green">
+      <div class="callout-mark">Q</div>
+      <div>
+        <div class="callout-label">학생 질문에 대한 짧은 답</div>
+        <p>“ChatGPT가 지금 내 말을 참고해서 답할 수는 있지만, 보통 대화할 때마다 모델의 기본 머릿속 숫자가 바로 바뀌는 것은 아니야. 지금 화면 안의 대화 내용은 문맥으로 보는 것에 가깝다.”</p>
+      </div>
+    </div>
+
+    <h3>확률을 넣으면 생성 원리가 선명해진다</h3>
+    <p>LLM은 정답 하나를 꺼내는 장치가 아니라 다음에 올 법한 토큰들의 확률을 계산합니다. 그래서 같은 질문에도 표현이 조금 달라질 수 있습니다.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>문장</th><th>후보 토큰</th><th>가능성 예시</th><th>수업 포인트</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>오늘 날씨가 매우 ___</td><td>좋다</td><td>35%</td><td>문맥상 자연스러운 후보</td></tr>
+          <tr><td>오늘 날씨가 매우 ___</td><td>맑다</td><td>25%</td><td>비슷하게 자연스러운 후보</td></tr>
+          <tr><td>오늘 날씨가 매우 ___</td><td>춥다</td><td>15%</td><td>계절과 앞 문맥에 따라 가능</td></tr>
+          <tr><td>오늘 날씨가 매우 ___</td><td>연필</td><td>0.1%</td><td>문법과 의미 흐름에 맞지 않음</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="limits">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <h2>환각과 컨텍스트 창을 꼭 넣어야 한다</h2>
+        <p>학생들이 AI를 실제로 사용할 때 가장 중요한 리터러시는 “자연스러운 문장과 사실은 다르다”는 감각입니다.</p>
+      </div>
+    </div>
+
+    <div class="callout red">
+      <div class="callout-mark">!</div>
+      <div>
+        <div class="callout-label">환각의 핵심</div>
+        <p>LLM은 데이터베이스처럼 정답을 찾아 꺼내는 방식이 아닙니다. 지금 문맥에서 다음에 올 법한 말을 생성하기 때문에, 모르는 내용도 문장 패턴에 맞춰 그럴듯하게 이어 말할 수 있습니다.</p>
+      </div>
+    </div>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 860 260" role="img" aria-label="컨텍스트 창 비유: 책상 위에 펼쳐진 몇 쪽만 참고하는 LLM">
+        <defs>
+          <marker id="ctxArrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#3a6b4a"/></marker>
+        </defs>
+        <rect x="40" y="48" width="780" height="164" rx="16" fill="#ffffff" stroke="#dedad2"/>
+        <text x="430" y="78" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1a18">컨텍스트 창</text>
+        <rect x="90" y="105" width="140" height="70" rx="10" fill="#e5eef7" stroke="#c0d4eb"/>
+        <rect x="260" y="105" width="140" height="70" rx="10" fill="#e6f0e9" stroke="#bcd8c4"/>
+        <rect x="430" y="105" width="140" height="70" rx="10" fill="#faeee7" stroke="#f0c8b6"/>
+        <rect x="600" y="105" width="140" height="70" rx="10" fill="#fdf5d9" stroke="#e8d8a0"/>
+        <text x="160" y="135" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a5f">앞 대화</text>
+        <text x="160" y="155" text-anchor="middle" font-size="11.5" fill="#2d5a8e">참고 가능</text>
+        <text x="330" y="135" text-anchor="middle" font-size="13" font-weight="700" fill="#244730">첨부 문서</text>
+        <text x="330" y="155" text-anchor="middle" font-size="11.5" fill="#3a6b4a">참고 가능</text>
+        <text x="500" y="135" text-anchor="middle" font-size="13" font-weight="700" fill="#8a3b1d">현재 질문</text>
+        <text x="500" y="155" text-anchor="middle" font-size="11.5" fill="#d95f2b">가장 중요</text>
+        <text x="670" y="135" text-anchor="middle" font-size="13" font-weight="700" fill="#5a4500">답변 생성</text>
+        <text x="670" y="155" text-anchor="middle" font-size="11.5" fill="#8a6a00">다음 토큰</text>
+        <path d="M230 140 L256 140" stroke="#3a6b4a" stroke-width="2" marker-end="url(#ctxArrow)"/>
+        <path d="M400 140 L426 140" stroke="#3a6b4a" stroke-width="2" marker-end="url(#ctxArrow)"/>
+        <path d="M570 140 L596 140" stroke="#3a6b4a" stroke-width="2" marker-end="url(#ctxArrow)"/>
+        <text x="430" y="232" text-anchor="middle" font-size="12" fill="#6b6a63">LLM은 모든 것을 무한히 기억하는 것이 아니라, 한 번에 펼쳐진 범위 안의 텍스트를 보고 답한다.</text>
+      </svg>
+      <p class="diagram-caption">컨텍스트 창은 책 전체가 아니라 책상 위에 펼쳐진 몇 쪽에 가깝다. 범위 밖의 내용은 놓칠 수 있다.</p>
+    </div>
+
+    <details>
+      <summary>학생들에게 사실 확인이 특히 필요한 항목</summary>
+      <p>숫자, 날짜, 인물 이름, 논문과 기사 출처, 법률·의학·진학·진로처럼 중요한 결정, 최신 정보는 반드시 확인하게 하는 것이 좋습니다.</p>
+    </details>
+    <details>
+      <summary>좋은 확인 질문</summary>
+      <p>“이 답변에서 사실 확인이 필요한 부분을 따로 표시해 줘.” 또는 “확실한 내용과 추정한 내용을 나누어 설명해 줘.”처럼 검토를 요구하는 질문을 가르치면 좋습니다.</p>
+    </details>
+  </section>
+
+  <section id="prompt">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <h2>프롬프트 엔지니어링은 ‘명확한 사고’ 연습이다</h2>
+        <p>프롬프트를 기술처럼만 가르치면 얕아집니다. 좋은 프롬프트는 결국 목적, 맥락, 조건, 형식을 분명히 하는 사고 훈련입니다.</p>
+      </div>
+    </div>
+
+    <div class="compare-grid">
+      <div class="compare-card bad">
+        <h4>모호한 질문</h4>
+        <p>역사 알려줘.</p>
+      </div>
+      <div class="compare-card good">
+        <h4>구체적인 질문</h4>
+        <p>고등학생 수준으로 산업혁명의 원인 3가지와 결과 3가지를 표로 정리해 줘. 각 항목은 한 문장씩 설명해 줘.</p>
+      </div>
+    </div>
+
+    <div class="pull-quote">역할 + 목표 + 맥락 + 조건 + 출력 형식</div>
+
+    <nav class="tabs" aria-label="프롬프트 예시 탭">
+      <button class="tab-btn active" type="button" data-panel="panel-understand">개념 이해</button>
+      <button class="tab-btn" type="button" data-panel="panel-present">발표 준비</button>
+      <button class="tab-btn" type="button" data-panel="panel-review">오류 검토</button>
+      <button class="tab-btn" type="button" data-panel="panel-check">자기 점검</button>
+    </nav>
+
+    <div id="panel-understand" class="tab-panel active">
+      <article class="prompt-card">
+        <div class="code-head"><h4>개념 이해용</h4><button class="copy-btn" type="button">Copy</button></div>
+        <div class="prompt-text">이 개념을 고등학생 수준에서 설명해 줘. 먼저 한 문장으로 정의하고, 쉬운 비유 하나와 실제 예시 하나를 들어 줘.</div>
+      </article>
+    </div>
+    <div id="panel-present" class="tab-panel">
+      <article class="prompt-card">
+        <div class="code-head"><h4>발표 준비용</h4><button class="copy-btn" type="button">Copy</button></div>
+        <div class="prompt-text">이 내용을 5분 발표용 구조로 바꿔 줘. 도입, 핵심 설명 3개, 마무리 질문 순서로 정리해 줘. 청중은 고등학생이고, 어려운 용어는 쉬운 비유와 함께 설명해 줘.</div>
+      </article>
+    </div>
+    <div id="panel-review" class="tab-panel">
+      <article class="prompt-card">
+        <div class="code-head"><h4>오류 검토용</h4><button class="copy-btn" type="button">Copy</button></div>
+        <div class="prompt-text">아래 설명에서 과학적으로 부정확하거나 오해를 부를 수 있는 표현을 찾아서 고쳐 줘. 확실한 내용과 추정한 내용을 구분해 줘.</div>
+      </article>
+    </div>
+    <div id="panel-check" class="tab-panel">
+      <article class="prompt-card">
+        <div class="code-head"><h4>자기 점검용</h4><button class="copy-btn" type="button">Copy</button></div>
+        <div class="prompt-text">내가 이 내용을 제대로 이해했는지 확인할 수 있도록 객관식 5문제와 서술형 2문제를 만들어 줘. 정답과 해설도 붙여 줘.</div>
+      </article>
+    </div>
+
+    <h3>한 번에 완벽한 답을 기대하지 않기</h3>
+    <ol class="step-list">
+      <li><strong>초안 만들기.</strong> 먼저 구조와 후보 답변을 빠르게 만든다.</li>
+      <li><strong>부족한 점 묻기.</strong> 헷갈릴 부분, 빠진 부분, 과장된 부분을 찾게 한다.</li>
+      <li><strong>반례와 오류 찾기.</strong> 그럴듯한 답을 비판적으로 검토한다.</li>
+      <li><strong>자기 언어로 바꾸기.</strong> 학생 자신의 표현으로 다시 쓴다.</li>
+      <li><strong>최종 판단하기.</strong> 제출하거나 발표할 내용은 사람이 선택하고 책임진다.</li>
+    </ol>
+  </section>
+
+  <section id="responsibility">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div>
+        <h2>최종 결과에 대한 판단과 책임은 인간에게 있다</h2>
+        <p>이 문장은 발표의 마지막에 반드시 남겨야 합니다. 학생들이 AI를 많이 쓸수록 더 중요해집니다.</p>
+      </div>
+    </div>
+
+    <div class="callout yellow">
+      <div class="callout-mark">R</div>
+      <div>
+        <div class="callout-label">마지막 슬라이드 추천 문장</div>
+        <p>LLM은 강력한 도구이지만, 최종 결과를 이해하고 선택하고 책임지는 주체는 인간이다. AI가 만든 답변을 그대로 제출하거나 믿는 것이 아니라, 사람이 목적에 맞게 검토하고 수정하고 판단해야 한다.</p>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>학생에게 남길 원칙</th><th>수업에서 풀어 말하기</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>AI는 생각을 대신하지 않는다</td><td>AI는 초안, 비교, 설명을 도울 수 있지만 무엇이 맞는지 판단하는 일은 사람의 몫이다.</td></tr>
+          <tr><td>내가 제출하면 내 책임이다</td><td>AI가 쓴 글이라도 내 이름으로 제출하면 내가 이해하고 설명할 수 있어야 한다.</td></tr>
+          <tr><td>출처와 사실을 확인한다</td><td>숫자, 날짜, 이름, 인용, 최신 정보는 반드시 다른 자료로 확인한다.</td></tr>
+          <tr><td>중요한 결정은 전문가에게 확인한다</td><td>진학, 진로, 건강, 법률처럼 삶에 큰 영향을 주는 문제는 AI 답변만으로 결정하지 않는다.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pull-quote">LLM은 사람처럼 세상을 경험해서 말하는 존재라기보다, 방대한 언어 데이터에서 배운 패턴을 바탕으로 지금 문맥에서 가장 그럴듯한 다음 말을 계산하는 시스템이다. 그래서 매우 유용하지만, 항상 사실 확인과 사람의 판단이 함께 필요하다.</div>
+  </section>
+
+  <div class="footer">
+    Vibe Article · LLM Literacy · 2026-07-06
+  </div>
+</main>
+
+<script>
+const progress = document.getElementById('read-progress');
+window.addEventListener('scroll', () => {
+  const root = document.documentElement;
+  const max = root.scrollHeight - root.clientHeight;
+  progress.style.width = (max > 0 ? (root.scrollTop / max) * 100 : 0) + '%';
+}, { passive: true });
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tabs = btn.closest('.tabs');
+    const section = tabs.parentElement;
+    tabs.querySelectorAll('.tab-btn').forEach(item => item.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.panel).classList.add('active');
+  });
+});
+
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const text = btn.closest('.prompt-card').querySelector('.prompt-text').innerText;
+    const original = btn.textContent;
+    const done = ok => {
+      btn.textContent = ok ? 'Copied' : 'Failed';
+      btn.disabled = true;
+      setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 1400);
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => done(true)).catch(fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      const area = document.createElement('textarea');
+      area.value = text;
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.appendChild(area);
+      area.focus();
+      area.select();
+      try { done(document.execCommand('copy')); } catch { done(false); }
+      document.body.removeChild(area);
+    }
+  });
+});
+</script>
+
+
+<!-- Back to index -->
+<a id="back-to-index" href="index.html" aria-label="목록으로 돌아가기" title="목록으로"><svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M8.5 15L3 10l5.5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10h14" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></a>
+<style>
+#back-to-index{position:fixed;bottom:1.5rem;left:1.5rem;width:44px;height:44px;background:#6b6a63;color:#fff;border-radius:9999px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.18);transition:background .15s,transform .15s;z-index:800;}
+#back-to-index:hover{background:#d95f2b;transform:translateX(-2px);}
+@media(max-width:600px){#back-to-index{bottom:1rem;left:1rem;}}
+</style>
+</body>
+</html>
