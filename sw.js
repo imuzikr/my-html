@@ -1,7 +1,7 @@
 <<<<<<< HEAD
-const CACHE = 'my-html-v20260706-1325';
+const CACHE = 'my-html-v20260706-1328';
 =======
-const CACHE = 'my-html-v20260706-1325';
+const CACHE = 'my-html-v20260706-1328';
 >>>>>>> 6c66b0a (Add LLM literacy slide deck)
 const PRECACHE = [
   '/my-html/',
