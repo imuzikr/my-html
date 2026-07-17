@@ -16,11 +16,11 @@
       --color-bg-code: #1e1e1e;
       --color-text: #1a1a18;
       --color-text-muted: #6b6a63;
-      --color-text-faint: #8b8982;
+      --color-text-faint: #66645e;
       --color-border: #dedad2;
       --color-border-strong: #b8b5ac;
-      --color-accent: #d95f2b;
-      --color-accent-hover: #c2521f;
+      --color-accent: #a94218;
+      --color-accent-hover: #87320f;
       --color-accent-soft: #faeee7;
       --color-green: #3a6b4a;
       --color-green-soft: #e6f0e9;
@@ -74,7 +74,6 @@
       font-size: var(--text-base);
       line-height: var(--leading-normal);
       word-break: keep-all;
-      overflow-wrap: anywhere;
     }
     a { color: var(--color-blue); text-underline-offset: 3px; }
     a:hover { color: var(--color-accent); }
@@ -168,7 +167,7 @@
       color: var(--color-text);
       font-size: clamp(2rem, 5.2vw, 3.5rem);
       line-height: 1.16;
-      letter-spacing: -0.035em;
+      letter-spacing: 0;
       text-wrap: balance;
     }
     .hero-lead { max-width: 760px; margin-bottom: var(--space-8); color: var(--color-text-muted); font-size: var(--text-lg); line-height: 1.8; }
@@ -186,13 +185,14 @@
     .article-section { margin-bottom: var(--space-16); scroll-margin-top: 76px; }
     .section-header { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: var(--space-4); margin-bottom: var(--space-6); padding-bottom: var(--space-4); border-bottom: 2px solid var(--color-border); }
     .section-number { color: var(--color-accent); font-size: var(--text-3xl); font-weight: var(--weight-bold); line-height: 1; }
-    .section-title { font-size: clamp(1.45rem, 4vw, var(--text-2xl)); line-height: var(--leading-tight); letter-spacing: -0.02em; }
+    .section-title { font-size: clamp(1.45rem, 4vw, var(--text-2xl)); line-height: var(--leading-tight); letter-spacing: 0; }
     .article-section > p { margin-bottom: var(--space-4); }
     .lead-text { margin-bottom: var(--space-6); color: var(--color-text-muted); font-size: var(--text-lg); }
     h3 { margin: var(--space-8) 0 var(--space-4); font-size: var(--text-xl); line-height: 1.4; }
     h4 { margin-bottom: var(--space-2); font-size: var(--text-base); }
     strong { color: var(--color-text); font-weight: var(--weight-semibold); }
     .inline-code { padding: 2px 6px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-bg-alt); color: var(--color-red); font-size: 0.9em; }
+    .inline-code, .source-list a, td a { overflow-wrap: anywhere; }
 
     .pipeline {
       display: grid;
@@ -345,19 +345,6 @@
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
     }
   </style>
-
-<style id="mobile-font-scale">
-@media(max-width:700px){
-  :root{
-    --text-sm:1rem;
-    --text-base:1.15rem;
-    --text-lg:1.35rem;
-    --text-xl:1.55rem;
-    --text-2xl:1.85rem;
-    --text-3xl:2.25rem;
-  }
-}
-</style>
 </head>
 <body>
   <div id="progress-bar" aria-hidden="true"></div>
@@ -503,11 +490,19 @@
       <h3>워크플로우가 하는 일</h3>
       <ol class="step-list">
         <li><strong>저장소를 체크아웃합니다.</strong><p>현재 <code>main</code>의 파일을 Actions 실행 환경으로 가져옵니다.</p></li>
-        <li><strong>Python과 OpenAI 호환 SDK를 준비합니다.</strong><p>Upstage는 OpenAI SDK에 전용 <code>base_url</code>을 지정해 호출할 수 있습니다.</p></li>
+        <li><strong>Python 표준 라이브러리로 API를 호출합니다.</strong><p>별도 패키지를 설치하지 않아 의존성 공급망을 줄이고 실행 환경을 단순하게 유지합니다.</p></li>
         <li><strong>새 대화문을 만들고 커밋합니다.</strong><p>변경이 있을 때만 봇 계정으로 커밋하고 <code>main</code>에 푸시합니다.</p></li>
-        <li><strong>현재 작업 폴더를 Pages 아티팩트로 올립니다.</strong><p>방금 생성된 파일이 포함된 상태 그대로 배포 준비를 합니다.</p></li>
-        <li><strong>GitHub Pages에 공개합니다.</strong><p>배포 결과 URL은 Actions 실행 화면의 environment 링크에서 확인할 수 있습니다.</p></li>
+        <li><strong>공개 파일만 <code>_site</code>에 모읍니다.</strong><p><code>index.html</code>과 <code>daily/</code>만 Pages 아티팩트에 담아 워크플로우나 스크립트가 공개되지 않게 합니다.</p></li>
+        <li><strong>격리된 배포 작업에서 GitHub Pages에 공개합니다.</strong><p>콘텐츠 생성 작업은 <code>contents: write</code>만, 배포 작업은 <code>pages: write</code>와 <code>id-token: write</code>만 사용합니다.</p></li>
       </ol>
+
+      <div class="callout callout-success">
+        <span class="callout-label">안전</span>
+        <div class="callout-body">
+          <div class="callout-title">Actions는 태그 대신 검증된 전체 커밋 SHA로 고정했습니다</div>
+          <p>외부 Action이 같은 태그 아래에서 바뀌는 공급망 위험을 줄이고, 생성 권한과 배포 권한도 서로 다른 작업으로 분리했습니다. 버전을 올릴 때는 공식 저장소의 새 릴리스 SHA를 확인해 교체합니다.</p>
+        </div>
+      </div>
     </section>
 
     <section class="article-section" id="secrets">
@@ -661,6 +656,7 @@
     .card:hover { transform: translateY(-2px); border-color: var(--accent); }
     .date { color: var(--accent); font-size: 0.85rem; font-weight: 700; }
     .card h2 { margin: 10px 0 0; font-size: 1.15rem; }
+    .card h2 { overflow-wrap: anywhere; }
     footer { padding: 48px 0; color: var(--muted); font-size: 0.9rem; }
     @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
   </style>
@@ -681,18 +677,16 @@
 
   <textarea id="source-python" hidden>import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from html import escape
 from pathlib import Path
-from zoneinfo import ZoneInfo
-
-from openai import OpenAI
+from urllib import error, request
 
 
 ROOT = Path(__file__).parent
 DAILY_DIR = ROOT / "daily"
 INDEX_PATH = ROOT / "index.html"
-KST = ZoneInfo("Asia/Seoul")
+KST = timezone(timedelta(hours=9), name="KST")
 
 PROMPT = """
 가족이 일상에서 바로 사용할 수 있는 짧은 영어 대화문을 하나 만들어 주세요.
@@ -730,26 +724,59 @@ def parse_json_object(text: str) -> dict:
     missing = required - data.keys()
     if missing:
         raise ValueError(f"AI 응답에 필수 항목이 없습니다: {sorted(missing)}")
-    if not isinstance(data["dialogue"], list) or not data["dialogue"]:
-        raise ValueError("dialogue는 비어 있지 않은 목록이어야 합니다.")
+    for field in ("title", "situation", "level", "tip"):
+        if not isinstance(data[field], str) or not data[field].strip():
+            raise ValueError(f"{field}는 비어 있지 않은 문자열이어야 합니다.")
+    if not isinstance(data["dialogue"], list) or not 8 <= len(data["dialogue"]) <= 10:
+        raise ValueError("dialogue는 8~10개의 항목을 가진 목록이어야 합니다.")
+    for position, item in enumerate(data["dialogue"], start=1):
+        if not isinstance(item, dict):
+            raise ValueError(f"dialogue {position}번 항목은 객체여야 합니다.")
+        for field in ("speaker", "english", "korean"):
+            if not isinstance(item.get(field), str) or not item[field].strip():
+                raise ValueError(
+                    f"dialogue {position}번의 {field}는 비어 있지 않은 문자열이어야 합니다."
+                )
     return data
 
 
 def generate_conversation(api_key: str) -> dict:
-    client = OpenAI(api_key=api_key, base_url="https://api.upstage.ai/v1")
-    response = client.chat.completions.create(
-        model="solar-pro3",
-        messages=[
-            {
-                "role": "system",
-                "content": "You create safe, practical English lessons for Korean families.",
-            },
-            {"role": "user", "content": PROMPT},
-        ],
-        temperature=0.7,
+    payload = json.dumps(
+        {
+            "model": "solar-pro3",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You create safe, practical English lessons for Korean families.",
+                },
+                {"role": "user", "content": PROMPT},
+            ],
+            "temperature": 0.7,
+        }
+    ).encode("utf-8")
+    api_request = request.Request(
+        "https://api.upstage.ai/v1/chat/completions",
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
     )
-    content = response.choices[0].message.content or ""
-    return parse_json_object(content)
+
+    try:
+        with request.urlopen(api_request, timeout=60) as response:
+            body = json.loads(response.read().decode("utf-8"))
+    except error.HTTPError as exc:
+        raise RuntimeError(f"Upstage API 호출 실패: HTTP {exc.code}") from exc
+    except error.URLError as exc:
+        raise RuntimeError("Upstage API에 연결하지 못했습니다.") from exc
+
+    try:
+        content = body["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, TypeError) as exc:
+        raise ValueError("Upstage API 응답 형식이 예상과 다릅니다.") from exc
+    return parse_json_object(str(content or ""))
 
 
 def render_dialogue_rows(items: list[dict]) -> str:
@@ -800,6 +827,7 @@ def render_daily_page(data: dict, date_label: str) -> str:
     .korean {{ margin:0; color:var(--muted); }}
     .tip {{ margin-top:24px; padding:20px; border-left:4px solid var(--accent);
       border-radius:8px; background:var(--soft); }}
+    .situation, .english, .korean, .tip {{ overflow-wrap:anywhere; }}
     .tip strong {{ display:block; margin-bottom:6px; }}
     @media (max-width:560px) {{ .line {{ grid-template-columns:1fr; gap:6px; }} }}
   </style>
@@ -861,34 +889,24 @@ on:
       timezone: 'Asia/Seoul'
   workflow_dispatch:
 
-permissions:
-  contents: write
-  pages: write
-  id-token: write
-
 concurrency:
   group: daily-english-pages
   cancel-in-progress: true
 
 jobs:
-  generate-and-deploy:
+  generate:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.12'
-          cache: 'pip'
-
-      - name: Install dependency
-        run: pip install 'openai>=1.52,<2'
 
       - name: Generate today's lesson
         env:
@@ -907,17 +925,32 @@ jobs:
             git push
           fi
 
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
+      - name: Assemble public site
+        run: |
+          mkdir -p _site/daily
+          cp index.html _site/index.html
+          cp -R daily/. _site/daily/
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b
         with:
-          path: '.'
+          path: '_site'
+
+  deploy:
+    needs: generate
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4</textarea>
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e</textarea>
 
   <script>
     const codeSources = {
@@ -967,7 +1000,13 @@ jobs:
     updateReadingState();
 
     const storageKey = "daily-english-guide-checklist";
-    const savedChecks = JSON.parse(localStorage.getItem(storageKey) || "{}");
+    let savedChecks = {};
+    try {
+      savedChecks = JSON.parse(localStorage.getItem(storageKey) || "{}");
+      if (!savedChecks || typeof savedChecks !== "object" || Array.isArray(savedChecks)) savedChecks = {};
+    } catch {
+      localStorage.removeItem(storageKey);
+    }
     document.querySelectorAll("[data-check]").forEach((input) => {
       input.checked = Boolean(savedChecks[input.dataset.check]);
       input.addEventListener("change", () => {
@@ -978,3 +1017,4 @@ jobs:
   </script>
 </body>
 </html>
+
