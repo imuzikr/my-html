@@ -345,19 +345,6 @@
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
     }
   </style>
-
-<style id="mobile-font-scale">
-@media(max-width:700px){
-  :root{
-    --text-sm:1rem;
-    --text-base:1.15rem;
-    --text-lg:1.35rem;
-    --text-xl:1.55rem;
-    --text-2xl:1.85rem;
-    --text-3xl:2.25rem;
-  }
-}
-</style>
 </head>
 <body>
   <div id="progress-bar" aria-hidden="true"></div>
@@ -960,6 +947,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
+
+      - name: Set up GitHub Pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b
 
       - name: Deploy to GitHub Pages
         id: deployment
