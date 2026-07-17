@@ -345,6 +345,19 @@
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
     }
   </style>
+
+<style id="mobile-font-scale">
+@media(max-width:700px){
+  :root{
+    --text-sm:1rem;
+    --text-base:1.15rem;
+    --text-lg:1.35rem;
+    --text-xl:1.55rem;
+    --text-2xl:1.85rem;
+    --text-3xl:2.25rem;
+  }
+}
+</style>
 </head>
 <body>
   <div id="progress-bar" aria-hidden="true"></div>
