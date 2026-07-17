@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>매일 아침 7시, 가족 생활영어가 자동으로 올라오는 웹사이트 만들기</title>
+  <meta name="description" content="Upstage Solar Pro 3, GitHub Actions, GitHub Pages를 연결해 매일 가족 생활영어 HTML을 생성하고 자동 배포하는 실습 가이드입니다.">
+  <meta property="og:title" content="가족 생활영어 자동 생성 웹사이트 구축 가이드">
+  <meta property="og:description" content="AI 생성부터 GitHub Pages 배포까지, 매일 반복되는 전체 파이프라인을 한 번에 완성합니다.">
+  <meta name="theme-color" content="#f5f2ed">
+  <style>
+    :root {
+      --color-bg: #f5f2ed;
+      --color-bg-alt: #eceae4;
+      --color-bg-card: #ffffff;
+      --color-bg-code: #1e1e1e;
+      --color-text: #1a1a18;
+      --color-text-muted: #6b6a63;
+      --color-text-faint: #66645e;
+      --color-border: #dedad2;
+      --color-border-strong: #b8b5ac;
+      --color-accent: #a94218;
+      --color-accent-hover: #87320f;
+      --color-accent-soft: #faeee7;
+      --color-green: #3a6b4a;
+      --color-green-soft: #e6f0e9;
+      --color-blue: #2d5a8e;
+      --color-blue-soft: #e5eef7;
+      --color-yellow: #8a6a00;
+      --color-yellow-soft: #fdf5d9;
+      --color-red: #a8322a;
+      --color-red-soft: #fdecea;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --font-mono: "SF Mono", "Fira Code", Consolas, monospace;
+      --text-xs: 0.75rem;
+      --text-sm: 0.875rem;
+      --text-base: 1rem;
+      --text-lg: 1.125rem;
+      --text-xl: 1.25rem;
+      --text-2xl: 1.5rem;
+      --text-3xl: 1.875rem;
+      --text-4xl: 2.25rem;
+      --weight-normal: 400;
+      --weight-medium: 500;
+      --weight-semibold: 600;
+      --weight-bold: 700;
+      --leading-tight: 1.25;
+      --leading-normal: 1.7;
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.25rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --space-10: 2.5rem;
+      --space-12: 3rem;
+      --space-16: 4rem;
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-full: 9999px;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.07);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      min-height: 100vh;
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-family: var(--font-sans);
+      font-size: var(--text-base);
+      line-height: var(--leading-normal);
+      word-break: keep-all;
+    }
+    a { color: var(--color-blue); text-underline-offset: 3px; }
+    a:hover { color: var(--color-accent); }
+    button, input { font: inherit; }
+    code { font-family: var(--font-mono); }
+
+    #progress-bar {
+      position: fixed;
+      inset: 0 auto auto 0;
+      width: 0;
+      height: 3px;
+      background: var(--color-accent);
+      z-index: 1100;
+    }
+
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(245, 242, 237, 0.96);
+      border-bottom: 1px solid var(--color-border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .top-nav-inner {
+      max-width: 960px;
+      height: 54px;
+      margin: 0 auto;
+      padding: 0 var(--space-6);
+      display: flex;
+      align-items: center;
+      gap: var(--space-5);
+      overflow: hidden;
+    }
+    .nav-title {
+      flex: 0 0 auto;
+      font-size: var(--text-sm);
+      font-weight: var(--weight-bold);
+      color: var(--color-text);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .nav-links {
+      flex: 1;
+      display: flex;
+      gap: var(--space-1);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .nav-links::-webkit-scrollbar { display: none; }
+    .nav-links a {
+      padding: var(--space-1) var(--space-3);
+      color: var(--color-text-muted);
+      border-radius: var(--radius-full);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-medium);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: color 150ms ease, background 150ms ease;
+    }
+    .nav-links a:hover,
+    .nav-links a.active { color: var(--color-accent); background: var(--color-accent-soft); }
+    .nav-links a:focus-visible,
+    .nav-title:focus-visible,
+    .copy-button:focus-visible,
+    .check-item input:focus-visible + span {
+      outline: 3px solid rgba(45, 90, 142, 0.32);
+      outline-offset: 2px;
+    }
+
+    .page-wrapper { max-width: 960px; margin: 0 auto; padding: var(--space-12) var(--space-6) var(--space-16); }
+    .hero { margin-bottom: var(--space-16); }
+    .hero-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-bottom: var(--space-5); }
+    .hero-date { color: var(--color-text-faint); font-size: var(--text-sm); font-weight: var(--weight-medium); }
+    .tag-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 2px var(--space-3);
+      border: 1px solid #c0d4ea;
+      border-radius: var(--radius-full);
+      color: var(--color-blue);
+      background: var(--color-blue-soft);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-semibold);
+    }
+    .hero-kicker { margin-bottom: var(--space-3); color: var(--color-accent); font-size: var(--text-sm); font-weight: var(--weight-bold); letter-spacing: 0.07em; text-transform: uppercase; }
+    .hero-title {
+      max-width: 820px;
+      margin-bottom: var(--space-6);
+      color: var(--color-text);
+      font-size: clamp(2rem, 5.2vw, 3.5rem);
+      line-height: 1.16;
+      letter-spacing: 0;
+      text-wrap: balance;
+    }
+    .hero-lead { max-width: 760px; margin-bottom: var(--space-8); color: var(--color-text-muted); font-size: var(--text-lg); line-height: 1.8; }
+    .summary-card {
+      padding: var(--space-6);
+      border: 1px solid var(--color-border);
+      border-left: 4px solid var(--color-accent);
+      border-radius: var(--radius-md);
+      background: var(--color-bg-card);
+      box-shadow: var(--shadow-sm);
+    }
+    .summary-card strong { display: block; margin-bottom: var(--space-2); font-size: var(--text-sm); }
+    .summary-card p { color: var(--color-text-muted); }
+
+    .article-section { margin-bottom: var(--space-16); scroll-margin-top: 76px; }
+    .section-header { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: var(--space-4); margin-bottom: var(--space-6); padding-bottom: var(--space-4); border-bottom: 2px solid var(--color-border); }
+    .section-number { color: var(--color-accent); font-size: var(--text-3xl); font-weight: var(--weight-bold); line-height: 1; }
+    .section-title { font-size: clamp(1.45rem, 4vw, var(--text-2xl)); line-height: var(--leading-tight); letter-spacing: 0; }
+    .article-section > p { margin-bottom: var(--space-4); }
+    .lead-text { margin-bottom: var(--space-6); color: var(--color-text-muted); font-size: var(--text-lg); }
+    h3 { margin: var(--space-8) 0 var(--space-4); font-size: var(--text-xl); line-height: 1.4; }
+    h4 { margin-bottom: var(--space-2); font-size: var(--text-base); }
+    strong { color: var(--color-text); font-weight: var(--weight-semibold); }
+    .inline-code { padding: 2px 6px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-bg-alt); color: var(--color-red); font-size: 0.9em; }
+    .inline-code, .source-list a, td a { overflow-wrap: anywhere; }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-3);
+      margin: var(--space-8) 0;
+      list-style: none;
+    }
+    .pipeline li {
+      position: relative;
+      min-height: 142px;
+      padding: var(--space-5);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      background: var(--color-bg-card);
+      box-shadow: var(--shadow-sm);
+    }
+    .pipeline li:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: calc(var(--space-3) * -1 - 1px);
+      width: var(--space-3);
+      border-top: 2px solid var(--color-border-strong);
+    }
+    .pipeline-step { display: block; margin-bottom: var(--space-3); color: var(--color-blue); font-family: var(--font-mono); font-size: var(--text-xs); font-weight: var(--weight-bold); letter-spacing: 0.05em; }
+    .pipeline-title { display: block; margin-bottom: var(--space-2); font-weight: var(--weight-bold); }
+    .pipeline-desc { color: var(--color-text-muted); font-size: var(--text-sm); line-height: 1.55; }
+
+    .file-tree {
+      margin: var(--space-6) 0;
+      padding: var(--space-6);
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      background: var(--color-bg-code);
+      color: #d4d4d4;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: 1.8;
+      white-space: pre;
+    }
+
+    .callout {
+      display: flex;
+      gap: var(--space-4);
+      margin: var(--space-6) 0;
+      padding: var(--space-5);
+      border: 1px solid transparent;
+      border-left-width: 4px;
+      border-radius: var(--radius-md);
+    }
+    .callout-label { flex: 0 0 auto; min-width: 52px; font-family: var(--font-mono); font-size: var(--text-xs); font-weight: var(--weight-bold); letter-spacing: 0.04em; }
+    .callout-body { min-width: 0; }
+    .callout-title { margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: var(--weight-bold); }
+    .callout-body p { color: inherit; font-size: var(--text-sm); line-height: 1.65; }
+    .callout-info { border-color: #c0d4ea; border-left-color: var(--color-blue); background: var(--color-blue-soft); color: #244e82; }
+    .callout-success { border-color: #b8d4c0; border-left-color: var(--color-green); background: var(--color-green-soft); color: #315b3f; }
+    .callout-warning { border-color: #e8d8a0; border-left-color: var(--color-yellow); background: var(--color-yellow-soft); color: #6e5600; }
+    .callout-important { border-color: #f0c4b0; border-left-color: var(--color-accent); background: var(--color-accent-soft); color: #8f431f; }
+
+    .code-block { margin: var(--space-6) 0; overflow: hidden; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
+    .code-block-header { min-height: 42px; padding: var(--space-2) var(--space-4); display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); background: #2d2d2b; color: #c0beb8; font-family: var(--font-mono); font-size: var(--text-xs); }
+    .copy-button { min-height: 32px; padding: 4px var(--space-3); border: 1px solid #55534f; border-radius: var(--radius-sm); color: #f0efec; background: transparent; cursor: pointer; }
+    .copy-button:hover { border-color: #aaa79f; background: #3a3a37; }
+    .code-block pre { max-height: 680px; padding: var(--space-5) var(--space-6); overflow: auto; background: var(--color-bg-code); color: #d4d4d4; tab-size: 2; }
+    .code-block code { font-size: 0.82rem; line-height: 1.7; white-space: pre; }
+
+    .table-wrapper { margin: var(--space-6) 0; overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg-card); box-shadow: var(--shadow-sm); }
+    table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    th { padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border); background: var(--color-bg-alt); color: var(--color-text-muted); font-size: var(--text-xs); font-weight: var(--weight-bold); letter-spacing: 0.05em; text-align: left; text-transform: uppercase; white-space: nowrap; }
+    td { padding: var(--space-4); border-bottom: 1px solid var(--color-border); vertical-align: top; }
+    tr:last-child td { border-bottom: 0; }
+
+    .step-list { display: grid; gap: var(--space-4); margin: var(--space-6) 0; list-style: none; counter-reset: steps; }
+    .step-list li { position: relative; min-height: 48px; padding-left: 52px; counter-increment: steps; }
+    .step-list li::before { content: counter(steps); position: absolute; top: 0; left: 0; width: 36px; height: 36px; display: grid; place-items: center; border-radius: var(--radius-full); background: var(--color-accent); color: white; font-size: var(--text-sm); font-weight: var(--weight-bold); }
+    .step-list strong { display: block; margin-bottom: var(--space-1); }
+    .step-list p { color: var(--color-text-muted); font-size: var(--text-sm); }
+
+    .checklist {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-3);
+      margin: var(--space-6) 0;
+    }
+    .check-item { display: flex; align-items: flex-start; gap: var(--space-3); min-height: 60px; padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg-card); cursor: pointer; }
+    .check-item input { flex: 0 0 auto; width: 20px; height: 20px; margin-top: 2px; accent-color: var(--color-green); }
+    .check-item span { line-height: 1.5; }
+
+    .source-list { display: grid; gap: var(--space-3); margin-top: var(--space-5); padding-left: 1.2rem; }
+    .source-list li { padding-left: var(--space-1); color: var(--color-text-muted); font-size: var(--text-sm); }
+
+    .finish-card { padding: var(--space-8); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-bg-card); box-shadow: var(--shadow-md); }
+    .finish-card h2 { margin-bottom: var(--space-4); font-size: var(--text-2xl); }
+    .finish-card p { color: var(--color-text-muted); }
+    .finish-card code { color: var(--color-accent); }
+
+    #back-to-index {
+      position: fixed;
+      bottom: var(--space-6);
+      left: var(--space-6);
+      z-index: 900;
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius-full);
+      color: white;
+      background: var(--color-text-muted);
+      box-shadow: var(--shadow-md);
+      text-decoration: none;
+      transition: background 150ms ease, transform 150ms ease;
+    }
+    #back-to-index:hover { color: white; background: var(--color-accent); transform: translateX(-2px); }
+    #back-to-index:focus-visible { outline: 3px solid rgba(45, 90, 142, 0.38); outline-offset: 3px; }
+    #back-to-index svg { width: 18px; height: 18px; }
+
+    footer { max-width: 960px; margin: 0 auto; padding: var(--space-8) var(--space-6) var(--space-12); border-top: 1px solid var(--color-border); color: var(--color-text-faint); font-size: var(--text-sm); text-align: center; }
+
+    @media (max-width: 820px) {
+      .pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .pipeline li::after { display: none; }
+    }
+    @media (max-width: 700px) {
+      :root {
+        --text-sm: 1rem;
+        --text-base: 1.1rem;
+        --text-lg: 1.25rem;
+        --text-xl: 1.45rem;
+        --text-2xl: 1.7rem;
+        --text-3xl: 2rem;
+      }
+      .top-nav-inner { padding: 0 var(--space-4); }
+      .nav-title { display: none; }
+      .page-wrapper { padding: var(--space-8) var(--space-4) var(--space-12); }
+      .hero { margin-bottom: var(--space-12); }
+      .hero-title { font-size: clamp(2rem, 10vw, 2.8rem); }
+      .section-header { grid-template-columns: 1fr; gap: var(--space-2); }
+      .section-number { font-size: var(--text-sm); font-family: var(--font-mono); letter-spacing: 0.06em; }
+      .pipeline, .checklist { grid-template-columns: 1fr; }
+      .code-block { margin-inline: calc(var(--space-4) * -1); border-radius: 0; }
+      .code-block pre { padding: var(--space-4); }
+      .code-block code { font-size: 0.8rem; }
+      .callout { flex-direction: column; gap: var(--space-2); }
+      #back-to-index { bottom: var(--space-4); left: var(--space-4); }
+      footer { padding-inline: var(--space-4); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+
+<style id="mobile-font-scale">
+@media(max-width:700px){
+  :root{
+    --text-sm:1rem;
+    --text-base:1.15rem;
+    --text-lg:1.35rem;
+    --text-xl:1.55rem;
+    --text-2xl:1.85rem;
+    --text-3xl:2.25rem;
+  }
+}
+</style>
+</head>
+<body>
+  <div id="progress-bar" aria-hidden="true"></div>
+
+  <nav class="top-nav" aria-label="문서 목차">
+    <div class="top-nav-inner">
+      <a class="nav-title" href="#top">Daily English Pipeline</a>
+      <div class="nav-links">
+        <a href="#architecture">구조</a>
+        <a href="#files">파일</a>
+        <a href="#python">생성 봇</a>
+        <a href="#workflow">Actions</a>
+        <a href="#secrets">Secrets</a>
+        <a href="#pages">Pages</a>
+        <a href="#test">테스트</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-wrapper" id="top">
+    <header class="hero">
+      <div class="hero-meta">
+        <span class="hero-date">2026-07-17</span>
+        <span class="tag-badge">GitHub Actions 실습</span>
+        <span class="tag-badge">시민 개발자</span>
+      </div>
+      <p class="hero-kicker">Family Daily English Automation</p>
+      <h1 class="hero-title">매일 아침 7시, 가족 생활영어가 자동으로 올라오는 웹사이트 만들기</h1>
+      <p class="hero-lead">Upstage Solar Pro 3가 생활영어 대화문을 만들고, Python이 HTML로 바꾸며, GitHub Actions가 GitHub Pages까지 배포합니다. 서버를 따로 운영하지 않아도 되는 작고 완결된 자동화 프로젝트입니다.</p>
+      <div class="summary-card">
+        <strong>이 실습의 완성 조건</strong>
+        <p>Actions를 한 번 수동 실행했을 때 <code class="inline-code">daily/YYYY-MM-DD.html</code>이 생기고, 메인 목록에 카드가 추가되며, 공개 Pages 주소에서 새 대화문을 바로 열 수 있으면 성공입니다.</p>
+      </div>
+    </header>
+
+    <section class="article-section" id="architecture">
+      <div class="section-header">
+        <span class="section-number">01</span>
+        <h2 class="section-title">전체 흐름부터 이해하기</h2>
+      </div>
+      <p class="lead-text">자동화의 핵심은 “생성, 저장, 배포”를 한 워크플로우 안에서 끝내는 것입니다.</p>
+
+      <ol class="pipeline" aria-label="자동화 파이프라인 네 단계">
+        <li><span class="pipeline-step">STEP 1</span><span class="pipeline-title">정해진 시간에 시작</span><span class="pipeline-desc">GitHub Actions가 매일 한국 시간 오전 7시에 실행됩니다.</span></li>
+        <li><span class="pipeline-step">STEP 2</span><span class="pipeline-title">AI가 대화문 생성</span><span class="pipeline-desc">Solar Pro 3가 가족 상황에 맞는 영어와 한국어 뜻을 JSON으로 만듭니다.</span></li>
+        <li><span class="pipeline-step">STEP 3</span><span class="pipeline-title">HTML 파일 저장</span><span class="pipeline-desc">Python이 날짜별 페이지를 만들고 메인 목록에 링크를 추가합니다.</span></li>
+        <li><span class="pipeline-step">STEP 4</span><span class="pipeline-title">Pages에 공개</span><span class="pipeline-desc">같은 워크플로우가 결과물을 GitHub Pages에 곧바로 배포합니다.</span></li>
+      </ol>
+
+      <div class="callout callout-important">
+        <span class="callout-label">핵심</span>
+        <div class="callout-body">
+          <div class="callout-title">생성과 배포를 같은 워크플로우에 둡니다</div>
+          <p><code>GITHUB_TOKEN</code>으로 푸시한 커밋은 다른 워크플로우나 브랜치 기반 Pages 빌드를 다시 시작하지 않을 수 있습니다. 따라서 이 가이드는 생성 직후 <code>upload-pages-artifact</code>와 <code>deploy-pages</code>까지 실행하는 구조를 사용합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="article-section" id="files">
+      <div class="section-header">
+        <span class="section-number">02</span>
+        <h2 class="section-title">프로젝트 파일 만들기</h2>
+      </div>
+      <p>새 저장소의 루트에 아래 세 파일을 만듭니다. <code class="inline-code">daily/</code> 폴더는 첫 실행 때 Python이 자동으로 생성합니다.</p>
+
+      <div class="file-tree" role="img" aria-label="프로젝트 폴더 구조">/
+├── index.html
+├── generate_daily.py
+├── daily/                         # 첫 실행 때 자동 생성
+└── .github/
+    └── workflows/
+        └── daily_update.yml</div>
+
+      <h3>1. 메인 목록 페이지: index.html</h3>
+      <p>주석 <code class="inline-code">&lt;!-- DAILY_CARDS_PLACEHOLDER --&gt;</code>는 Python이 새 카드를 삽입하는 기준점입니다. 지우거나 문구를 바꾸지 않습니다.</p>
+      <div class="code-block">
+        <div class="code-block-header"><span>index.html</span><button class="copy-button" type="button" data-copy="code-index">코드 복사</button></div>
+        <pre><code id="code-index"></code></pre>
+      </div>
+
+      <div class="callout callout-info">
+        <span class="callout-label">참고</span>
+        <div class="callout-body">
+          <div class="callout-title">재실행해도 카드가 중복되지 않습니다</div>
+          <p>각 카드에 <code>data-date</code>를 기록하고, Python이 같은 날짜의 카드가 있는지 먼저 확인합니다. 수동 테스트를 여러 번 해도 목록은 한 번만 추가됩니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="article-section" id="python">
+      <div class="section-header">
+        <span class="section-number">03</span>
+        <h2 class="section-title">AI 호출과 HTML 생성을 담당하는 Python 봇</h2>
+      </div>
+      <p class="lead-text"><code class="inline-code">generate_daily.py</code>는 API 호출, JSON 해석, 날짜별 페이지 생성, 메인 목록 업데이트를 차례로 처리합니다.</p>
+
+      <div class="code-block">
+        <div class="code-block-header"><span>generate_daily.py</span><button class="copy-button" type="button" data-copy="code-python">코드 복사</button></div>
+        <pre><code id="code-python"></code></pre>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>안전장치</th><th>이유</th></tr></thead>
+          <tbody>
+            <tr><td>환경 변수 확인</td><td>API 키가 없을 때 모호한 네트워크 오류 대신 즉시 원인을 알려 줍니다.</td></tr>
+            <tr><td>JSON 범위 추출</td><td>모델이 코드 펜스를 붙여도 첫 <code>{</code>부터 마지막 <code>}</code>까지 읽습니다.</td></tr>
+            <tr><td>HTML 이스케이프</td><td>AI가 만든 문자열이 HTML 태그로 해석되는 것을 막습니다.</td></tr>
+            <tr><td>날짜 카드 중복 검사</td><td>같은 날 다시 실행해도 메인 목록에 같은 카드가 쌓이지 않습니다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-success">
+        <span class="callout-label">모델</span>
+        <div class="callout-body">
+          <div class="callout-title">현재 공식 예시는 solar-pro3입니다</div>
+          <p>Upstage의 현재 Chat API 예제는 <code>base_url="https://api.upstage.ai/v1"</code>과 <code>model="solar-pro3"</code>를 사용합니다. 계정에서 제공되는 모델 이름이 다르면 해당 한 줄만 바꾸면 됩니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="article-section" id="workflow">
+      <div class="section-header">
+        <span class="section-number">04</span>
+        <h2 class="section-title">매일 실행하고 곧바로 배포하는 Actions 워크플로우</h2>
+      </div>
+      <p>GitHub는 현재 IANA 시간대 지정을 지원합니다. 따라서 UTC를 계산하는 대신 <code class="inline-code">timezone: "Asia/Seoul"</code>과 오전 7시를 그대로 적을 수 있습니다.</p>
+
+      <div class="code-block">
+        <div class="code-block-header"><span>.github/workflows/daily_update.yml</span><button class="copy-button" type="button" data-copy="code-workflow">코드 복사</button></div>
+        <pre><code id="code-workflow"></code></pre>
+      </div>
+
+      <div class="callout callout-warning">
+        <span class="callout-label">UTC</span>
+        <div class="callout-body">
+          <div class="callout-title">기존 방식으로 연습하고 싶다면</div>
+          <p><code>timezone</code> 줄을 지우고 <code>cron: '0 22 * * *'</code>로 바꾸면 됩니다. UTC 22시는 한국 시간으로 다음 날 오전 7시입니다.</p>
+        </div>
+      </div>
+
+      <h3>워크플로우가 하는 일</h3>
+      <ol class="step-list">
+        <li><strong>저장소를 체크아웃합니다.</strong><p>현재 <code>main</code>의 파일을 Actions 실행 환경으로 가져옵니다.</p></li>
+        <li><strong>Python 표준 라이브러리로 API를 호출합니다.</strong><p>별도 패키지를 설치하지 않아 의존성 공급망을 줄이고 실행 환경을 단순하게 유지합니다.</p></li>
+        <li><strong>새 대화문을 만들고 커밋합니다.</strong><p>변경이 있을 때만 봇 계정으로 커밋하고 <code>main</code>에 푸시합니다.</p></li>
+        <li><strong>공개 파일만 <code>_site</code>에 모읍니다.</strong><p><code>index.html</code>과 <code>daily/</code>만 Pages 아티팩트에 담아 워크플로우나 스크립트가 공개되지 않게 합니다.</p></li>
+        <li><strong>격리된 배포 작업에서 GitHub Pages에 공개합니다.</strong><p>콘텐츠 생성 작업은 <code>contents: write</code>만, 배포 작업은 <code>pages: write</code>와 <code>id-token: write</code>만 사용합니다.</p></li>
+      </ol>
+
+      <div class="callout callout-success">
+        <span class="callout-label">안전</span>
+        <div class="callout-body">
+          <div class="callout-title">Actions는 태그 대신 검증된 전체 커밋 SHA로 고정했습니다</div>
+          <p>외부 Action이 같은 태그 아래에서 바뀌는 공급망 위험을 줄이고, 생성 권한과 배포 권한도 서로 다른 작업으로 분리했습니다. 버전을 올릴 때는 공식 저장소의 새 릴리스 SHA를 확인해 교체합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="article-section" id="secrets">
+      <div class="section-header">
+        <span class="section-number">05</span>
+        <h2 class="section-title">API 키를 GitHub Secrets에 보관하기</h2>
+      </div>
+      <p class="lead-text">API 키는 HTML, Python, YAML 어디에도 직접 적지 않습니다. 저장소의 암호화된 Secret으로만 전달합니다.</p>
+      <ol class="step-list">
+        <li><strong>저장소의 Settings로 이동합니다.</strong><p>상단 탭에서 <code>Settings</code>를 엽니다.</p></li>
+        <li><strong>Actions Secrets 메뉴를 엽니다.</strong><p><code>Secrets and variables</code> → <code>Actions</code>를 선택합니다.</p></li>
+        <li><strong>새 Repository secret을 만듭니다.</strong><p>이름은 정확히 <code>UPSTAGE_API_KEY</code>, 값은 Upstage에서 발급받은 실제 키를 입력합니다.</p></li>
+      </ol>
+
+      <div class="callout callout-important">
+        <span class="callout-label">보안</span>
+        <div class="callout-body">
+          <div class="callout-title">키가 한 번이라도 커밋되었다면 단순 삭제로 끝나지 않습니다</div>
+          <p>Git 기록에 남은 키는 노출된 것으로 간주하고 Upstage 콘솔에서 즉시 폐기한 뒤 새 키를 발급받아야 합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="article-section" id="pages">
+      <div class="section-header">
+        <span class="section-number">06</span>
+        <h2 class="section-title">GitHub Pages를 Actions 방식으로 활성화하기</h2>
+      </div>
+      <ol class="step-list">
+        <li><strong>Settings → Pages로 이동합니다.</strong><p>저장소 관리자 권한이 있어야 설정할 수 있습니다.</p></li>
+        <li><strong>Build and deployment의 Source를 GitHub Actions로 선택합니다.</strong><p>이 가이드의 워크플로우가 직접 Pages 아티팩트를 배포하므로 <code>Deploy from a branch</code>가 아닙니다.</p></li>
+        <li><strong>첫 워크플로우 실행 뒤 주소를 확인합니다.</strong><p>프로젝트 저장소라면 보통 <code>https://사용자명.github.io/저장소명/</code> 형태입니다.</p></li>
+      </ol>
+
+      <div class="callout callout-info">
+        <span class="callout-label">저장소</span>
+        <div class="callout-body">
+          <div class="callout-title">my-html 저장소의 운영 방식도 같은 원리입니다</div>
+          <p>참고 저장소는 <code>scripts/generate_index.py</code>로 카테고리 색인을 다시 만들고, <code>actions/upload-pages-artifact</code>와 <code>actions/deploy-pages</code>로 정적 파일 전체를 배포합니다. 이 문서 역시 <code>vibe/</code>에 놓이면 자동으로 Vibe 목록에 포함됩니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="article-section" id="test">
+      <div class="section-header">
+        <span class="section-number">07</span>
+        <h2 class="section-title">수동 실행으로 전체 파이프라인 검증하기</h2>
+      </div>
+      <p class="lead-text">예약 시간을 기다리지 말고 <code class="inline-code">workflow_dispatch</code>로 한 번 직접 실행합니다.</p>
+      <ol class="step-list">
+        <li><strong>Actions 탭에서 Daily English Generator를 선택합니다.</strong><p>워크플로우 파일이 <code>main</code>에 있어야 Run workflow 버튼이 보입니다.</p></li>
+        <li><strong>Run workflow를 누릅니다.</strong><p>초록색 완료 표시가 나올 때까지 실행 로그를 확인합니다.</p></li>
+        <li><strong>Code 탭에서 생성 파일을 확인합니다.</strong><p><code>daily/오늘날짜.html</code>과 수정된 <code>index.html</code>이 새 커밋에 포함되어야 합니다.</p></li>
+        <li><strong>Pages 주소에서 실제 페이지를 엽니다.</strong><p>메인 카드, 날짜별 페이지, 목록으로 돌아가기 링크를 차례로 눌러 봅니다.</p></li>
+      </ol>
+
+      <h3>실습 체크리스트</h3>
+      <div class="checklist" id="checklist">
+        <label class="check-item"><input type="checkbox" data-check="secret"><span><code>UPSTAGE_API_KEY</code> Secret을 만들었다.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="manual"><span>워크플로우를 수동으로 실행했다.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="daily"><span><code>daily/날짜.html</code> 파일이 생겼다.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="index"><span>메인 목록에 오늘 카드가 한 번만 나타난다.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="pages"><span>Pages 주소에서 새 글이 열린다.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="mobile"><span>휴대전화 화면에서도 대화문이 읽기 쉽다.</span></label>
+      </div>
+
+      <h3>자주 만나는 오류</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>증상</th><th>확인할 곳</th><th>해결</th></tr></thead>
+          <tbody>
+            <tr><td><code>UPSTAGE_API_KEY is missing</code></td><td>Settings → Secrets and variables → Actions</td><td>Secret 이름의 철자와 저장 위치를 확인합니다.</td></tr>
+            <tr><td><code>403</code> 또는 push 거부</td><td>워크플로우의 <code>permissions</code></td><td><code>contents: write</code>가 있는지 확인합니다.</td></tr>
+            <tr><td>파일은 생겼지만 사이트가 그대로</td><td>Settings → Pages</td><td>Source가 <code>GitHub Actions</code>인지, Deploy step이 성공했는지 봅니다.</td></tr>
+            <tr><td>예약 실행이 늦음</td><td>Actions 실행 시작 시각</td><td>GitHub의 예약 실행은 부하가 큰 시간대에 지연될 수 있습니다. 정확한 분 단위 보장은 아닙니다.</td></tr>
+            <tr><td>같은 날짜 카드가 두 개</td><td><code>index.html</code> 카드 속성</td><td><code>data-date="YYYY-MM-DD"</code>와 중복 검사 코드가 유지되었는지 확인합니다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="article-section" id="sources">
+      <div class="section-header">
+        <span class="section-number">08</span>
+        <h2 class="section-title">공식 문서와 참고 저장소</h2>
+      </div>
+      <p>API와 Actions 문법은 바뀔 수 있으므로, 오류가 생기면 아래 1차 자료부터 확인합니다.</p>
+      <ul class="source-list">
+        <li><a href="https://console.upstage.ai/api-keys?api=chat" target="_blank" rel="noreferrer">Upstage Chat API 공식 예제</a> — <code>solar-pro3</code>와 <code>https://api.upstage.ai/v1</code> 사용 예시</li>
+        <li><a href="https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onschedule" target="_blank" rel="noreferrer">GitHub Actions workflow syntax: on.schedule</a> — cron과 IANA 시간대 문법</li>
+        <li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages" target="_blank" rel="noreferrer">GitHub Pages custom workflow 공식 문서</a> — configure, upload, deploy 단계</li>
+        <li><a href="https://github.com/imuzikr/my-html" target="_blank" rel="noreferrer">imuzikr/my-html</a> — 카테고리 색인 생성과 Pages 배포 구조 참고</li>
+      </ul>
+    </section>
+
+    <section class="finish-card" aria-labelledby="finish-title">
+      <h2 id="finish-title">완성 후에는 주제만 바꾸면 됩니다</h2>
+      <p>아침 식사, 등교 준비, 장보기, 주말 계획처럼 프롬프트의 상황 목록을 가족의 실제 생활에 맞게 조정해 보세요. 자동화의 뼈대는 그대로 두고 <code>PROMPT</code>만 다듬는 것이 다음 학습 단계입니다.</p>
+    </section>
+  </main>
+
+  <footer>
+    My HTML Library · Vibe · GitHub Actions와 Upstage Solar Pro 3를 활용한 자동화 실습
+  </footer>
+
+  <a id="back-to-index" href="index.html" aria-label="Vibe 목록으로 돌아가기" title="목록으로 돌아가기">
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path d="M8.5 15 3 10l5.5-5M3 10h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </a>
+
+  <textarea id="source-index" hidden><!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>우리 가족 오늘의 생활영어</title>
+  <style>
+    :root {
+      --bg: #f7f4ef;
+      --card: #ffffff;
+      --text: #20201d;
+      --muted: #6f6d66;
+      --accent: #d95f2b;
+      --border: #dedad2;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.65;
+      word-break: keep-all;
+    }
+    header, main, footer { width: min(920px, calc(100% - 32px)); margin-inline: auto; }
+    header { padding: 72px 0 40px; }
+    h1 { margin: 0 0 12px; font-size: clamp(2rem, 7vw, 3.5rem); line-height: 1.12; }
+    header p { margin: 0; color: var(--muted); font-size: 1.1rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+    .card {
+      display: block;
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: inherit;
+      background: var(--card);
+      text-decoration: none;
+      transition: transform 160ms ease, border-color 160ms ease;
+    }
+    .card:hover { transform: translateY(-2px); border-color: var(--accent); }
+    .date { color: var(--accent); font-size: 0.85rem; font-weight: 700; }
+    .card h2 { margin: 10px 0 0; font-size: 1.15rem; }
+    .card h2 { overflow-wrap: anywhere; }
+    footer { padding: 48px 0; color: var(--muted); font-size: 0.9rem; }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>우리 가족 오늘의 생활영어</h1>
+    <p>하루 한 장면, 바로 써 보는 짧은 영어 대화</p>
+  </header>
+  <main>
+    <div class="grid">
+      <!-- DAILY_CARDS_PLACEHOLDER -->
+    </div>
+  </main>
+  <footer>매일 오전 7시 자동 업데이트</footer>
+</body>
+</html></textarea>
+
+  <textarea id="source-python" hidden>import json
+import os
+from datetime import datetime, timedelta, timezone
+from html import escape
+from pathlib import Path
+from urllib import error, request
+
+
+ROOT = Path(__file__).parent
+DAILY_DIR = ROOT / "daily"
+INDEX_PATH = ROOT / "index.html"
+KST = timezone(timedelta(hours=9), name="KST")
+
+PROMPT = """
+가족이 일상에서 바로 사용할 수 있는 짧은 영어 대화문을 하나 만들어 주세요.
+
+조건:
+- 상황은 아침 식사, 등교 준비, 장보기, 집안일, 주말 계획 중 하나
+- 초급 학습자가 말하기 쉬운 자연스러운 문장
+- 대화는 8~10턴
+- 설명은 한국어
+- 아래 JSON 형식만 출력하고 코드 펜스는 사용하지 않기
+
+{
+  "title": "오늘의 상황 제목",
+  "situation": "상황을 한 문장으로 설명",
+  "level": "Beginner",
+  "dialogue": [
+    {
+      "speaker": "Parent",
+      "english": "Are you ready for school?",
+      "korean": "학교 갈 준비됐니?"
+    }
+  ],
+  "tip": "오늘 기억할 표현과 사용 팁"
+}
+""".strip()
+
+
+def parse_json_object(text: str) -> dict:
+    start = text.find("{")
+    end = text.rfind("}")
+    if start == -1 or end == -1 or end <= start:
+        raise ValueError("AI 응답에서 JSON 객체를 찾지 못했습니다.")
+    data = json.loads(text[start : end + 1])
+    required = {"title", "situation", "level", "dialogue", "tip"}
+    missing = required - data.keys()
+    if missing:
+        raise ValueError(f"AI 응답에 필수 항목이 없습니다: {sorted(missing)}")
+    for field in ("title", "situation", "level", "tip"):
+        if not isinstance(data[field], str) or not data[field].strip():
+            raise ValueError(f"{field}는 비어 있지 않은 문자열이어야 합니다.")
+    if not isinstance(data["dialogue"], list) or not 8 <= len(data["dialogue"]) <= 10:
+        raise ValueError("dialogue는 8~10개의 항목을 가진 목록이어야 합니다.")
+    for position, item in enumerate(data["dialogue"], start=1):
+        if not isinstance(item, dict):
+            raise ValueError(f"dialogue {position}번 항목은 객체여야 합니다.")
+        for field in ("speaker", "english", "korean"):
+            if not isinstance(item.get(field), str) or not item[field].strip():
+                raise ValueError(
+                    f"dialogue {position}번의 {field}는 비어 있지 않은 문자열이어야 합니다."
+                )
+    return data
+
+
+def generate_conversation(api_key: str) -> dict:
+    payload = json.dumps(
+        {
+            "model": "solar-pro3",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You create safe, practical English lessons for Korean families.",
+                },
+                {"role": "user", "content": PROMPT},
+            ],
+            "temperature": 0.7,
+        }
+    ).encode("utf-8")
+    api_request = request.Request(
+        "https://api.upstage.ai/v1/chat/completions",
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+
+    try:
+        with request.urlopen(api_request, timeout=60) as response:
+            body = json.loads(response.read().decode("utf-8"))
+    except error.HTTPError as exc:
+        raise RuntimeError(f"Upstage API 호출 실패: HTTP {exc.code}") from exc
+    except error.URLError as exc:
+        raise RuntimeError("Upstage API에 연결하지 못했습니다.") from exc
+
+    try:
+        content = body["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, TypeError) as exc:
+        raise ValueError("Upstage API 응답 형식이 예상과 다릅니다.") from exc
+    return parse_json_object(str(content or ""))
+
+
+def render_dialogue_rows(items: list[dict]) -> str:
+    rows = []
+    for item in items:
+        speaker = escape(str(item.get("speaker", "Family")))
+        english = escape(str(item.get("english", "")))
+        korean = escape(str(item.get("korean", "")))
+        rows.append(
+            f"""
+            <li class="line">
+              <span class="speaker">{speaker}</span>
+              <div><p class="english">{english}</p><p class="korean">{korean}</p></div>
+            </li>"""
+        )
+    return "".join(rows)
+
+
+def render_daily_page(data: dict, date_label: str) -> str:
+    title = escape(str(data["title"]))
+    situation = escape(str(data["situation"]))
+    level = escape(str(data["level"]))
+    tip = escape(str(data["tip"]))
+    rows = render_dialogue_rows(data["dialogue"])
+    return f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title} | 우리 가족 오늘의 생활영어</title>
+  <meta name="description" content="{situation}">
+  <style>
+    :root {{ --bg:#f7f4ef; --card:#fff; --text:#20201d; --muted:#6f6d66;
+      --accent:#d95f2b; --soft:#faeee7; --border:#dedad2; }}
+    * {{ box-sizing:border-box; }}
+    body {{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text); background:var(--bg); line-height:1.65; word-break:keep-all; }}
+    main {{ width:min(760px,calc(100% - 32px)); margin:0 auto; padding:56px 0; }}
+    .back {{ color:var(--accent); text-underline-offset:3px; }}
+    .meta {{ margin:28px 0 10px; color:var(--accent); font-size:.85rem; font-weight:700; }}
+    h1 {{ margin:0 0 12px; font-size:clamp(2rem,8vw,3.2rem); line-height:1.15; }}
+    .situation {{ margin:0 0 28px; color:var(--muted); font-size:1.08rem; }}
+    .dialogue {{ margin:0; padding:0; display:grid; gap:12px; list-style:none; }}
+    .line {{ padding:20px; display:grid; grid-template-columns:92px 1fr; gap:16px;
+      border:1px solid var(--border); border-radius:12px; background:var(--card); }}
+    .speaker {{ color:var(--accent); font-weight:700; }}
+    .english {{ margin:0 0 4px; font-size:1.08rem; font-weight:650; }}
+    .korean {{ margin:0; color:var(--muted); }}
+    .tip {{ margin-top:24px; padding:20px; border-left:4px solid var(--accent);
+      border-radius:8px; background:var(--soft); }}
+    .situation, .english, .korean, .tip {{ overflow-wrap:anywhere; }}
+    .tip strong {{ display:block; margin-bottom:6px; }}
+    @media (max-width:560px) {{ .line {{ grid-template-columns:1fr; gap:6px; }} }}
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back" href="../index.html">목록으로 돌아가기</a>
+    <p class="meta">{date_label} · {level}</p>
+    <h1>{title}</h1>
+    <p class="situation">{situation}</p>
+    <ol class="dialogue">{rows}</ol>
+    <aside class="tip"><strong>오늘의 표현 팁</strong>{tip}</aside>
+  </main>
+</body>
+</html>"""
+
+
+def update_index(date_slug: str, date_label: str, title: str) -> None:
+    index_html = INDEX_PATH.read_text(encoding="utf-8")
+    marker = "<!-- DAILY_CARDS_PLACEHOLDER -->"
+    if marker not in index_html:
+        raise ValueError(f"index.html에서 {marker}를 찾지 못했습니다.")
+    if f'data-date="{date_slug}"' in index_html:
+        print("오늘 날짜의 목록 카드는 이미 있습니다.")
+        return
+    card = f"""
+      <a class="card" data-date="{date_slug}" href="daily/{date_slug}.html">
+        <span class="date">{date_label}</span>
+        <h2>{escape(title)}</h2>
+      </a>"""
+    INDEX_PATH.write_text(index_html.replace(marker, marker + card, 1), encoding="utf-8")
+
+
+def main() -> None:
+    api_key = os.environ.get("UPSTAGE_API_KEY")
+    if not api_key:
+        raise RuntimeError("UPSTAGE_API_KEY 환경 변수가 없습니다.")
+
+    now = datetime.now(KST)
+    date_slug = now.strftime("%Y-%m-%d")
+    date_label = now.strftime("%Y년 %m월 %d일")
+    data = generate_conversation(api_key)
+
+    DAILY_DIR.mkdir(exist_ok=True)
+    output_path = DAILY_DIR / f"{date_slug}.html"
+    output_path.write_text(render_daily_page(data, date_label), encoding="utf-8")
+    update_index(date_slug, date_label, str(data["title"]))
+    print(f"생성 완료: {output_path}")
+
+
+if __name__ == "__main__":
+    main()</textarea>
+
+  <textarea id="source-workflow" hidden>name: Daily English Generator
+
+on:
+  schedule:
+    - cron: '0 7 * * *'
+      timezone: 'Asia/Seoul'
+  workflow_dispatch:
+
+concurrency:
+  group: daily-english-pages
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+
+      - name: Generate today's lesson
+        env:
+          UPSTAGE_API_KEY: ${{ secrets.UPSTAGE_API_KEY }}
+        run: python generate_daily.py
+
+      - name: Commit generated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html daily/
+          if git diff --cached --quiet; then
+            echo "No content changes"
+          else
+            git commit -m "Add daily English lesson $(date +'%Y-%m-%d')"
+            git push
+          fi
+
+      - name: Assemble public site
+        run: |
+          mkdir -p _site/daily
+          cp index.html _site/index.html
+          cp -R daily/. _site/daily/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b
+        with:
+          path: '_site'
+
+  deploy:
+    needs: generate
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+
+      - name: Set up GitHub Pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e</textarea>
+
+  <script>
+    const codeSources = {
+      "code-index": "source-index",
+      "code-python": "source-python",
+      "code-workflow": "source-workflow"
+    };
+
+    for (const [codeId, sourceId] of Object.entries(codeSources)) {
+      const code = document.getElementById(codeId);
+      const source = document.getElementById(sourceId);
+      if (code && source) code.textContent = source.value.trim();
+    }
+
+    document.querySelectorAll("[data-copy]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const target = document.getElementById(button.dataset.copy);
+        if (!target) return;
+        try {
+          await navigator.clipboard.writeText(target.textContent);
+          const original = button.textContent;
+          button.textContent = "복사 완료";
+          window.setTimeout(() => { button.textContent = original; }, 1600);
+        } catch {
+          button.textContent = "복사 실패";
+        }
+      });
+    });
+
+    const progressBar = document.getElementById("progress-bar");
+    const navLinks = Array.from(document.querySelectorAll(".nav-links a"));
+    const sections = Array.from(document.querySelectorAll(".article-section"));
+
+    function updateReadingState() {
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollable > 0 ? Math.min(1, window.scrollY / scrollable) : 0;
+      progressBar.style.width = `${progress * 100}%`;
+
+      let current = sections[0]?.id || "";
+      for (const section of sections) {
+        if (section.getBoundingClientRect().top <= 110) current = section.id;
+      }
+      navLinks.forEach((link) => link.classList.toggle("active", link.getAttribute("href") === `#${current}`));
+    }
+
+    window.addEventListener("scroll", updateReadingState, { passive: true });
+    updateReadingState();
+
+    const storageKey = "daily-english-guide-checklist";
+    let savedChecks = {};
+    try {
+      savedChecks = JSON.parse(localStorage.getItem(storageKey) || "{}");
+      if (!savedChecks || typeof savedChecks !== "object" || Array.isArray(savedChecks)) savedChecks = {};
+    } catch {
+      localStorage.removeItem(storageKey);
+    }
+    document.querySelectorAll("[data-check]").forEach((input) => {
+      input.checked = Boolean(savedChecks[input.dataset.check]);
+      input.addEventListener("change", () => {
+        savedChecks[input.dataset.check] = input.checked;
+        localStorage.setItem(storageKey, JSON.stringify(savedChecks));
+      });
+    });
+  </script>
+</body>
+</html>
+
